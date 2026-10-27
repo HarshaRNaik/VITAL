@@ -1,0 +1,1078 @@
+
+===== src\data\exercises.js =====
+export const EXERCISES = [
+  { id: 1, name: 'Jumping Jacks', duration: 30, emoji: '🤸', focus: 'Full body', instruction: 'Land softly with feet apart as your arms rise overhead.' },
+  { id: 2, name: 'Push Ups', duration: 30, emoji: '💪', focus: 'Chest and arms', instruction: 'Keep your body in a straight line and lower with control.' },
+  { id: 3, name: 'Squats', duration: 30, emoji: '🦵', focus: 'Legs and glutes', instruction: 'Sit your hips back, keep your chest lifted, and press through your feet.' },
+  { id: 4, name: 'Plank', duration: 30, emoji: '🧘', focus: 'Core', instruction: 'Brace your core and keep your hips level with your shoulders.' },
+  { id: 5, name: 'Side Plank', duration: 25, emoji: '🏋️', focus: 'Core and obliques', instruction: 'Stack your shoulders and hips, then hold a steady side position.' },
+  { id: 6, name: 'Mountain Climbers', duration: 30, emoji: '⛰️', focus: 'Cardio and core', instruction: 'From a strong plank, alternate driving each knee toward your chest.' },
+]
+
+===== src\data\workouts.js =====
+const movement = (id, name, equipment, focus, instruction, easier, options = {}) => ({
+  id,
+  name,
+  equipment,
+  focus,
+  instruction,
+  easier,
+  tracking: options.tracking || 'reps',
+  defaultReps: options.reps || 10,
+  defaultSeconds: options.seconds || 30,
+  emoji: options.emoji || '🏋️',
+  animationSrc: options.animationSrc || '',
+})
+
+export const MOVEMENTS = [
+  movement('march', 'Low-impact march', 'Bodyweight only', 'Cardio', 'March in place, swing your arms comfortably, and keep a steady pace.', 'Slow the pace and hold a chair for balance.', { tracking: 'timed', seconds: 45, emoji: '🚶' }),
+  movement('step-jack', 'Step jacks', 'Bodyweight only', 'Cardio', 'Step one foot out at a time while raising your arms; keep both feet grounded.', 'Keep the arm movement below shoulder height.', { tracking: 'timed', seconds: 40, emoji: '🤸' }),
+  movement('squat', 'Bodyweight squat', 'Bodyweight only', 'Legs and glutes', 'Sit the hips back, keep the chest lifted, and use a comfortable depth.', 'Sit back to a chair and stand with support.', { reps: 10, emoji: '🦵' }),
+  movement('chair-squat', 'Chair sit-to-stand', 'Bodyweight only', 'Legs and glutes', 'Tap a stable chair, then stand by pressing through the whole foot.', 'Use a higher chair and your hands for support.', { reps: 8, emoji: '🪑' }),
+  movement('reverse-lunge', 'Step-back lunge', 'Bodyweight only', 'Legs and glutes', 'Step back softly, bend both knees only as far as comfortable, then return.', 'Use a shallow step and hold a wall for balance.', { reps: 8, emoji: '🦵' }),
+  movement('glute-bridge', 'Glute bridge', 'Bodyweight only', 'Glutes and hamstrings', 'Lie on your back, brace gently, and lift hips without arching the lower back.', 'Lift only a few inches.', { reps: 12, emoji: '🌉' }),
+  movement('calf-raise', 'Standing calf raise', 'Bodyweight only', 'Calves', 'Rise onto the balls of your feet, pause, and lower with control.', 'Hold a wall and use a smaller range.', { reps: 12, emoji: '🦶' }),
+  movement('wall-push', 'Wall push-up', 'Bodyweight only', 'Chest and arms', 'Place hands on a wall, brace the body, and bend elbows to bring the chest closer.', 'Stand closer to the wall.', { reps: 10, emoji: '🧱' }),
+  movement('knee-push', 'Knee push-up', 'Bodyweight only', 'Chest and arms', 'Keep a straight line from knees to shoulders and lower your chest under control.', 'Use wall push-ups instead.', { reps: 8, emoji: '💪' }),
+  movement('push-up', 'Push-up', 'Bodyweight only', 'Chest and arms', 'Brace your trunk and lower in one line; stop before form changes.', 'Use knee or wall push-ups.', { reps: 8, emoji: '💪' }),
+  movement('incline-push', 'Incline push-up', 'Bodyweight only', 'Chest and arms', 'Use a stable counter or bench, keep the body aligned, and lower with control.', 'Choose a higher, firmly supported surface.', { reps: 10, emoji: '💪' }),
+  movement('dead-bug', 'Dead bug', 'Bodyweight only', 'Core', 'Keep the lower back gently grounded as opposite arm and leg extend.', 'Move one limb at a time.', { reps: 8, emoji: '🐞' }),
+  movement('bird-dog', 'Bird dog', 'Bodyweight only', 'Core and back', 'From hands and knees, reach opposite arm and leg without rotating the hips.', 'Slide one foot back while keeping hands down.', { reps: 8, emoji: '🐦' }),
+  movement('knee-plank', 'Knee plank', 'Bodyweight only', 'Core', 'Support on forearms and knees, keep hips in line, and breathe steadily.', 'Shorten the hold or elevate the upper body.', { tracking: 'timed', seconds: 20, emoji: '🧘' }),
+  movement('plank', 'Forearm plank', 'Bodyweight only', 'Core', 'Support on forearms and toes, brace gently, and keep hips level.', 'Use a knee plank or elevated hands.', { tracking: 'timed', seconds: 25, emoji: '🧘' }),
+  movement('side-plank', 'Side plank', 'Bodyweight only', 'Obliques', 'Stack shoulders and hips and hold a comfortable side position.', 'Bend the lower knee for support.', { tracking: 'timed', seconds: 20, emoji: '🧘' }),
+  movement('heel-tap', 'Alternating heel tap', 'Bodyweight only', 'Core', 'Lie on your back and reach toward each heel without pulling your neck.', 'Keep the movement small.', { reps: 10, emoji: '🔁' }),
+  movement('mountain-climber', 'Slow mountain climber', 'Bodyweight only', 'Core and cardio', 'From a stable high plank, bring one knee forward at a time without bouncing.', 'Elevate hands on a counter.', { tracking: 'timed', seconds: 25, emoji: '⛰️' }),
+  movement('low-impact-burpee', 'Step-back squat thrust', 'Bodyweight only', 'Full body', 'Squat, place hands on a stable surface, step back one foot at a time, then return.', 'Keep hands elevated and skip the push-up.', { reps: 6, emoji: '⚡' }),
+  movement('jumping-jack', 'Jumping jack', 'Bodyweight only', 'Cardio', 'Jump lightly while arms move overhead; land softly with knees relaxed.', 'Use step jacks with no jumping.', { tracking: 'timed', seconds: 20, emoji: '🤸' }),
+  movement('shadow-box', 'Shadow boxing', 'Bodyweight only', 'Cardio and upper body', 'Alternate relaxed punches in the air with a stable stance and soft knees.', 'Slow down and keep punches below shoulder height.', { tracking: 'timed', seconds: 40, emoji: '🥊' }),
+  movement('step-touch', 'Lateral step touch', 'Bodyweight only', 'Cardio and mobility', 'Step side to side with soft knees and comfortable arm movement.', 'Use a smaller step and hold support.', { tracking: 'timed', seconds: 45, emoji: '↔️' }),
+  movement('hip-flexor', 'Half-kneeling hip flexor stretch', 'Bodyweight only', 'Hip mobility', 'Kneel on a pad, gently tuck the pelvis, and shift forward until a mild stretch.', 'Stand in a short split stance while holding support.', { tracking: 'timed', seconds: 30, emoji: '🧘' }),
+  movement('hamstring-stretch', 'Seated hamstring stretch', 'Bodyweight only', 'Hamstrings', 'Sit tall and hinge slightly at the hips toward an extended leg; avoid bouncing.', 'Bend the knee and reduce the reach.', { tracking: 'timed', seconds: 30, emoji: '🧘' }),
+  movement('cat-cow', 'Cat-cow', 'Bodyweight only', 'Spine mobility', 'On hands and knees, gently round and extend the spine with your breath.', 'Use a smaller, pain-free range.', { reps: 8, emoji: '🐈' }),
+  movement('thoracic-rotation', 'Open-book rotation', 'Bodyweight only', 'Upper-back mobility', 'Lie on your side and rotate the top arm and chest gently toward the floor behind you.', 'Keep knees stacked and shorten the range.', { reps: 6, emoji: '🔄' }),
+  movement('db-goblet-squat', 'Dumbbell goblet squat', 'Dumbbells', 'Legs and glutes', 'Hold one dumbbell close to the chest and squat to a controlled depth.', 'Use a lighter dumbbell or bodyweight squat.', { reps: 10, emoji: '🏋️', animationSrc: '/exercises/dumbbell-goblet-squat.gif' }),
+  movement('db-floor-press', 'Dumbbell floor press', 'Dumbbells', 'Chest and triceps', 'Lie on the floor and press dumbbells above the chest; lower until upper arms touch softly.', 'Use lighter dumbbells and a shorter range.', { reps: 10, emoji: '🏋️' }),
+  movement('db-row', 'Dumbbell row', 'Dumbbells', 'Back and biceps', 'Hinge with a neutral back and row the dumbbell toward the hip.', 'Support one hand on a sturdy bench and reduce load.', { reps: 10, emoji: '🏋️' }),
+  movement('db-rdl', 'Dumbbell Romanian deadlift', 'Dumbbells', 'Hamstrings and glutes', 'With soft knees, push hips back and lower weights close to the legs; stand tall.', 'Practice the hip hinge without weights.', { reps: 10, emoji: '🏋️' }),
+  movement('db-shoulder-press', 'Seated dumbbell shoulder press', 'Dumbbells', 'Shoulders', 'Sit supported and press dumbbells overhead without arching the back.', 'Use a lighter load or press one arm at a time.', { reps: 8, emoji: '🏋️' }),
+  movement('db-lateral-raise', 'Dumbbell lateral raise', 'Dumbbells', 'Shoulders', 'Raise light dumbbells out to the sides with soft elbows and no swinging.', 'Use very light weights or no weights.', { reps: 10, emoji: '🏋️', animationSrc: '/exercises/dumbbell-lateral-raise.gif' }),
+  movement('db-curl', 'Dumbbell curl', 'Dumbbells', 'Biceps', 'Keep elbows near your sides and curl without swinging.', 'Use a lighter weight or alternate arms.', { reps: 10, emoji: '🏋️' }),
+  movement('db-overhead-triceps', 'Dumbbell overhead triceps extension', 'Dumbbells', 'Triceps', 'Hold one light dumbbell securely and bend elbows while keeping upper arms steady.', 'Use one arm at a time with a light weight.', { reps: 10, emoji: '🏋️' }),
+  movement('db-split-squat', 'Dumbbell split squat', 'Dumbbells', 'Legs and glutes', 'Stand in a stable split stance and lower vertically with control.', 'Use bodyweight and hold a support.', { reps: 8, emoji: '🏋️' }),
+  movement('db-calf-raise', 'Dumbbell calf raise', 'Dumbbells', 'Calves', 'Hold light dumbbells at your sides and raise heels smoothly.', 'Perform without weights next to a support.', { reps: 12, emoji: '🏋️' }),
+  movement('db-dead-bug', 'Dumbbell dead bug', 'Dumbbells', 'Core', 'Hold very light dumbbells above the chest and alternate leg taps while bracing.', 'Perform the dead bug without weights.', { reps: 8, emoji: '🏋️' }),
+  movement('db-suitcase-carry', 'Dumbbell suitcase carry', 'Dumbbells', 'Core and grip', 'Carry one manageable dumbbell at your side and walk tall without leaning.', 'Use a lighter dumbbell or march in place.', { tracking: 'timed', seconds: 30, emoji: '🏋️' }),
+  movement('bar-squat', 'Barbell back squat', 'Barbells and plates', 'Legs and glutes', 'Use a rack with safeties, unrack only a manageable load, and squat under control.', 'Use a goblet squat or leg press; do not squat unracked.', { reps: 6, emoji: '🏋️', animationSrc: '/exercises/barbell-back-squat.gif' }),
+  movement('bar-deadlift', 'Barbell deadlift', 'Barbells and plates', 'Posterior chain', 'Set the bar securely, brace, keep it close, and stand without jerking.', 'Practice a dumbbell hinge or use a lighter raised start.', { reps: 5, emoji: '🏋️' }),
+  movement('bar-bench', 'Barbell bench press', 'Barbells and plates', 'Chest and triceps', 'Use a bench rack and safety arms or a competent spotter; lower under control.', 'Use dumbbell floor press or machine chest press.', { reps: 6, emoji: '🏋️' }),
+  movement('bar-row', 'Barbell bent-over row', 'Barbells and plates', 'Back and biceps', 'Hinge with a neutral spine and row toward the lower ribs without momentum.', 'Use a chest-supported machine or light dumbbells.', { reps: 8, emoji: '🏋️' }),
+  movement('bar-ohp', 'Barbell overhead press', 'Barbells and plates', 'Shoulders', 'Use a clear space, brace the trunk, and press a manageable bar overhead.', 'Use light dumbbells seated or a shoulder press machine.', { reps: 6, emoji: '🏋️', animationSrc: '/exercises/barbell-overhead-press.gif' }),
+  movement('bar-hip-thrust', 'Barbell hip thrust', 'Barbells and plates', 'Glutes', 'Secure the upper back against a bench and use a pad; lift without overextending.', 'Perform a bodyweight glute bridge.', { reps: 8, emoji: '🏋️', animationSrc: '/exercises/barbell-hip-thrust.gif' }),
+  movement('kb-deadlift', 'Kettlebell deadlift', 'Kettlebells', 'Posterior chain', 'Place the bell between feet, hinge, grip securely, and stand tall.', 'Practice the hinge without a kettlebell.', { reps: 10, emoji: '🔔' }),
+  movement('kb-goblet', 'Kettlebell goblet squat', 'Kettlebells', 'Legs and glutes', 'Hold the bell close to your chest and squat smoothly within a comfortable range.', 'Use a bodyweight squat or lighter bell.', { reps: 8, emoji: '🔔' }),
+  movement('kb-swing', 'Kettlebell hip hinge swing', 'Kettlebells', 'Posterior chain and cardio', 'Only if familiar: hinge to drive the bell to chest height; arms guide, hips power.', 'Substitute kettlebell deadlifts; skip swings until coached in technique.', { tracking: 'timed', seconds: 20, emoji: '🔔' }),
+  movement('kb-goblet-carry', 'Kettlebell suitcase carry', 'Kettlebells', 'Core and grip', 'Carry a manageable bell at one side and walk tall without leaning.', 'Use a lighter bell or march in place.', { tracking: 'timed', seconds: 30, emoji: '🔔' }),
+  movement('band-row', 'Resistance-band row', 'Resistance bands', 'Back and biceps', 'Anchor the band securely at chest height and row elbows back.', 'Use a lighter band and shorter range.', { reps: 12, emoji: '🟢' }),
+  movement('band-press', 'Resistance-band chest press', 'Resistance bands', 'Chest and triceps', 'Anchor behind you securely and press forward without shrugging.', 'Use less tension or a shorter range.', { reps: 10, emoji: '🟢' }),
+  movement('band-pull-apart', 'Band pull-apart', 'Resistance bands', 'Upper back and shoulders', 'Hold a light band at chest height and pull apart without arching.', 'Use a lighter band and smaller range.', { reps: 12, emoji: '🟢' }),
+  movement('band-glute', 'Band lateral walk', 'Resistance bands', 'Glutes and hips', 'Place a loop above the knees or ankles and take small controlled side steps.', 'Use a lighter band or no band.', { reps: 8, emoji: '🟢' }),
+  movement('band-glute-bridge', 'Banded glute bridge', 'Resistance bands', 'Glutes', 'Place a loop above knees, press knees gently outward, and bridge with control.', 'Remove the band.', { reps: 12, emoji: '🟢' }),
+  movement('band-squat', 'Resistance-band squat', 'Resistance bands', 'Legs and glutes', 'Stand on a resistance band and hold it securely at shoulder level as you squat.', 'Use a lighter band or bodyweight squat.', { reps: 10, emoji: '🟢' }),
+  movement('machine-chest', 'Machine chest press', 'Gym machines', 'Chest and triceps', 'Adjust seat so handles meet mid-chest; use a light setting and smooth reps.', 'Reduce the pin weight and ask staff to check setup.', { reps: 10, emoji: '🏢' }),
+  movement('machine-row', 'Seated cable row', 'Gym machines', 'Back and biceps', 'Set the seat and chest tall; pull handle toward torso without rocking.', 'Use a lighter setting and controlled range.', { reps: 10, emoji: '🏢' }),
+  movement('machine-lat', 'Lat pulldown', 'Gym machines', 'Back', 'Set thigh pad snugly and pull bar toward upper chest; do not pull behind the neck.', 'Use a lighter load and shorter range.', { reps: 10, emoji: '🏢' }),
+  movement('machine-leg-press', 'Leg press', 'Gym machines', 'Legs and glutes', 'Set seat so hips stay supported; lower only while back remains against the pad.', 'Use a shallow range and light setting.', { reps: 10, emoji: '🏢', animationSrc: '/exercises/leg-press.gif' }),
+  movement('machine-curl', 'Seated leg curl', 'Gym machines', 'Hamstrings', 'Align the machine pivot with the knee and curl the pad smoothly.', 'Reduce the weight and range.', { reps: 10, emoji: '🏢', animationSrc: '/exercises/seated-leg-curl.gif' }),
+  movement('machine-extension', 'Leg extension', 'Gym machines', 'Quadriceps', 'Align knee with pivot and extend smoothly without snapping the knee.', 'Use a light setting and comfortable range.', { reps: 10, emoji: '🏢', animationSrc: '/exercises/leg-extension.gif' }),
+  movement('machine-shoulder', 'Machine shoulder press', 'Gym machines', 'Shoulders', 'Set handles around shoulder level and press without arching the back.', 'Reduce the load and shorten the range.', { reps: 10, emoji: '🏢', animationSrc: '/exercises/machine-shoulder-press.gif' }),
+  movement('machine-cable', 'Cable face pull', 'Gym machines', 'Upper back and shoulders', 'Set cable around face height and pull toward forehead with elbows high.', 'Use light resistance and a stable stance.', { reps: 12, emoji: '🏢' }),
+  movement('walk', 'Brisk walk', 'No-equipment cardio', 'Cardio and endurance', 'Walk at a pace that raises breathing while still allowing short sentences.', 'Choose a level route and comfortable pace.', { tracking: 'timed', seconds: 300, emoji: '🚶' }),
+  movement('jog-place', 'Easy jog in place', 'No-equipment cardio', 'Cardio and endurance', 'Jog lightly in place with soft steps and relaxed shoulders.', 'Replace with a low-impact march.', { tracking: 'timed', seconds: 45, emoji: '🏃' }),
+  movement('stairs', 'Step-ups on a low step', 'Bodyweight only', 'Legs and cardio', 'Use a stable low step, step up and down carefully, and alternate lead legs.', 'March in place if no safe step is available.', { tracking: 'timed', seconds: 30, emoji: '🪜' }),
+]
+
+const movementById = Object.fromEntries(MOVEMENTS.map((item) => [item.id, item]))
+const ex = (id, sets = 3, value, restSeconds = 45) => {
+  const item = movementById[id]
+  if (!item) throw new Error(`Unknown movement in workout library: ${id}`)
+  return {
+    ...item,
+    sets,
+    reps: item.tracking === 'reps' ? value ?? item.defaultReps : null,
+    durationSeconds: item.tracking === 'timed' ? value ?? item.defaultSeconds : null,
+    restSeconds,
+  }
+}
+
+const plan = (id, name, description, category, equipment, difficulty, durationMinutes, muscles, movementSpecs, tags = []) => ({
+  id,
+  name,
+  description,
+  trainingGoal: category,
+  category,
+  equipment,
+  requiredEquipment: equipment === 'Bodyweight only' || equipment === 'No-equipment cardio'
+    ? []
+    : equipment === 'Mixed equipment'
+      ? [...new Set(movementSpecs.flatMap(([movementId]) => movementById[movementId].equipment))].filter((item) => item !== 'Bodyweight only' && item !== 'No-equipment cardio')
+      : [equipment],
+  difficulty,
+  durationMinutes,
+  targetMuscles: muscles,
+  exercises: movementSpecs.map(([movementId, sets, value, rest]) => ex(movementId, sets, value, rest)),
+  warmup: 'Begin with 3–5 minutes of easy movement and a comfortable rehearsal of the first exercise.',
+  cooldown: 'Finish with a few minutes of easy movement; stretch only within a comfortable range.',
+  ...(id === 'weekly-balanced' ? {
+    weeklySchedule: [
+      { day: 'Session 1', focus: 'Strength', durationMinutes: 15, movementIds: ['db-goblet-squat', 'band-row'], detail: 'Complete the dumbbell squat and resistance-band row at a controlled pace.' },
+      { day: 'Session 2', focus: 'Cardio', durationMinutes: 5, movementIds: ['march'], detail: 'Use the march interval as steady aerobic movement; keep the pace conversational.' },
+      { day: 'Session 3', focus: 'Mobility and recovery', durationMinutes: 10, movementIds: ['cat-cow', 'hip-flexor'], detail: 'Practice the cat-cow and hip-flexor mobility sequence without forcing range.' },
+    ],
+  } : {}),
+  tags,
+})
+
+export const WORKOUTS = [
+  plan('beginner-full-body', 'Beginner Full Body', 'A calm first strength session using stable, low-impact movements.', 'Beginner workouts', 'Bodyweight only', 'Beginner', 15, ['Legs', 'Chest', 'Core'], [['chair-squat', 2, 8, 45], ['wall-push', 2, 10, 45], ['glute-bridge', 2, 10, 45], ['bird-dog', 2, 6, 30]], ['beginner', 'home', 'full body', 'under 15 minutes']),
+  plan('bodyweight-upper', 'Bodyweight Upper Body', 'Build pressing strength with wall, incline, or floor variations.', 'Upper body', 'Bodyweight only', 'Beginner', 20, ['Chest', 'Arms', 'Upper back'], [['incline-push', 3, 10, 60], ['knee-push', 2, 8, 60], ['bird-dog', 3, 8, 45], ['knee-plank', 3, 20, 45]], ['home', 'bodyweight']),
+  plan('bodyweight-lower', 'Bodyweight Lower Body', 'Controlled leg and glute strength with balance options.', 'Lower body', 'Bodyweight only', 'Beginner', 20, ['Quads', 'Glutes', 'Calves'], [['chair-squat', 3, 10, 60], ['reverse-lunge', 2, 8, 60], ['glute-bridge', 3, 12, 45], ['calf-raise', 3, 12, 30]], ['home', 'bodyweight']),
+  plan('core-starter', 'Core Foundations', 'Accessible trunk stability without advanced crunching or fast transitions.', 'Core and abs', 'Bodyweight only', 'Beginner', 12, ['Core', 'Obliques'], [['dead-bug', 2, 8, 30], ['bird-dog', 2, 8, 30], ['knee-plank', 3, 20, 30], ['heel-tap', 2, 10, 30]], ['home', 'beginner', 'under 15 minutes']),
+  plan('cardio-low-impact', 'Low-Impact Cardio', 'A joint-friendly home cardio session with grounded footwork.', 'Cardio and endurance', 'No-equipment cardio', 'Beginner', 15, ['Full body', 'Cardio'], [['march', 1, 60, 20], ['step-jack', 1, 45, 20], ['step-touch', 1, 60, 20], ['shadow-box', 1, 45, 20], ['march', 1, 60, 0]], ['home', 'no equipment', 'under 15 minutes']),
+  plan('hiit-low-impact', 'Low-Impact Interval Circuit', 'Moderate work intervals alternate with recovery; no jumping required.', 'HIIT', 'Bodyweight only', 'Intermediate', 18, ['Full body', 'Cardio'], [['step-jack', 3, 35, 30], ['squat', 3, 10, 40], ['shadow-box', 3, 35, 30], ['low-impact-burpee', 2, 6, 45]], ['home', 'bodyweight']),
+  plan('mobility-reset', 'Daily Mobility Reset', 'Easy mobility work for a short movement break or warm-down.', 'Flexibility and mobility', 'Bodyweight only', 'Beginner', 10, ['Hips', 'Spine', 'Hamstrings'], [['cat-cow', 2, 8, 15], ['thoracic-rotation', 2, 6, 15], ['hip-flexor', 2, 30, 10], ['hamstring-stretch', 2, 30, 10]], ['home', 'beginner', 'under 15 minutes']),
+  plan('yoga-recovery', 'Gentle Recovery Flow', 'A gentle sequence of breath-led mobility and relaxed holds.', 'Yoga and recovery', 'Bodyweight only', 'Beginner', 20, ['Hips', 'Spine', 'Hamstrings'], [['cat-cow', 2, 8, 15], ['hip-flexor', 2, 35, 15], ['hamstring-stretch', 2, 35, 15], ['thoracic-rotation', 2, 6, 15], ['knee-plank', 2, 15, 20]], ['home', 'recovery']),
+  plan('quick-move', 'Five-Minute Move Break', 'An approachable short routine to break up a sedentary day.', 'Beginner workouts', 'Bodyweight only', 'Beginner', 5, ['Full body'], [['march', 1, 45, 10], ['chair-squat', 1, 8, 10], ['wall-push', 1, 8, 10], ['step-touch', 1, 45, 0]], ['home', 'beginner', 'under 15 minutes']),
+  plan('bodyweight-progressive', 'Progressive Bodyweight Strength', 'A measured step up with controlled push, squat, hinge, and trunk work.', 'Strength training', 'Bodyweight only', 'Intermediate', 25, ['Full body'], [['squat', 3, 12, 60], ['incline-push', 3, 12, 60], ['reverse-lunge', 3, 10, 60], ['glute-bridge', 3, 15, 45], ['plank', 3, 25, 45]], ['home', 'bodyweight', 'full body']),
+  plan('bodyweight-full-standard', 'Full-Body Bodyweight Strength', 'A balanced strength session with an easier option for every movement.', 'Full body', 'Bodyweight only', 'Intermediate', 28, ['Full body'], [['squat', 3, 12, 60], ['push-up', 3, 8, 60], ['reverse-lunge', 3, 8, 60], ['dead-bug', 3, 10, 45], ['calf-raise', 3, 15, 30]], ['home', 'bodyweight']),
+  plan('bodyweight-glutes', 'Glutes and Hips', 'Hip-dominant bodyweight work with stable, controlled repetitions.', 'Lower body', 'Bodyweight only', 'Beginner', 18, ['Glutes', 'Hamstrings'], [['glute-bridge', 3, 12, 45], ['reverse-lunge', 3, 8, 60], ['chair-squat', 3, 10, 45], ['calf-raise', 2, 12, 45]], ['home']),
+  plan('abs-stability', 'Core Stability Builder', 'Progress core endurance with low-risk bracing and anti-rotation patterns.', 'Core and abs', 'Bodyweight only', 'Intermediate', 20, ['Core', 'Obliques'], [['dead-bug', 3, 10, 30], ['bird-dog', 3, 10, 30], ['side-plank', 2, 20, 45], ['plank', 3, 25, 45], ['heel-tap', 3, 12, 30]], ['home']),
+  plan('bodyweight-cardio', 'No-Equipment Cardio Mix', 'A steady at-home cardio session with low-impact substitutions.', 'Cardio and endurance', 'No-equipment cardio', 'Beginner', 25, ['Full body', 'Cardio'], [['march', 1, 60, 20], ['step-touch', 1, 60, 20], ['shadow-box', 1, 45, 20], ['jog-place', 1, 35, 30], ['step-jack', 1, 45, 20]], ['home', 'no equipment']),
+  plan('gentle-strength', 'Gentle Strength and Balance', 'Low-impact strength with balance support and generous recovery.', 'Beginner workouts', 'Bodyweight only', 'Beginner', 22, ['Legs', 'Core'], [['chair-squat', 3, 8, 60], ['calf-raise', 3, 10, 45], ['bird-dog', 2, 6, 45], ['glute-bridge', 2, 10, 45], ['march', 1, 45, 30]], ['home', 'beginner', 'low impact']),
+  plan('dumbbell-full', 'Full-Body Dumbbell Basics', 'Foundational dumbbell patterns for a complete strength session.', 'Full body', 'Dumbbells', 'Beginner', 30, ['Full body'], [['db-goblet-squat', 3, 10, 60], ['db-floor-press', 3, 10, 60], ['db-row', 3, 10, 60], ['db-rdl', 3, 10, 60], ['dead-bug', 2, 8, 40]], ['gym', 'full body']),
+  plan('dumbbell-upper', 'Dumbbell Upper Body', 'A balanced upper-body push and pull session.', 'Upper body', 'Dumbbells', 'Intermediate', 30, ['Chest', 'Back', 'Shoulders', 'Arms'], [['db-floor-press', 3, 10, 60], ['db-row', 3, 10, 60], ['db-shoulder-press', 3, 8, 60], ['db-curl', 3, 10, 45], ['db-overhead-triceps', 3, 10, 45]], ['gym']),
+  plan('dumbbell-lower', 'Dumbbell Lower Body', 'Hinge, squat, and single-leg patterns with manageable dumbbells.', 'Lower body', 'Dumbbells', 'Intermediate', 30, ['Quads', 'Glutes', 'Hamstrings'], [['db-goblet-squat', 3, 10, 60], ['db-rdl', 3, 10, 60], ['db-split-squat', 3, 8, 60], ['db-calf-raise', 3, 12, 45]], ['gym']),
+  plan('dumbbell-chest-triceps', 'Dumbbell Chest and Triceps', 'Pressing work with a stable floor-based chest option.', 'Strength training', 'Dumbbells', 'Intermediate', 25, ['Chest', 'Triceps'], [['db-floor-press', 4, 8, 75], ['db-overhead-triceps', 3, 10, 60], ['db-floor-press', 3, 12, 60], ['knee-plank', 3, 20, 45]], ['gym', 'upper body']),
+  plan('dumbbell-back-biceps', 'Dumbbell Back and Biceps', 'Supported pulling patterns and controlled arm work.', 'Strength training', 'Dumbbells', 'Intermediate', 25, ['Back', 'Biceps'], [['db-row', 4, 8, 75], ['db-curl', 3, 10, 60], ['db-row', 3, 12, 60], ['bird-dog', 2, 8, 40]], ['gym', 'upper body']),
+  plan('dumbbell-shoulders', 'Dumbbell Shoulder Session', 'Moderate shoulder pressing and light lateral work; avoid painful ranges.', 'Strength training', 'Dumbbells', 'Intermediate', 22, ['Shoulders', 'Upper back'], [['db-shoulder-press', 3, 8, 75], ['db-lateral-raise', 3, 10, 45], ['db-row', 3, 10, 60], ['thoracic-rotation', 2, 6, 30]], ['gym', 'upper body']),
+  plan('dumbbell-legs', 'Dumbbell Legs and Calves', 'A focused lower-body session with stable single-leg alternatives.', 'Muscle building / hypertrophy', 'Dumbbells', 'Intermediate', 32, ['Quads', 'Glutes', 'Calves'], [['db-goblet-squat', 4, 10, 75], ['db-split-squat', 3, 8, 75], ['db-rdl', 3, 10, 75], ['db-calf-raise', 4, 12, 45]], ['gym']),
+  plan('dumbbell-core', 'Dumbbell Core Control', 'Light-load core control that prioritizes bracing over speed.', 'Core and abs', 'Dumbbells', 'Intermediate', 18, ['Core', 'Obliques'], [['db-dead-bug', 3, 8, 40], ['db-suitcase-carry', 3, 30, 45], ['side-plank', 2, 20, 40]], ['gym']),
+  plan('barbell-squat', 'Barbell Squat Practice', 'Conservative squat practice; requires rack safeties and an appropriate setup.', 'Strength training', 'Barbells and plates', 'Advanced', 35, ['Quads', 'Glutes'], [['bar-squat', 4, 5, 120], ['bar-hip-thrust', 3, 8, 90], ['calf-raise', 3, 12, 45]], ['gym', 'lower body']),
+  plan('barbell-deadlift', 'Barbell Deadlift Practice', 'Practice controlled deadlift sets; stop if bracing or position is lost.', 'Strength training', 'Barbells and plates', 'Advanced', 30, ['Posterior chain', 'Back'], [['bar-deadlift', 4, 5, 120], ['bar-row', 3, 8, 90], ['bird-dog', 2, 8, 40]], ['gym']),
+  plan('barbell-bench', 'Barbell Bench Press', 'Bench pressing only with rack safety arms correctly set or a competent spotter.', 'Strength training', 'Barbells and plates', 'Advanced', 30, ['Chest', 'Triceps'], [['bar-bench', 4, 6, 120], ['bar-row', 3, 8, 90], ['knee-plank', 3, 20, 45]], ['gym', 'upper body']),
+  plan('barbell-upper', 'Barbell Upper Strength', 'Compound upper-body work with a conservative overhead press option.', 'Strength training', 'Barbells and plates', 'Advanced', 35, ['Chest', 'Back', 'Shoulders'], [['bar-bench', 3, 6, 120], ['bar-row', 3, 8, 90], ['bar-ohp', 3, 6, 120]], ['gym', 'upper body']),
+  plan('barbell-posterior', 'Barbell Posterior Chain', 'A deliberate hip hinge and hip extension session with long rests.', 'Muscle building / hypertrophy', 'Barbells and plates', 'Advanced', 35, ['Glutes', 'Hamstrings', 'Back'], [['bar-deadlift', 3, 5, 150], ['bar-hip-thrust', 3, 8, 90], ['bar-row', 3, 8, 90]], ['gym']),
+  plan('kettlebell-basics', 'Kettlebell Fundamentals', 'Begin with controlled deadlifts and goblet squats before dynamic work.', 'Beginner workouts', 'Kettlebells', 'Beginner', 20, ['Full body'], [['kb-deadlift', 3, 10, 60], ['kb-goblet', 3, 8, 60], ['kb-goblet-carry', 2, 25, 45]], ['gym', 'beginner']),
+  plan('kettlebell-full', 'Kettlebell Full Body', 'A measured total-body routine using squat, hinge, and carry movements.', 'Full body', 'Kettlebells', 'Intermediate', 28, ['Full body'], [['kb-goblet', 3, 10, 75], ['kb-deadlift', 3, 10, 75], ['kb-goblet-carry', 3, 30, 45], ['bird-dog', 2, 8, 40]], ['gym']),
+  plan('kettlebell-posterior', 'Kettlebell Posterior Chain', 'Controlled posterior-chain strength; no swing experience is assumed.', 'Lower body', 'Kettlebells', 'Intermediate', 25, ['Glutes', 'Hamstrings'], [['kb-deadlift', 4, 8, 75], ['kb-goblet', 3, 8, 75], ['glute-bridge', 3, 12, 45], ['kb-goblet-carry', 2, 30, 45]], ['gym']),
+  plan('kettlebell-conditioning', 'Kettlebell Controlled Conditioning', 'Alternating loaded carries and steady low-impact aerobic intervals.', 'Cardio and endurance', 'Mixed equipment', 'Intermediate', 22, ['Full body', 'Cardio'], [['kb-goblet-carry', 3, 30, 30], ['march', 1, 45, 30], ['kb-goblet', 3, 8, 45], ['shadow-box', 1, 40, 30]], ['gym']),
+  plan('band-full', 'Resistance Band Full Body', 'Portable push, pull, and lower-body resistance with secure anchoring.', 'Full body', 'Resistance bands', 'Beginner', 25, ['Full body'], [['band-squat', 3, 10, 50], ['band-press', 3, 10, 50], ['band-row', 3, 12, 50], ['band-glute', 2, 8, 40]], ['home']),
+  plan('band-upper', 'Resistance Band Upper Body', 'Light upper-body pulling and pressing with a secure anchor point.', 'Upper body', 'Resistance bands', 'Beginner', 22, ['Chest', 'Back', 'Shoulders'], [['band-row', 3, 12, 45], ['band-press', 3, 10, 45], ['band-pull-apart', 3, 12, 40], ['wall-push', 2, 10, 40]], ['home']),
+  plan('band-legs', 'Band Glutes and Legs', 'Glute activation and leg strength using a loop band or no-band option.', 'Lower body', 'Resistance bands', 'Beginner', 20, ['Glutes', 'Legs'], [['band-glute', 3, 10, 45], ['band-glute-bridge', 3, 12, 45], ['chair-squat', 3, 10, 45], ['calf-raise', 2, 12, 30]], ['home']),
+  plan('band-mobility', 'Band Mobility and Activation', 'Gentle shoulder activation and low-intensity lower-body movement.', 'Flexibility and mobility', 'Resistance bands', 'Beginner', 15, ['Shoulders', 'Hips'], [['band-pull-apart', 2, 12, 30], ['band-glute', 2, 8, 30], ['thoracic-rotation', 2, 6, 20], ['hip-flexor', 2, 30, 15]], ['home', 'under 15 minutes']),
+  plan('machine-upper', 'Gym Machine Upper Body', 'Learn a few adjustable machines with low starting resistance.', 'Upper body', 'Gym machines', 'Beginner', 25, ['Chest', 'Back', 'Shoulders'], [['machine-chest', 3, 10, 60], ['machine-row', 3, 10, 60], ['machine-lat', 2, 10, 60], ['machine-shoulder', 2, 10, 60]], ['gym', 'beginner']),
+  plan('machine-lower', 'Gym Machine Lower Body', 'A supported lower-body introduction using seat adjustments and light loads.', 'Lower body', 'Gym machines', 'Beginner', 25, ['Quads', 'Hamstrings', 'Glutes'], [['machine-leg-press', 3, 10, 60], ['machine-curl', 3, 10, 60], ['machine-extension', 2, 10, 60], ['calf-raise', 2, 12, 40]], ['gym', 'beginner']),
+  plan('machine-full', 'Gym Machine Full Body', 'A simple full-body machine circuit; ask staff to help with unfamiliar settings.', 'Full body', 'Gym machines', 'Beginner', 30, ['Full body'], [['machine-leg-press', 3, 10, 60], ['machine-chest', 3, 10, 60], ['machine-row', 3, 10, 60], ['machine-curl', 2, 10, 50], ['machine-cable', 2, 12, 45]], ['gym', 'beginner']),
+  plan('gym-orientation', 'Beginner Gym Orientation', 'Practice safe, light settings and learn basic machine adjustments.', 'Beginner workouts', 'Gym machines', 'Beginner', 20, ['Full body'], [['machine-leg-press', 2, 8, 60], ['machine-chest', 2, 8, 60], ['machine-row', 2, 8, 60], ['machine-cable', 2, 10, 45]], ['gym', 'beginner']),
+  plan('hybrid-full', 'Full-Body Hybrid', 'Combines dumbbell strength, bodyweight trunk work, and a light cardio finisher.', 'Mixed training courses', 'Mixed equipment', 'Intermediate', 32, ['Full body'], [['db-goblet-squat', 3, 10, 60], ['db-floor-press', 3, 10, 60], ['db-row', 3, 10, 60], ['dead-bug', 2, 8, 40], ['march', 1, 60, 30]], ['gym', 'full body', 'mixed']),
+  plan('hybrid-strength-cardio', 'Strength + Cardio', 'Strength sets followed by moderate, low-impact aerobic intervals.', 'Mixed training courses', 'Mixed equipment', 'Beginner', 28, ['Full body', 'Cardio'], [['db-goblet-squat', 3, 8, 60], ['band-row', 3, 12, 45], ['step-touch', 1, 60, 30], ['shadow-box', 1, 45, 30], ['march', 1, 60, 30]], ['mixed']),
+  plan('hybrid-upper-core', 'Upper Body + Core', 'Dumbbell upper-body strength followed by bodyweight core stability.', 'Mixed training courses', 'Mixed equipment', 'Intermediate', 28, ['Chest', 'Back', 'Arms', 'Core'], [['db-floor-press', 3, 10, 60], ['db-row', 3, 10, 60], ['db-curl', 2, 10, 45], ['dead-bug', 3, 8, 30], ['side-plank', 2, 20, 40]], ['gym', 'mixed']),
+  plan('hybrid-lower-conditioning', 'Lower Body + Conditioning', 'Dumbbell leg strength paired with a manageable no-jump cardio finish.', 'Mixed training courses', 'Mixed equipment', 'Intermediate', 30, ['Legs', 'Glutes', 'Cardio'], [['db-goblet-squat', 3, 10, 60], ['db-rdl', 3, 10, 60], ['db-split-squat', 2, 8, 60], ['march', 1, 60, 30], ['step-jack', 1, 40, 30]], ['gym', 'mixed']),
+  plan('hybrid-home', 'Home Fitness Mix', 'Bodyweight strength, mobility, and low-impact aerobic movement with no gear.', 'Mixed training courses', 'Bodyweight only', 'Beginner', 25, ['Full body'], [['chair-squat', 3, 8, 45], ['wall-push', 3, 10, 45], ['cat-cow', 2, 8, 20], ['march', 1, 60, 30], ['bird-dog', 2, 8, 30]], ['home', 'no equipment', 'mixed']),
+  plan('hybrid-gym', 'Gym Hybrid Circuit', 'Machine strength with a controlled cardio interval between stations.', 'Mixed training courses', 'Mixed equipment', 'Intermediate', 32, ['Full body', 'Cardio'], [['machine-leg-press', 3, 10, 60], ['machine-chest', 3, 10, 60], ['machine-row', 3, 10, 60], ['jog-place', 1, 30, 40], ['machine-cable', 2, 12, 45]], ['gym', 'mixed']),
+  plan('hybrid-mobility-strength', 'Mobility + Strength', 'Mobility preparation, controlled strength movements, and a gentle cooldown.', 'Mixed training courses', 'Bodyweight only', 'Beginner', 25, ['Hips', 'Legs', 'Spine'], [['cat-cow', 2, 8, 15], ['thoracic-rotation', 2, 6, 15], ['chair-squat', 3, 10, 45], ['glute-bridge', 3, 12, 40], ['hamstring-stretch', 2, 30, 15]], ['home', 'mixed']),
+  plan('hybrid-beginner-circuit', 'Beginner Fitness Circuit', 'Simple exercises and short manageable intervals with ample recovery.', 'Mixed training courses', 'Bodyweight only', 'Beginner', 18, ['Full body'], [['chair-squat', 2, 8, 45], ['wall-push', 2, 8, 45], ['march', 1, 40, 30], ['glute-bridge', 2, 10, 45], ['bird-dog', 2, 6, 30]], ['home', 'beginner', 'mixed']),
+  plan('hybrid-endurance-core', 'Endurance + Core', 'Steady low-impact aerobic blocks interspersed with core stability work.', 'Mixed training courses', 'Bodyweight only', 'Beginner', 25, ['Cardio', 'Core'], [['march', 1, 75, 30], ['dead-bug', 3, 8, 30], ['step-touch', 1, 60, 30], ['bird-dog', 3, 8, 30], ['shadow-box', 1, 60, 30]], ['home', 'mixed']),
+  plan('weekly-balanced', 'Weekly Balanced Course', 'A three-session weekly course that separates strength, cardio, and mobility/recovery.', 'Mixed training courses', 'Mixed equipment', 'Beginner', 30, ['Full body'], [['db-goblet-squat', 2, 8, 60], ['band-row', 2, 12, 45], ['march', 1, 60, 30], ['cat-cow', 2, 8, 20], ['hip-flexor', 2, 30, 15]], ['mixed']),
+]
+
+export const TRAINING_CATEGORIES = [
+  'Strength training',
+  'Muscle building / hypertrophy',
+  'Cardio and endurance',
+  'HIIT',
+  'Core and abs',
+  'Flexibility and mobility',
+  'Yoga and recovery',
+  'Lower body',
+  'Upper body',
+  'Full body',
+  'Beginner workouts',
+  'Mixed training courses',
+]
+
+export const EQUIPMENT_CATEGORIES = [
+  'Bodyweight only',
+  'Dumbbells',
+  'Barbells and plates',
+  'Kettlebells',
+  'Resistance bands',
+  'Gym machines',
+  'Mixed equipment',
+  'No-equipment cardio',
+]
+
+export const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced']
+
+
+===== src\components\ExerciseAnimation.jsx =====
+import { useState } from 'react'
+
+export default function ExerciseAnimation({ exercise, compact = false, priority = false }) {
+  const [failedSrc, setFailedSrc] = useState('')
+  const hasAnimation = exercise.animationSrc && failedSrc !== exercise.animationSrc
+
+  return (
+    <div className={`relative flex ${compact ? 'h-28 w-28 shrink-0' : 'h-48 w-full sm:h-56'} flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-lime-400/10 via-white/[0.03] to-transparent text-gray-300`}>
+      <div aria-hidden="true" className="absolute h-36 w-36 rounded-full bg-xp/10 blur-3xl" />
+      <div className="relative flex min-h-0 w-full flex-1 items-center justify-center">
+        {hasAnimation ? (
+          <img
+            key={exercise.animationSrc}
+            src={exercise.animationSrc}
+            alt={`${exercise.name} demonstration`}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
+            onError={() => {
+              console.error(`Failed to load exercise demonstration: ${exercise.animationSrc}`)
+              setFailedSrc(exercise.animationSrc)
+            }}
+            className="h-full w-full object-contain"
+          />
+        ) : (
+          <span aria-hidden="true" className={`drop-shadow-[0_0_24px_rgb(163_230_53_/_20%)] ${compact ? 'text-5xl' : 'text-7xl'}`}>{exercise.emoji}</span>
+        )}
+      </div>
+      <span className={`relative shrink-0 bg-black/40 text-center uppercase tracking-[0.18em] text-gray-300 ${compact ? 'px-2 py-1 text-[9px]' : 'px-3 py-2 text-xs'}`}>{exercise.duration > 0 ? `${exercise.duration} seconds · controlled pace` : `${exercise.sets} sets · ${exercise.reps} reps`}</span>
+    </div>
+  )
+}
+
+===== src\pages\Fitness.jsx =====
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import Field from '../components/Field'
+import ExerciseAnimation from '../components/ExerciseAnimation'
+import { workouts, metrics } from '../services/api'
+import { useGame } from '../context/GameContext'
+import { WORKOUT_TYPES } from '../data/constants'
+import { DIFFICULTIES, EQUIPMENT_CATEGORIES, TRAINING_CATEGORIES, WORKOUTS } from '../data/workouts'
+import { today } from '../utils/helpers'
+
+const emptyW = () => ({
+  type: 'Cardio',
+  name: '',
+  duration: '',
+  calories: '',
+  date: today(),
+  sessionId: null,
+})
+
+const emptyM = () => ({
+  weight: '',
+  date: today(),
+})
+
+export default function Fitness() {
+  const { applyGame } = useGame()
+  const metricRequestId = useRef(null)
+
+  const [wList, setWList] = useState([])
+  const [mList, setMList] = useState([])
+  const [w, setW] = useState(emptyW())
+  const [m, setM] = useState(emptyM())
+  const [editId, setEditId] = useState(null)
+  const [wErr, setWErr] = useState({})
+  const [mErr, setMErr] = useState({})
+  const [feedback, setFeedback] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('All categories')
+  const [equipmentFilter, setEquipmentFilter] = useState('All equipment')
+  const [difficultyFilter, setDifficultyFilter] = useState('All levels')
+  const [durationFilter, setDurationFilter] = useState('Any duration')
+  const [muscleFilter, setMuscleFilter] = useState('All muscle groups')
+  const [quickFilter, setQuickFilter] = useState('')
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState('')
+
+  async function load() {
+    try {
+      const [workoutList, metricList] = await Promise.all([workouts.list(), metrics.list()])
+      setWList(workoutList.sort((a, b) => b.date.localeCompare(a.date)))
+      setMList(metricList.sort((a, b) => b.date.localeCompare(a.date)))
+      setLoadError('')
+    } catch (error) {
+      console.error('Failed to load fitness history:', error)
+      setLoadError('Could not load your fitness history. Please refresh to try again.')
+    }
+  }
+
+  useEffect(() => {
+    Promise.all([workouts.list(), metrics.list()])
+      .then(([workoutList, metricList]) => {
+        setWList(workoutList.sort((a, b) => b.date.localeCompare(a.date)))
+        setMList(metricList.sort((a, b) => b.date.localeCompare(a.date)))
+      })
+      .catch((error) => {
+        console.error('Failed to load fitness history:', error)
+        setLoadError('Could not load your fitness history. Please refresh to try again.')
+      })
+  }, [])
+
+  async function submitWorkout(e) {
+    e.preventDefault()
+    setFeedback('')
+
+    const er = {}
+
+    if (!w.name.trim()) er.name = 'Required'
+    if (!(Number(w.duration) > 0) || !Number.isInteger(Number(w.duration))) {
+      er.duration = 'Enter a whole number above 0'
+    }
+    if (w.calories !== '' && Number(w.calories) < 0) {
+      er.calories = 'Cannot be negative'
+    }
+    if (!w.date) er.date = 'Required'
+
+    setWErr(er)
+
+    if (Object.keys(er).length) return
+
+    const item = {
+      type: w.type,
+      name: w.name.trim(),
+      duration: +w.duration,
+      calories: +w.calories || 0,
+      date: w.date,
+      ...(w.sessionId && !editId ? { sessionId: w.sessionId } : {}),
+    }
+
+    setSaving(true)
+    try {
+      if (editId) {
+        await workouts.update(editId, item)
+        setEditId(null)
+        setFeedback('Workout updated.')
+      } else {
+        item.sessionId = w.sessionId || crypto.randomUUID()
+        const result = await workouts.add(item)
+        applyGame(result.game, result.duplicate ? undefined : 'workout')
+        setFeedback(result.duplicate ? 'Workout already recorded.' : 'Workout recorded. +25 XP')
+      }
+      setW(emptyW())
+      setWErr({})
+      await load()
+    } catch (error) {
+      console.error('Failed to save workout:', error)
+      setFeedback(error.code === 'AUTH_REQUIRED' || error.code === 'SUPABASE_NOT_CONFIGURED'
+        ? error.message
+        : 'Could not save this workout. Please try again.')
+      if (!editId) setW((current) => ({ ...current, sessionId: item.sessionId }))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function submitMetric(e) {
+    e.preventDefault()
+    setFeedback('')
+
+    const er = {}
+
+    if (!(Number(m.weight) > 0)) {
+      er.weight = 'Enter a valid weight'
+    }
+
+    if (!m.date) {
+      er.date = 'Required'
+    }
+
+    setMErr(er)
+
+    if (Object.keys(er).length) return
+
+    setSaving(true)
+    try {
+      const result = await metrics.add({
+        weight: +m.weight,
+        date: m.date,
+        requestId: metricRequestId.current || (metricRequestId.current = crypto.randomUUID()),
+      })
+      metricRequestId.current = null
+      applyGame(result.game, result.duplicate ? undefined : 'weight')
+      setFeedback('Weight measurement logged. +15 XP')
+      setM(emptyM())
+      setMErr({})
+      await load()
+    } catch (error) {
+      console.error('Failed to save weight measurement:', error)
+      setFeedback(error.code === 'AUTH_REQUIRED' || error.code === 'SUPABASE_NOT_CONFIGURED'
+        ? error.message
+        : 'Could not save this measurement. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const latestWeight = mList.length > 0 ? mList[0].weight : null
+
+  const totalMinutes = wList.reduce(
+    (total, workout) => total + Number(workout.duration || 0),
+    0
+  )
+
+  const totalCalories = wList.reduce(
+    (total, workout) => total + Number(workout.calories || 0),
+    0
+  )
+
+  const muscleGroups = useMemo(() => [...new Set(WORKOUTS.flatMap((item) => item.targetMuscles))].sort(), [])
+  const filteredWorkouts = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    return WORKOUTS.filter((item) => {
+      const searchText = [item.name, item.description, ...item.targetMuscles, ...item.exercises.map((exercise) => exercise.name)].join(' ').toLowerCase()
+      const durationMatches = durationFilter === 'Any duration'
+        || (durationFilter === 'Under 15 min' && item.durationMinutes < 15)
+        || (durationFilter === '15–30 min' && item.durationMinutes >= 15 && item.durationMinutes <= 30)
+        || (durationFilter === 'Over 30 min' && item.durationMinutes > 30)
+      const quickMatches = !quickFilter
+        || (quickFilter === 'No equipment' && ['Bodyweight only', 'No-equipment cardio'].includes(item.equipment))
+        || (quickFilter === 'Home workouts' && item.tags.includes('home'))
+        || (quickFilter === 'Gym workouts' && item.tags.includes('gym'))
+        || (quickFilter === 'Under 15 min' && item.durationMinutes < 15)
+        || (quickFilter === 'Beginner friendly' && item.difficulty === 'Beginner')
+        || (quickFilter === 'Full body' && item.category === 'Full body')
+        || (quickFilter === 'Mixed training' && item.category === 'Mixed training courses')
+      return (!query || searchText.includes(query))
+        && (categoryFilter === 'All categories' || item.category === categoryFilter)
+        && (equipmentFilter === 'All equipment' || item.equipment === equipmentFilter)
+        && (difficultyFilter === 'All levels' || item.difficulty === difficultyFilter)
+        && durationMatches
+        && (muscleFilter === 'All muscle groups' || item.targetMuscles.includes(muscleFilter))
+        && quickMatches
+    })
+  }, [search, categoryFilter, equipmentFilter, difficultyFilter, durationFilter, muscleFilter, quickFilter])
+  const selectedWorkout = WORKOUTS.find((item) => item.id === selectedWorkoutId)
+
+  return (
+    <div className="page-enter space-y-5 pb-6">
+
+      {/* Page Header */}
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-xp/20 via-white/5 to-transparent p-5">
+        <div className="relative z-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-xp">
+            FITNESS
+          </p>
+
+          <h1 className="mt-2 text-2xl md:text-3xl font-bold">
+            Train stronger. Move better. 💪
+          </h1>
+
+          <p className="mt-1 max-w-xl text-sm text-gray-400">
+            Track your workouts, monitor your body metrics, and build
+            consistency one session at a time.
+          </p>
+        </div>
+
+        <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-xp/10 blur-3xl" />
+      </div>
+      {loadError && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{loadError}</p>}
+      {feedback && <p role="status" className={`rounded-xl border p-3 text-sm ${feedback.startsWith('Could not') ? 'border-red-400/20 bg-red-400/10 text-red-200' : 'border-good/20 bg-good/5 text-good'}`}>{feedback}</p>}
+
+      {/* Statistics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+        <div className="card">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-gray-400">Workouts</p>
+              <p className="mt-1 text-2xl font-bold">
+                {wList.length}
+              </p>
+            </div>
+
+            <span className="text-xl">💪</span>
+          </div>
+
+          <p className="mt-2 text-[11px] text-gray-500">
+            Total sessions
+          </p>
+        </div>
+
+        <div className="card">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-gray-400">Training time</p>
+              <p className="mt-1 text-2xl font-bold">
+                {totalMinutes}
+                <span className="ml-1 text-xs font-normal text-gray-500">
+                  min
+                </span>
+              </p>
+            </div>
+
+            <span className="text-xl">⏱️</span>
+          </div>
+
+          <p className="mt-2 text-[11px] text-gray-500">
+            Total duration
+          </p>
+        </div>
+
+        <div className="card">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-gray-400">Calories burned</p>
+              <p className="mt-1 text-2xl font-bold">
+                {totalCalories}
+              </p>
+            </div>
+
+            <span className="text-xl">🔥</span>
+          </div>
+
+          <p className="mt-2 text-[11px] text-gray-500">
+            Reported calories from logged workouts
+          </p>
+        </div>
+
+        <div className="card">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-gray-400">Latest weight</p>
+              <p className="mt-1 text-2xl font-bold">
+                {latestWeight ?? '—'}
+                {latestWeight && (
+                  <span className="ml-1 text-xs font-normal text-gray-500">
+                    kg
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <span className="text-xl">⚖️</span>
+          </div>
+
+          <p className="mt-2 text-[11px] text-gray-500">
+            Latest measurement
+          </p>
+        </div>
+      </div>
+
+      <section id="workout-library" className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-game text-xs text-xp">WORKOUT LIBRARY</p>
+            <h2 className="mt-2 text-2xl font-extrabold">Choose your session.</h2>
+            <p className="mt-1 text-sm text-gray-400">Browse {WORKOUTS.length} plans with real exercise sequences, equipment, and modifications.</p>
+          </div>
+          <a href="#workout-log" className="btn-ghost min-h-11 text-sm">＋ Log completed training</a>
+        </div>
+
+        <div className="card space-y-4">
+          <div className="flex flex-wrap gap-2" aria-label="Quick workout filters">
+            {['No equipment', 'Home workouts', 'Gym workouts', 'Under 15 min', 'Beginner friendly', 'Full body', 'Mixed training'].map((filter) => (
+              <button key={filter} type="button" aria-pressed={quickFilter === filter} className={`btn-ghost min-h-10 text-xs ${quickFilter === filter ? 'border-xp/40 bg-xp/10 text-xp' : ''}`} onClick={() => setQuickFilter(quickFilter === filter ? '' : filter)}>{filter}</button>
+            ))}
+          </div>
+          <div className="grid gap-x-3 sm:grid-cols-2 xl:grid-cols-3">
+            <Field label="Search workouts or movements" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try squats, mobility, cardio…" />
+            <Field label="Training category" options={['All categories', ...TRAINING_CATEGORIES]} value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} />
+            <Field label="Equipment" options={['All equipment', ...EQUIPMENT_CATEGORIES]} value={equipmentFilter} onChange={(event) => setEquipmentFilter(event.target.value)} />
+            <Field label="Difficulty" options={['All levels', ...DIFFICULTIES]} value={difficultyFilter} onChange={(event) => setDifficultyFilter(event.target.value)} />
+            <Field label="Duration" options={['Any duration', 'Under 15 min', '15–30 min', 'Over 30 min']} value={durationFilter} onChange={(event) => setDurationFilter(event.target.value)} />
+            <Field label="Target muscle group" options={['All muscle groups', ...muscleGroups]} value={muscleFilter} onChange={(event) => setMuscleFilter(event.target.value)} />
+          </div>
+          <p aria-live="polite" className="text-xs text-gray-500">{filteredWorkouts.length} {filteredWorkouts.length === 1 ? 'workout' : 'workouts'} match your filters.</p>
+        </div>
+
+        {selectedWorkout && (
+          <article className="hero-panel p-5 sm:p-7" aria-label={`${selectedWorkout.name} details`}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <span className="badge">{selectedWorkout.category}</span>
+                <h3 className="mt-3 text-2xl font-extrabold">{selectedWorkout.name}</h3>
+                <p className="mt-2 max-w-2xl text-sm text-gray-300">{selectedWorkout.description}</p>
+              </div>
+              <button type="button" className="btn-ghost min-h-10" onClick={() => setSelectedWorkoutId('')}>Close details</button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs">
+              <span className="badge">{selectedWorkout.durationMinutes} min {selectedWorkout.weeklySchedule ? 'course total' : 'estimated'}</span>
+              <span className="badge">{selectedWorkout.difficulty}</span>
+              <span className="badge">{selectedWorkout.equipment}</span>
+              {selectedWorkout.targetMuscles.map((muscle) => <span key={muscle} className="badge">{muscle}</span>)}
+            </div>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Training goal</p>
+            <p className="mt-1 text-sm text-white">{selectedWorkout.trainingGoal}</p>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Equipment checklist</p>
+            <p className="mt-1 text-sm text-white">{selectedWorkout.requiredEquipment.length ? selectedWorkout.requiredEquipment.join(', ') : 'No external equipment required'}</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <p className="rounded-xl border border-white/5 bg-white/[0.03] p-3 text-xs text-gray-300"><span className="font-semibold text-white">Warm-up:</span> {selectedWorkout.warmup}</p>
+              <p className="rounded-xl border border-white/5 bg-white/[0.03] p-3 text-xs text-gray-300"><span className="font-semibold text-white">Cooldown:</span> {selectedWorkout.cooldown}</p>
+            </div>
+            {selectedWorkout.weeklySchedule && <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Weekly course sequence</p>
+              <ol className="mt-2 grid gap-2 sm:grid-cols-3">{selectedWorkout.weeklySchedule.map((session, sessionIndex) => {
+                const sessionMovements = selectedWorkout.exercises.filter((exercise) => session.movementIds.includes(exercise.id))
+                const sessionEquipment = [...new Set(sessionMovements.map((exercise) => exercise.equipment).filter((item) => item !== 'Bodyweight only' && item !== 'No-equipment cardio'))]
+                return <li key={session.day} className="flex flex-col rounded-xl border border-white/5 bg-white/[0.03] p-3">
+                  <p className="text-xs font-bold text-xp">{session.day} · {session.focus}</p>
+                  <p className="mt-1 text-xs text-gray-400">{session.detail}</p>
+                  <p className="mt-2 text-[11px] text-gray-500">{session.durationMinutes} min · {sessionEquipment.length ? sessionEquipment.join(', ') : 'No external equipment'}</p>
+                  <Link to={`/fitness/workout?plan=${selectedWorkout.id}&courseSession=${sessionIndex}`} className="btn-ghost mt-3 min-h-10 justify-center text-xs">Start {session.day}</Link>
+                </li>
+              })}</ol>
+            </div>}
+            <ol className="mt-4 grid gap-2 sm:grid-cols-2">
+              {selectedWorkout.exercises.map((exercise, index) => (
+                <li key={`${exercise.id}-${index}`} className="rounded-xl border border-white/10 bg-black/10 p-3">
+                  <div className="flex items-start gap-3">
+                    {exercise.animationSrc
+                      ? <ExerciseAnimation exercise={{ ...exercise, duration: exercise.tracking === 'timed' ? exercise.durationSeconds : 0 }} compact />
+                      : <span className="text-lg">{exercise.emoji}</span>}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-white">{index + 1}. {exercise.name}</p>
+                      <p className="mt-1 text-xs text-gray-400">{exercise.tracking === 'reps' ? `${exercise.sets} sets × ${exercise.reps} reps` : `${exercise.sets} × ${exercise.durationSeconds}s`} · {exercise.restSeconds}s rest</p>
+                      <p className="mt-1 text-xs text-gray-500">{exercise.instruction}</p>
+                      {exercise.easier && <p className="mt-1 text-xs text-xp">Easier option: {exercise.easier}</p>}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 rounded-xl border border-streak/20 bg-streak/5 p-3 text-xs text-gray-300">Move at a controlled pace, use the listed alternatives when needed, and stop if you feel pain, dizziness, or anything concerning.</p>
+            {!selectedWorkout.weeklySchedule && <Link to={`/fitness/workout?plan=${selectedWorkout.id}`} className="btn mt-4 min-h-12">Start workout <span aria-hidden="true">→</span></Link>}
+          </article>
+        )}
+
+        {filteredWorkouts.length === 0 ? (
+          <div className="empty-state min-h-44">
+            <span className="text-3xl">🔎</span><p className="mt-2 text-sm font-semibold text-white">No plans match those filters</p>
+            <p className="mt-1 text-xs text-gray-500">Try clearing a filter or searching for another movement.</p>
+            <button type="button" className="btn-ghost mt-3" onClick={() => { setSearch(''); setCategoryFilter('All categories'); setEquipmentFilter('All equipment'); setDifficultyFilter('All levels'); setDurationFilter('Any duration'); setMuscleFilter('All muscle groups'); setQuickFilter('') }}>Clear filters</button>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredWorkouts.map((item) => (
+              <article key={item.id} className="card card-interactive flex flex-col">
+                <div className="flex items-start justify-between gap-3">
+                  <div><p className="text-[10px] font-bold uppercase tracking-wider text-xp">{item.category}</p><h3 className="mt-2 text-base font-bold text-white">{item.name}</h3></div>
+                  <span aria-hidden="true" className="rounded-xl bg-xp/10 p-2 text-xl">{item.equipment === 'Dumbbells' || item.equipment === 'Barbells and plates' || item.equipment === 'Kettlebells' ? '🏋️' : item.equipment === 'Gym machines' ? '🏢' : item.equipment === 'Resistance bands' ? '🟢' : item.category === 'Mixed training courses' ? '🔀' : item.category === 'Yoga and recovery' ? '🧘' : '🤸'}</span>
+                </div>
+                <p className="mt-2 flex-1 text-xs leading-relaxed text-gray-400">{item.description}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <span className="badge">{item.durationMinutes} min</span><span className="badge">{item.difficulty}</span><span className="badge">{item.equipment}</span>
+                </div>
+                <p className="mt-3 text-[11px] text-gray-500">{item.exercises.length} movements · {item.targetMuscles.join(' · ')}</p>
+                <button type="button" className="btn-ghost mt-4 min-h-11 w-full" aria-expanded={selectedWorkoutId === item.id} onClick={() => { setSelectedWorkoutId(selectedWorkoutId === item.id ? '' : item.id); document.getElementById('workout-library')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>View plan & exercises</button>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Workout section */}
+      <div className="grid min-w-0 gap-5 lg:grid-cols-2">
+
+        {/* Workout form */}
+        <form id="workout-log" onSubmit={submitWorkout} className="card min-w-0">
+
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="font-game text-sm text-xp">
+                {editId ? 'EDIT WORKOUT' : 'LOG TRAINING'}
+              </h2>
+
+              <p className="mt-1 text-xs text-gray-500">
+                {editId
+                  ? 'Update your workout details'
+                  : 'Record a completed training session'}
+              </p>
+            </div>
+
+            <span className="text-xl">
+              {editId ? '✏️' : '➕'}
+            </span>
+          </div>
+
+          <Field
+            label="Exercise type"
+            options={WORKOUT_TYPES}
+            value={w.type}
+            onChange={(e) =>
+              setW({ ...w, type: e.target.value })
+            }
+          />
+
+          <Field
+            label="Workout name"
+            value={w.name}
+            onChange={(e) =>
+              setW({ ...w, name: e.target.value })
+            }
+            error={wErr.name}
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Duration (minutes)"
+              type="number"
+              value={w.duration}
+              onChange={(e) =>
+                setW({ ...w, duration: e.target.value })
+              }
+              error={wErr.duration}
+            />
+
+            <Field
+              label="Calories burned"
+              type="number"
+              value={w.calories}
+              onChange={(e) =>
+                setW({ ...w, calories: e.target.value })
+              }
+              error={wErr.calories}
+            />
+          </div>
+
+          <Field
+            label="Date"
+            type="date"
+            value={w.date}
+            onChange={(e) =>
+              setW({ ...w, date: e.target.value })
+            }
+            error={wErr.date}
+          />
+
+          <div className="flex gap-2 pt-1">
+            <button className="btn min-h-11 flex-1" disabled={saving}>
+              {saving ? 'Saving…' : editId ? 'Save changes' : 'Add workout (+25 XP)'}
+            </button>
+
+            {editId && (
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => {
+                  setEditId(null)
+                  setW(emptyW())
+                  setWErr({})
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+
+        {/* Workout history */}
+        <div className="card min-w-0">
+
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="font-game text-sm text-xp">
+                WORKOUT HISTORY
+              </h2>
+
+              <p className="mt-1 text-xs text-gray-500">
+                Your recent training sessions
+              </p>
+            </div>
+
+            <span className="text-xl">📋</span>
+          </div>
+
+          {wList.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
+              <div className="text-4xl">🏃</div>
+
+              <p className="mt-3 font-semibold">
+                No workouts yet
+              </p>
+
+              <p className="mt-1 text-xs text-gray-500">
+                Log your first training session to start
+                building your fitness history.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {wList.map((x) => (
+                <li
+                  key={x.id}
+                  className="group rounded-xl border border-white/5 bg-white/[0.03] p-3 transition-all hover:border-white/10 hover:bg-white/[0.06]"
+                >
+                  <div className="flex items-center gap-3">
+
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-xp/10 text-lg">
+                      {x.type === 'Cardio'
+                        ? '🏃'
+                        : x.type === 'Strength'
+                          ? '🏋️'
+                          : x.type === 'Yoga'
+                            ? '🧘'
+                            : x.type === 'HIIT'
+                              ? '⚡'
+                              : '💪'}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">
+                        {x.name}
+                      </p>
+
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {x.type} · {x.date}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-400">
+                        {x.duration} min
+                        {x.planId && WORKOUTS.find((plan) => plan.id === x.planId)
+                          ? ` actual · ${x.plannedDurationMinutes || WORKOUTS.find((plan) => plan.id === x.planId).durationMinutes} min planned`
+                          : ''}
+                        {x.calories > 0 ? ` · ${x.calories} kcal` : x.planId ? ' · calories not estimated' : ''}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-1 opacity-70 transition-opacity group-hover:opacity-100">
+                      <button
+                        className="btn-ghost px-2"
+                        onClick={() => {
+                          setW(x)
+                          setEditId(x.id)
+                          setWErr({})
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="btn-ghost px-2 text-red-400"
+                        onClick={async () => {
+                          if (!window.confirm('Delete this workout from your history?')) return
+                          try {
+                            await workouts.remove(x.id)
+                            setFeedback('Workout deleted.')
+                            await load()
+                          } catch (error) {
+                            console.error('Failed to delete workout:', error)
+                            setFeedback('Could not delete this workout. Please try again.')
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Body metrics */}
+      <div className="grid min-w-0 gap-5 lg:grid-cols-2">
+
+        <form onSubmit={submitMetric} className="card min-w-0">
+
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="font-game text-sm text-xp">
+                BODY METRICS
+              </h2>
+
+              <p className="mt-1 text-xs text-gray-500">
+                Keep track of your weight over time
+              </p>
+            </div>
+
+            <span className="text-xl">⚖️</span>
+          </div>
+
+          <Field
+            label="Weight (kg)"
+            type="number"
+            step="0.1"
+            value={m.weight}
+            onChange={(e) => {
+              metricRequestId.current = null
+              setM({ ...m, weight: e.target.value })
+            }}
+            error={mErr.weight}
+          />
+
+          <Field
+            label="Date"
+            type="date"
+            value={m.date}
+            onChange={(e) => {
+              metricRequestId.current = null
+              setM({ ...m, date: e.target.value })
+            }}
+            error={mErr.date}
+          />
+
+          <button className="btn min-h-11 w-full" disabled={saving}>
+            {saving ? 'Saving…' : 'Log weight (+15 XP)'}
+          </button>
+        </form>
+
+        {/* Weight history */}
+        <div className="card min-w-0">
+
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h2 className="font-game text-sm text-xp">
+                WEIGHT HISTORY
+              </h2>
+
+              <p className="mt-1 text-xs text-gray-500">
+                Your recorded measurements
+              </p>
+            </div>
+
+            <span className="text-xl">📈</span>
+          </div>
+
+          {mList.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
+              <div className="text-4xl">⚖️</div>
+
+              <p className="mt-3 font-semibold">
+                No weight entries yet
+              </p>
+
+              <p className="mt-1 text-xs text-gray-500">
+                Add your first measurement to start
+                tracking your progress.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {mList.map((x) => (
+                <li
+                  key={x.id}
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] p-3"
+                >
+                  <div>
+                    <p className="font-semibold">
+                      {x.weight} kg
+                    </p>
+
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {x.date}
+                    </p>
+                  </div>
+
+                  <button
+                    className="btn-ghost text-red-400"
+                    onClick={async () => {
+                      if (!window.confirm('Delete this weight measurement?')) return
+                      try {
+                        await metrics.remove(x.id)
+                        setFeedback('Weight measurement deleted.')
+                        await load()
+                      } catch (error) {
+                        console.error('Failed to delete weight measurement:', error)
+                        setFeedback('Could not delete this measurement. Please try again.')
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+
+===== DATASET SUMMARY =====
+Exercise count: 1324
+[
+    {
+        "id":  "0001",
+        "name":  "3/4 sit-up",
+        "category":  "waist",
+        "equipment":  "body weight",
+        "target":  "abs",
+        "image":  "images/0001-2gPfomN.jpg",
+        "gif_url":  "videos/0001-2gPfomN.gif"
+    },
+    {
+        "id":  "0002",
+        "name":  "45° side bend",
+        "category":  "waist",
+        "equipment":  "body weight",
+        "target":  "abs",
+        "image":  "images/0002-Hy9D21L.jpg",
+        "gif_url":  "videos/0002-Hy9D21L.gif"
+    },
+    {
+        "id":  "0003",
+        "name":  "air bike",
+        "category":  "waist",
+        "equipment":  "body weight",
+        "target":  "abs",
+        "image":  "images/0003-1ZFqTDN.jpg",
+        "gif_url":  "videos/0003-1ZFqTDN.gif"
+    },
+    {
+        "id":  "1512",
+        "name":  "all fours squad stretch",
+        "category":  "upper legs",
+        "equipment":  "body weight",
+        "target":  "quads",
+        "image":  "images/1512-qBcKorM.jpg",
+        "gif_url":  "videos/1512-qBcKorM.gif"
+    },
+    {
+        "id":  "0006",
+        "name":  "alternate heel touchers",
+        "category":  "waist",
+        "equipment":  "body weight",
+        "target":  "abs",
+        "image":  "images/0006-qaZVsGk.jpg",
+        "gif_url":  "videos/0006-qaZVsGk.gif"
+    },
+    {
+        "id":  "0007",
+        "name":  "alternate lateral pulldown",
+        "category":  "back",
+        "equipment":  "cable",
+        "target":  "lats",
+        "image":  "images/0007-4IKbhHV.jpg",
+        "gif_url":  "videos/0007-4IKbhHV.gif"
+    },
+    {
+        "id":  "1368",
+        "name":  "ankle circles",
+        "category":  "lower legs",
+        "equipment":  "body weight",
+        "target":  "calves",
+        "image":  "images/1368-uL9CsKm.jpg",
+        "gif_url":  "videos/1368-uL9CsKm.gif"
+    },
+    {
+        "id":  "3293",
+        "name":  "archer pull up",
+        "category":  "back",
+        "equipment":  "body weight",
+        "target":  "lats",
+        "image":  "images/3293-72BC5Za.jpg",
+        "gif_url":  "videos/3293-72BC5Za.gif"
+    }
+]
+
+===== ASSET COUNTS =====
+JPG previews: 1324
+GIFs: 1324

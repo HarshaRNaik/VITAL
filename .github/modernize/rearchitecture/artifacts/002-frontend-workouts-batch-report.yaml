@@ -1,0 +1,115 @@
+batch_id: "002-frontend-workouts"
+completed_tasks:
+  - "002-frontend-workouts"
+blocked_tasks: []
+files_changed:
+  "002-frontend-workouts":
+    - file: "src/services/api.js"
+      change_type: "modified"
+      description: "Added paginated API-backed workouts and exercise catalogue clients plus workout CRUD, CSRF, and idempotency request handling."
+    - file: "src/pages/Fitness.jsx"
+      change_type: "modified"
+      description: "Connected workout history and manual workout create/edit/delete UI to backend calls using schema-compatible payloads."
+    - file: "src/pages/WorkoutPlayer.jsx"
+      change_type: "modified"
+      description: "Persists performed sets and restores completion from server workout history without changing timer flow."
+    - file: "src/services/api.test.js"
+      change_type: "modified"
+      description: "Added API contract tests for pagination, exercise listing, idempotent workout create, update, and delete."
+    - file: "dist/index.html"
+      change_type: "modified"
+      description: "Vite build output refreshed."
+    - file: "dist/assets/index-ByMakP7S.css"
+      change_type: "modified"
+      description: "Vite build output refreshed."
+    - file: "dist/assets/index-B-P94fc7.js"
+      change_type: "created"
+      description: "Vite production JavaScript bundle."
+    - file: ".github/modernize/rearchitecture/artifacts/002-frontend-workouts.md"
+      change_type: "created"
+      description: "Task summary and artifact index."
+    - file: ".github/modernize/rearchitecture/artifacts/002-frontend-workouts-results.md"
+      change_type: "created"
+      description: "Detailed API mapping, verification evidence, and remaining gaps."
+    - file: ".github/modernize/rearchitecture/artifacts/002-frontend-workouts-batch-report.yaml"
+      change_type: "created"
+      description: "Structured task result."
+    - file: ".github/modernize/rearchitecture/artifacts/checkpoints/tasks-to-impl.yaml"
+      change_type: "modified"
+      description: "Added task-002 workout integration traceability."
+    - file: ".github/modernize/rearchitecture/team/frontend/log.md"
+      change_type: "modified"
+      description: "Recorded discoveries and workflow notes."
+    - file: ".github/modernize/rearchitecture/learnings/frontend/workout-idempotent-records.md"
+      change_type: "created"
+      description: "Recorded reusable workout API idempotency and performed-set mapping guidance."
+upstream_artifacts_consumed:
+  "002-frontend-workouts":
+    - artifact: ".github/modernize/rearchitecture/artifacts/001-backend.md"
+      used_for: "Task-001 API/data-layer contract index."
+    - artifact: ".github/modernize/rearchitecture/artifacts/001-backend-results.md"
+      used_for: "Workout request/response, performed-set, idempotency, validation, and safety evidence."
+    - artifact: ".github/modernize/rearchitecture/artifacts/002-frontend.md"
+      used_for: "Existing auth client integration and prior frontend boundary."
+    - artifact: ".github/modernize/rearchitecture/artifacts/002-frontend-results.md"
+      used_for: "Prior client/test evidence and local activity/game-state boundaries."
+    - artifact: "server/src/routes/activity.ts"
+      used_for: "Workout endpoint methods, response shapes, session idempotency, and workout reward behavior."
+    - artifact: "server/src/routes/users.ts"
+      used_for: "Paginated exercise catalogue contract."
+    - artifact: "server/src/validation.ts"
+      used_for: "Strict workout/performed-set field validation."
+    - artifact: "server/src/seed.ts"
+      used_for: "Canonical exercise IDs used by the catalogue seed."
+evidence_mapping:
+  "002-frontend-workouts":
+    - upstream: "server/src/routes/activity.ts#GET /workouts"
+      output: "src/services/api.js#workouts.list"
+      evidence: "API client tests verify authenticated paginated history requests and aggregation."
+    - upstream: "server/src/routes/activity.ts#POST /workouts; server/src/validation.ts#workoutSchema"
+      output: "src/services/api.js#workouts.add; src/pages/WorkoutPlayer.jsx#finishWorkout"
+      evidence: "API client tests verify CSRF and Idempotency-Key headers plus serialized performed-set body; full suite passes."
+    - upstream: "server/src/routes/activity.ts#PATCH/DELETE /workouts/:id"
+      output: "src/services/api.js#workouts.update/remove; src/pages/Fitness.jsx"
+      evidence: "API client tests verify methods, paths, body, and credential inclusion."
+    - upstream: "server/src/routes/users.ts#GET /exercises; server/src/seed.ts#seedExerciseCatalog"
+      output: "src/services/api.js#exerciseApi.list; src/pages/WorkoutPlayer.jsx"
+      evidence: "API tests verify exercise catalogue pagination; set payloads associate IDs only when listed."
+    - upstream: "User request to preserve timer behavior and GIF assets"
+      output: "src/pages/WorkoutPlayer.jsx; public/exercises/*.gif"
+      evidence: "Timer flow retained; 9 source/built GIF SHA-256 comparisons match."
+traceability:
+  - requirement: "Persist workout records and performed exercise sets, and restore workout completion through the existing API contracts while preserving current workout/timer UX."
+    plan_item: "Task 002 — next bounded frontend integration slice"
+    task: "002-frontend-workouts"
+    files:
+      - "src/services/api.js"
+      - "src/pages/Fitness.jsx"
+      - "src/pages/WorkoutPlayer.jsx"
+      - "src/services/api.test.js"
+    status: "completed"
+protocol_violation: false
+errors: []
+warnings:
+  - "No live API/database execution or exercise seed was run; runtime persistence remains unverified in this slice."
+  - "Frontend GameContext remains browser-local while the workout endpoint persists its own reward state."
+  - "Vite reports an existing oversized JavaScript chunk."
+test_results:
+  "002-frontend-workouts":
+    command: "npm test"
+    passed: 20
+    failed: 0
+    skipped: 0
+    failures: []
+build_results:
+  command: "npx vite build"
+  exit_code: 0
+  warning: "Existing >500 kB chunk-size warning."
+lint_results:
+  command: "npx eslint src/services/api.js src/services/api.test.js src/pages/Fitness.jsx src/pages/WorkoutPlayer.jsx"
+  exit_code: 0
+  errors: []
+asset_verification:
+  source_gifs: 9
+  built_gifs: 9
+  sha256_mismatches: 0

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Implementation tasks for Supabase Auth and isolated VITAL Fitness persistence.",
+  "tasks": [
+    {
+      "type": "transform",
+      "id": "001-transform-supabase-auth-and-persistence",
+      "description": "Connect VITAL Fitness to Supabase Auth and persistent user data",
+      "reason": "The application already has a React client, Express API, Prisma models, PostgreSQL migrations, and user-scoped routes; the approved work is to integrate Supabase safely while preserving that application and its guest-access behavior.",
+      "requirements": "Inspect the existing API, Prisma schema, migrations, test coverage, frontend API client, AuthContext, and route usage before editing. Replace the app-owned authentication integration with Supabase Auth and map each verified Supabase user identity to an application profile without trusting a caller-supplied userId. Preserve the current API contract and keep HttpOnly session/CSRF protections where retained. Persist profiles, workout plans and plan exercises, completed workouts and exercise sets, fitness progress/goals, nutrition logs, assistant conversation/message history, and settings; retain existing game-state/reward behavior and the shared exercise catalogue. Add RLS policies for every user-owned row and child records, with ownership enforced by verified Supabase identity; keep shared catalogue access appropriately read-only. Support the existing guest/login-bypass experience without requiring login, including a safe guest-scoped persistence strategy or graceful guest behavior. Do not gate routes or change the user-visible behavior/assets in src/App.jsx or src/components/NavBar.jsx. Use a least-privilege public anon key only where appropriate; never expose a service-role or other privileged key to frontend code. Add only reviewed, forward-only/non-destructive migrations that preserve existing rows and do not auto-link accounts using unverified email. Update .env.example with placeholders only and provide concise local Supabase/Auth/database setup and migration/test instructions. Add or update unit and API tests for authentication, API persistence, ownership, CSRF/session compatibility, and failure/guest behavior; run tests without connecting to production or an unprovided external database.",
+      "dependencies": [],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "002-security-rls-and-secret-boundaries",
+      "description": "Verify RLS user isolation and secure Supabase credential handling",
+      "reason": "Fitness, nutrition, profile, settings, and assistant records are private user data, and the new authentication/database boundary must not expose another user's records or privileged credentials.",
+      "requirements": "After the Supabase integration, verify policies for profile, settings, workout plan, workout, exercise set, progress, nutrition, and assistant data with at least two distinct test identities. Confirm cross-user reads and writes are rejected or return no rows, while owners can access their own persisted data. Test the API authentication-to-persistence path and reject forged owner IDs. Verify the frontend bundle/configuration contains no service-role or other privileged key; check that server-only secrets are read from environment configuration and absent from committed examples. Retain and verify CSRF, rate limiting, and safe error behavior for affected API routes. Review newly added/changed dependencies for known security advisories and remediate confirmed in-scope findings. Run npm test, npm run typecheck:server, npm run lint, and npm run build. Use only local/test resources, never production credentials or a real production database; do not run reset/destructive migration commands. If no local Supabase-compatible environment is configured, report the RLS integration-test portion as not run and preserve runnable test coverage for CI/local setup.",
+      "dependencies": [
+        "001-transform-supabase-auth-and-persistence"
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "vital-fitness-persistent-backend",
+    "projectName": "VITAL Fitness App",
+    "language": "typescript",
+    "createdAt": "2026-10-25T07:02:09.767+05:30",
+    "version": "1.0"
+  }
+}

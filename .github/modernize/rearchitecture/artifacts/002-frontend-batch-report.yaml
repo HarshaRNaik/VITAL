@@ -1,0 +1,84 @@
+batch_id: "002-frontend-auth"
+task_scope: "First bounded frontend API client and registration/login/session integration"
+status: "completed"
+
+upstream_artifacts_consumed:
+  - artifact: ".github/modernize/rearchitecture/artifacts/001-backend.md"
+    used_for: "Task-001 backend contract index and implementation boundary."
+  - artifact: ".github/modernize/rearchitecture/artifacts/001-backend-results.md"
+    used_for: "Auth endpoint behavior, test evidence, and DB safety constraints."
+  - artifact: "server/src/routes/auth.ts"
+    used_for: "Auth endpoint request/response contract."
+  - artifact: "server/src/middleware/csrf.ts"
+    used_for: "CSRF token cookie/header requirement."
+  - artifact: "server/src/middleware/auth.ts"
+    used_for: "Session cookie validation behavior."
+evidence_mapping:
+  - upstream: "auth.ts#/csrf,/session,/register,/login,/logout"
+    output: "src/services/api.js; src/context/AuthContext.jsx"
+    evidence: "Four frontend API unit tests; npm test passes."
+  - upstream: "csrf.ts#csrfProtection"
+    output: "src/services/api.js"
+    evidence: "Mocked tests verify cookie credentials, CSRF header, and one invalid-token refresh retry."
+  - upstream: "validation.ts#registerSchema"
+    output: "src/pages/Register.jsx"
+    evidence: "Registration checks the backend minimum of 12 characters."
+  - upstream: "User requirement to preserve current UI and GIFs"
+    output: "Auth page components and public/exercises/*.gif"
+    evidence: "Existing form layout retained; 9 GIFs verified byte-for-byte against dist."
+
+files_changed:
+  - "src/services/api.js"
+  - "src/context/AuthContext.jsx"
+  - "src/pages/Login.jsx"
+  - "src/pages/Register.jsx"
+  - "src/components/ProtectedRoute.jsx"
+  - "src/components/NavBar.jsx"
+  - "src/services/api.test.js"
+  - ".github/modernize/rearchitecture/artifacts/002-frontend.md"
+  - ".github/modernize/rearchitecture/artifacts/002-frontend-results.md"
+  - ".github/modernize/rearchitecture/artifacts/002-frontend-batch-report.yaml"
+  - ".github/modernize/rearchitecture/artifacts/checkpoints/tasks-to-impl.yaml"
+  - ".github/modernize/rearchitecture/team/frontend/log.md"
+  - ".github/modernize/rearchitecture/learnings/frontend/auth-cookie-session.md"
+
+api_assumptions:
+  base_url: "Relative /api by default; Vite proxy targets http://localhost:4000; optional VITE_API_BASE_URL."
+  credentials: "fetch credentials include; browser-managed vital_session cookie."
+  csrf: "GET /api/auth/csrf, send X-CSRF-Token for mutations, retry once on CSRF_INVALID."
+  session: "GET /api/auth/session returns { user }; no active session returns { user: null }."
+  registration: "POST /api/auth/register JSON {name,email,password,goal}; success 201 {user,game,csrfToken}."
+  login: "POST /api/auth/login JSON {email,password}; success {user,csrfToken}."
+  logout: "POST /api/auth/logout requires session and CSRF; success {ok:true,csrfToken}."
+  errors: "API failure body {error:{code,message,details?}}."
+
+test_results:
+  command: "npm test"
+  exit_code: 0
+  passed: 18
+  failed: 0
+  skipped: 0
+  failure_details: []
+
+build_results:
+  command: "npx vite build"
+  exit_code: 0
+  covers_frontend: true
+  warning: "Existing built JavaScript chunk exceeds 500 kB."
+
+additional_validation:
+  lint_command: "npx eslint src/services/api.js src/services/api.test.js src/context/AuthContext.jsx src/pages/Login.jsx src/pages/Register.jsx src/components/ProtectedRoute.jsx src/components/NavBar.jsx"
+  lint_exit_code: 1
+  lint_findings:
+    - "Existing react-refresh/only-export-components rule error on AuthContext.jsx useAuth export."
+  gif_asset_verification:
+    source_count: 9
+    dist_count: 9
+    sha256_parity: true
+
+remaining_gaps:
+  - "No real API/database runtime test; backend tests use Prisma test doubles."
+  - "Workout, meal, metric, assistant, and game/XP behavior remains local/mock-backed."
+  - "Legacy vital_users and vital_session localStorage entries are neither read nor deleted."
+  - "Frontend lint rule finding remains on the existing exported useAuth hook."
+  - "No real DB, migration, credential, or secret was used or created."

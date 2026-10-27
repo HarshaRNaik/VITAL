@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+model LegacyImport {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @db.Uuid
+  workoutCount  Int      @default(0)
+  mealCount     Int      @default(0)
+  metricCount   Int      @default(0)
+  importedAt    DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FitnessGoal {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  name        String    @db.VarChar(120)
+  metric      String    @db.VarChar(40)
+  targetValue Float
+  unit        String    @db.VarChar(40)
+  deadline    DateTime? @db.Date
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt, deadline])
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AssistantRole {
+  user
+  assistant
+}
+
+model User {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  email                 String                   @unique @db.VarChar(320)
+  name                  String                   @db.VarChar(100)
+  passwordHash          String                   @db.VarChar(255)
+  goal                  String                   @db.VarChar(100)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  settings              UserSettings?
+  sessions              AuthSession[]
+  workouts              Workout[]
+  meals                 Meal[]
+  metrics               ProgressMetric[]
+  fitnessGoals          FitnessGoal[]
+  legacyImport          LegacyImport?
+  gameState             GameState?
+  gameRewards           GameReward[]
+  workoutPlans          WorkoutPlan[]
+  conversations         AssistantConversation[]
+  auditEvents           SecurityAuditEvent[]
+
+  @@index([createdAt])
+}
+
+model UserSettings {
+  id                       String   @id @default(uuid()) @db.Uuid
+  userId                   String   @unique @db.Uuid
+  theme                    String   @default("dark") @db.VarChar(20)
+  measurementUnit          String   @default("metric") @db.VarChar(20)
+  timeZone                 String   @default("UTC") @db.VarChar(100)
+  workoutPreference        String   @default("") @db.VarChar(500)
+  emailNotifications       Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique @db.Char(64)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+model Workout {
+  id                    String       @id @default(uuid()) @db.Uuid
+  userId                String       @db.Uuid
+  customPlanId          String?      @db.Uuid
+  type                  String       @db.VarChar(40)
+  name                  String       @db.VarChar(120)
+  duration              Int
+  durationSeconds       Int?
+  calories              Float        @default(0)
+  caloriesEstimated     Boolean      @default(false)
+  date                  DateTime     @db.Date
+  planId                String?      @db.VarChar(100)
+  planCategory          String?      @db.VarChar(100)
+  courseSession         String?      @db.VarChar(100)
+  plannedDurationMinutes Int?
+  exercisesCompleted    Int?
+  setsCompleted         Int?
+  sessionId             String?      @db.VarChar(100)
+  clientRequestId       String?      @db.VarChar(100)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customPlan            WorkoutPlan? @relation(fields: [customPlanId], references: [id], onDelete: SetNull)
+  sets                  WorkoutSet[]
+
+  @@index([userId, date(sort: Desc)])
+  @@index([userId, type, date(sort: Desc)])
+  @@unique([userId, sessionId])
+  @@unique([userId, clientRequestId])
+}
+
+model WorkoutSet {
+  id              String    @id @default(uuid()) @db.Uuid
+  workoutId       String    @db.Uuid
+  exerciseId      String?   @db.VarChar(100)
+  exerciseSequence Int?
+  exerciseName    String    @db.VarChar(120)
+  setNumber       Int
+  reps            Int?
+  weightKg        Float?
+  durationSeconds Int?
+  restSeconds     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  workout         Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise        Exercise? @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+
+  @@unique([workoutId, exerciseSequence, setNumber])
+  @@index([workoutId])
+  @@index([exerciseId])
+}
+
+model Meal {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @db.Uuid
+  name              String   @db.VarChar(120)
+  type              String   @db.VarChar(40)
+  quantity          Float    @default(1)
+  quantityUnit      String   @default("serving") @db.VarChar(40)
+  calories          Float
+  protein           Float    @default(0)
+  carbs             Float    @default(0)
+  fat               Float    @default(0)
+  nutritionEstimated Boolean @default(false)
+  date              DateTime @db.Date
+  clientRequestId   String?  @db.VarChar(100)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date(sort: Desc)])
+  @@index([userId, type, date(sort: Desc)])
+  @@unique([userId, clientRequestId])
+}
+
+model ProgressMetric {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  weightKg  Float
+  date      DateTime @db.Date
+  clientRequestId String? @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date(sort: Desc)])
+  @@unique([userId, clientRequestId])
+}
+
+model GameState {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid
+  totalXP   Int      @default(0)
+  streak    Int      @default(0)
+  lastActive DateTime? @db.Date
+  counts    Json     @default("{}")
+  badges    String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GameReward {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  idempotencyKey  String   @db.VarChar(160)
+  type            String   @db.VarChar(40)
+  amount          Int
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Exercise {
+  id           String          @id @db.VarChar(100)
+  name         String          @db.VarChar(120)
+  equipment    String          @db.VarChar(80)
+  focus        String          @db.VarChar(120)
+  instruction  String          @db.VarChar(1000)
+  easier       String          @db.VarChar(500)
+  tracking     String          @db.VarChar(20)
+  defaultReps  Int
+  defaultSeconds Int
+  animationSrc String          @default("") @db.VarChar(500)
+  updatedAt    DateTime        @updatedAt
+  planItems    WorkoutPlanExercise[]
+  workoutSets WorkoutSet[]
+
+  @@index([equipment])
+  @@index([focus])
+}
+
+model WorkoutPlan {
+  id          String                @id @default(uuid()) @db.Uuid
+  userId      String                @db.Uuid
+  name        String                @db.VarChar(120)
+  description String                @default("") @db.VarChar(1000)
+  category    String                @db.VarChar(100)
+  difficulty  String                @db.VarChar(20)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises   WorkoutPlanExercise[]
+  workouts    Workout[]
+
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+model WorkoutPlanExercise {
+  id           String      @id @default(uuid()) @db.Uuid
+  planId       String      @db.Uuid
+  exerciseId   String      @db.VarChar(100)
+  sequence     Int
+  sets         Int
+  reps         Int?
+  durationSeconds Int?
+  restSeconds  Int
+  plan         WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  exercise     Exercise    @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, sequence])
+  @@index([exerciseId])
+}
+
+model AssistantConversation {
+  id        String                   @id @default(uuid()) @db.Uuid
+  userId    String                   @db.Uuid
+  title     String                   @db.VarChar(120)
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  user      User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AssistantMessage[]
+
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+model AssistantMessage {
+  id             String               @id @default(uuid()) @db.Uuid
+  conversationId String               @db.Uuid
+  clientRequestId String?              @db.VarChar(100)
+  role           AssistantRole
+  content        String               @db.VarChar(2000)
+  createdAt      DateTime             @default(now())
+  conversation   AssistantConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@unique([conversationId, clientRequestId, role])
+}
+
+model SecurityAuditEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @db.Uuid
+  action     String   @db.VarChar(80)
+  targetType String   @db.VarChar(80)
+  targetId   String?  @db.VarChar(100)
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action, createdAt(sort: Desc)])
+}

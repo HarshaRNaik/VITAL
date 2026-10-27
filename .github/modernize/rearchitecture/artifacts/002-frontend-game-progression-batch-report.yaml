@@ -1,0 +1,122 @@
+batch_id: "002-frontend-game-progression"
+completed_tasks:
+  - "002-frontend-game-progression"
+blocked_tasks: []
+required_endpoints: []
+files_changed:
+  "002-frontend-game-progression":
+    - file: "src/services/api.js"
+      change_type: "modified"
+      description: "Add existing persistent game-state and daily chat-reward clients."
+    - file: "src/context/GameContext.jsx"
+      change_type: "modified"
+      description: "Replace browser-local progression authority with authenticated server-state hydration."
+    - file: "src/context/AuthContext.jsx"
+      change_type: "modified"
+      description: "Return the successful registration payload for its persistent game state."
+    - file: "src/pages/Register.jsx"
+      change_type: "modified"
+      description: "Apply the server-provided registration game state."
+    - file: "src/pages/Diet.jsx"
+      change_type: "modified"
+      description: "Apply game state returned from meal creation."
+    - file: "src/pages/Fitness.jsx"
+      change_type: "modified"
+      description: "Apply game state returned from workout and weight creation."
+    - file: "src/pages/WorkoutPlayer.jsx"
+      change_type: "modified"
+      description: "Reconcile workout rewards from the server response and duplicate marker."
+    - file: "src/pages/Assistant.jsx"
+      change_type: "modified"
+      description: "Use the existing chat reward API instead of local daily reward storage."
+    - file: "src/pages/Hub.jsx"
+      change_type: "modified"
+      description: "Read chat mission state from the API-backed game object and surface load errors."
+    - file: "src/services/api.test.js"
+      change_type: "modified"
+      description: "Test GET game state and CSRF-protected chat reward API contracts."
+    - file: "dist/index.html"
+      change_type: "modified"
+      description: "Refresh generated production entry."
+    - file: "dist/assets/index-po93ySeu.css"
+      change_type: "modified"
+      description: "Refresh generated production stylesheet."
+    - file: "dist/assets/index-CLG-EEn4.js"
+      change_type: "added"
+      description: "Generate the production JavaScript bundle."
+upstream_artifacts_consumed:
+  "002-frontend-game-progression":
+    - artifact: ".github/modernize/rearchitecture/artifacts/001-backend-results.md"
+      used_for: "Existing game, activity reward response, and safety contracts."
+    - artifact: ".github/modernize/rearchitecture/artifacts/002-frontend.md"
+      used_for: "API client and authentication/CSRF conventions."
+    - artifact: ".github/modernize/rearchitecture/artifacts/002-frontend-workouts-results.md"
+      used_for: "Workout idempotency and reward behavior."
+    - artifact: ".github/modernize/rearchitecture/artifacts/002-frontend-meals-metrics-results.md"
+      used_for: "Analytics collection source and behavior preservation."
+    - artifact: "server/src/routes/activity.ts; server/src/routes/auth.ts; server/src/routes/assistant.ts; server/src/services/game.ts; server/src/validation.ts"
+      used_for: "Direct source verification of the game-state, reward, and mutation payload contracts."
+evidence_mapping:
+  "002-frontend-game-progression":
+    - upstream: "activity.ts#GET /game + game.ts#readGameState"
+      output: "src/services/api.js#gameApi.get; src/context/GameContext.jsx"
+      evidence: "Focused client test validates authenticated GET and the returned game object."
+    - upstream: "activity.ts#POST /game/rewards + validation.ts#rewardSchema"
+      output: "src/services/api.js#gameApi.rewardChat; src/pages/Assistant.jsx"
+      evidence: "Focused test validates {type: chat}, CSRF token, credentials, and returned game state."
+    - upstream: "auth.ts#register and activity create response game payloads"
+      output: "Register, Diet, Fitness, and WorkoutPlayer"
+      evidence: "Existing and added API tests verify response payloads; workout duplicate flag avoids repeat reward notification."
+    - upstream: "002-frontend-meals-metrics-results.md#Analytics data access"
+      output: "Analytics.jsx unchanged"
+      evidence: "Analytics still consumes meals/workouts/metrics API-backed collection exports and retains prior calculations."
+traceability:
+  - requirement: "Use persistent game progression and supported API-backed dashboard data without changing analytics or workout reward behavior"
+    plan_item: "Task 002 — next bounded dashboard/analytics and game progression slice"
+    task: "002-frontend-game-progression"
+    files:
+      - "src/services/api.js"
+      - "src/context/GameContext.jsx"
+      - "src/context/AuthContext.jsx"
+      - "src/pages/Register.jsx"
+      - "src/pages/Diet.jsx"
+      - "src/pages/Fitness.jsx"
+      - "src/pages/WorkoutPlayer.jsx"
+      - "src/pages/Assistant.jsx"
+      - "src/pages/Hub.jsx"
+      - "src/services/api.test.js"
+    status: "completed"
+protocol_violation: false
+errors: []
+warnings:
+  - severity: "WARNING"
+    message: "Focused ESLint still reports pre-existing react-refresh/only-export-components errors on exported context hooks in AuthContext.jsx and GameContext.jsx."
+  - severity: "INFO"
+    message: "No live API/database test was run; assistant answers remain local rule-based output, and the separate assistant-conversation API was not integrated."
+  - severity: "INFO"
+    message: "The first npm run build attempt lacked DATABASE_URL; it passed using an ephemeral no-credential placeholder URL without connecting to a database or running migrations."
+  - severity: "WARNING"
+    message: "Vite reports the existing production JavaScript chunk exceeds 500 kB."
+test_results:
+  "002-frontend-game-progression":
+    command: "npm test"
+    passed: 24
+    failed: 0
+    skipped: 0
+    failures: []
+build_results:
+  command: "npm run build"
+  exit_code: 0
+  covers_server_and_frontend: true
+  environment: "Ephemeral DATABASE_URL=postgresql://localhost/vital with no credentials; Prisma client generation and compilation only, no DB connection or migration."
+lint_results:
+  command: "npx eslint src/services/api.js src/services/api.test.js src/context/GameContext.jsx src/context/AuthContext.jsx src/pages/Register.jsx src/pages/Diet.jsx src/pages/Fitness.jsx src/pages/WorkoutPlayer.jsx src/pages/Assistant.jsx src/pages/Hub.jsx"
+  exit_code: 1
+  findings:
+    - "Pre-existing react-refresh/only-export-components violation on AuthContext.jsx useAuth export."
+    - "Pre-existing react-refresh/only-export-components violation on GameContext.jsx useGame export."
+endpoint_probes: []
+limitations:
+  - "No generic arbitrary reward endpoint exists; client uses only server-supported registration, meal, workout, weight, and chat reward state."
+  - "Assistant response generation remains local rule-based output; chat reward is server-backed."
+  - "No live API, database, or migration was run."

@@ -1,0 +1,760 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-night: #050912;
+  --color-card: #0c1422;
+  --color-xp: #67e8f9;
+  --color-good: #5eead4;
+  --color-streak: #fb923c;
+
+  --font-game: "Press Start 2P", monospace;
+  --font-sans: "Inter", sans-serif;
+}
+
+/* =========================
+   GLOBAL DESIGN
+========================= */
+
+:root {
+  color-scheme: dark;
+
+  --bg-primary: #050912;
+  --bg-secondary: #09111e;
+  --bg-card: #0c1422;
+  --bg-card-hover: #111f31;
+
+  --accent: #67e8f9;
+  --accent-hover: #a5f3fc;
+  --accent-soft: rgb(103 232 249 / 12%);
+
+  --success: #5eead4;
+  --warning: #c084fc;
+  --danger: #fb7185;
+  --info: #60a5fa;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #a6b1c5;
+  --text-muted: #75829a;
+
+  --border-color: rgb(203 213 225 / 12%);
+  --border-highlight: rgb(103 232 249 / 38%);
+
+  --radius-card: 20px;
+  --radius-control: 12px;
+
+  --shadow-card: 0 16px 36px rgb(0 0 0 / 24%);
+  --shadow-glow: 0 0 28px rgb(103 232 249 / 14%);
+
+  --transition-fast: 160ms ease;
+  --transition-normal: 240ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: #35425a var(--bg-primary);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+
+  background:
+    radial-gradient(ellipse at 12% -10%, rgb(34 211 238 / 9%), transparent 34%),
+    radial-gradient(ellipse at 100% 30%, rgb(129 140 248 / 6%), transparent 28%),
+    var(--bg-primary);
+
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--accent);
+  color: #101708;
+}
+
+/* =========================
+   TYPOGRAPHY
+========================= */
+
+h1,
+h2,
+h3,
+h4,
+p {
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+.font-game {
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.7rem;
+  line-height: 1.9;
+  letter-spacing: 0;
+}
+
+.text-xp {
+  color: var(--color-xp);
+}
+
+.text-streak {
+  color: var(--color-streak);
+}
+
+.text-good {
+  color: var(--color-good);
+}
+
+/* =========================
+   REUSABLE CARDS
+========================= */
+
+@layer components {
+  .card {
+    @apply rounded-2xl border p-4 sm:p-5;
+
+    background: linear-gradient(
+      145deg,
+      rgb(26 37 45 / 96%),
+      rgb(18 26 33 / 99%)
+    );
+
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-card);
+    transition:
+      border-color var(--transition-normal),
+      background var(--transition-normal),
+      transform var(--transition-normal),
+      box-shadow var(--transition-normal);
+  }
+
+  .card:hover {
+    border-color: rgb(103 232 249 / 24%);
+  }
+
+  .card-interactive {
+    cursor: pointer;
+  }
+
+  .card-interactive:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .hero-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgb(103 232 249 / 20%);
+    border-radius: 24px;
+    background:
+      radial-gradient(ellipse at 85% 20%, rgb(34 211 238 / 12%), transparent 38%),
+      linear-gradient(120deg, #0e1c2d, #0a1220 64%, #090e18);
+    box-shadow: var(--shadow-card);
+  }
+
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 132px;
+  }
+
+  .mission-card {
+    transition:
+      border-color var(--transition-normal),
+      background var(--transition-normal),
+      transform var(--transition-normal);
+  }
+
+  .mission-card:hover {
+    transform: translateY(-2px);
+    border-color: rgb(103 232 249 / 25%);
+  }
+
+  .page-enter {
+    animation: fade-in-up 380ms ease both;
+  }
+
+  /* =========================
+     BUTTONS
+  ========================= */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold;
+
+    background: var(--accent);
+    color: #17220a;
+    border: 1px solid transparent;
+
+    transition:
+      background var(--transition-fast),
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    box-shadow: 0 5px 20px rgb(34 211 238 / 18%);
+    transform: translateY(-1px);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 font-semibold;
+
+    background: rgb(255 255 255 / 5%);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: rgb(255 255 255 / 10%);
+    border-color: rgb(103 232 249 / 25%);
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 font-semibold;
+
+    color: #fda4af;
+    background: rgb(251 113 133 / 10%);
+    border: 1px solid rgb(251 113 133 / 20%);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background: rgb(251 113 133 / 18%);
+  }
+
+  /* =========================
+     FORM CONTROLS
+  ========================= */
+
+  .input {
+    @apply mt-1 w-full rounded-xl px-3 py-2.5 outline-none;
+
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      background var(--transition-fast);
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input:hover {
+    border-color: rgb(148 163 184 / 30%);
+  }
+
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(103 232 249 / 12%);
+  }
+
+  select.input {
+    cursor: pointer;
+  }
+
+  textarea.input {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  /* =========================
+     PROGRESS INDICATORS
+  ========================= */
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(148 163 184 / 16%);
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0891b2, #67e8f9);
+    transition: width 500ms ease;
+  }
+
+  .progress-fill-good {
+    background: linear-gradient(90deg, #0f766e, #5eead4);
+  }
+
+  .progress-fill-xp {
+    background: linear-gradient(90deg, #0891b2, #a5f3fc);
+  }
+
+  /* =========================
+     BADGES AND STATUS
+  ========================= */
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold;
+
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--border-highlight);
+  }
+
+  .badge-success {
+    color: var(--success);
+    background: rgb(52 211 153 / 10%);
+    border-color: rgb(52 211 153 / 22%);
+  }
+
+  .badge-warning {
+    color: var(--warning);
+    background: rgb(251 146 60 / 10%);
+    border-color: rgb(251 146 60 / 22%);
+  }
+
+  /* =========================
+     WORKOUT EXPERIENCE
+  ========================= */
+
+  .workout-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .workout-card::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      135deg,
+      rgb(34 211 238 / 7%),
+      transparent 65%
+    );
+    content: "";
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+  }
+
+  .workout-card:hover::before {
+    opacity: 1;
+  }
+
+  .workout-start {
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold;
+
+    background: var(--accent);
+    color: #17220a;
+    transition:
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .workout-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(34 211 238 / 20%);
+  }
+
+  .workout-timer {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.06em;
+  }
+
+  /* =========================
+     EMPTY STATES
+  ========================= */
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center rounded-2xl p-8 text-center;
+
+    background: rgb(255 255 255 / 2%);
+    border: 1px dashed rgb(148 163 184 / 22%);
+  }
+
+  /* =========================
+     ACCESSIBILITY
+  ========================= */
+
+  :where(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes xp-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgb(34 211 238 / 0%);
+  }
+
+  50% {
+    box-shadow: 0 0 22px rgb(34 211 238 / 15%);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 400ms ease both;
+}
+
+.animate-xp-pop {
+  animation: xp-pop 350ms ease both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .font-game {
+    font-size: 0.58rem;
+  }
+
+  .card {
+    border-radius: 16px;
+    padding: 1rem;
+  }
+
+  .btn,
+  .btn-ghost {
+    min-height: 42px;
+  }
+
+  .workout-timer {
+    font-size: 2.75rem;
+  }
+
+  .hero-panel {
+    border-radius: 18px;
+  }
+}
+
+/* =========================
+   REDUCED MOTION
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* SYSTEM INTERFACE */
+
+.system-shell {
+  background:
+    linear-gradient(90deg, transparent 49.9%, rgb(103 232 249 / 2%) 50%, transparent 50.1%),
+    radial-gradient(ellipse at 50% 0%, rgb(34 211 238 / 3%), transparent 48%);
+}
+
+.system-panel {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgb(103 232 249 / 15%);
+  background: linear-gradient(135deg, rgb(14 28 46 / 96%), rgb(8 15 27 / 98%));
+  box-shadow: inset 0 1px rgb(255 255 255 / 3%), 0 20px 48px rgb(0 0 0 / 24%);
+}
+
+.system-panel::before {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 54px;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 14px rgb(103 232 249 / 55%);
+  content: "";
+}
+
+.system-hero {
+  background:
+    linear-gradient(120deg, rgb(5 9 18 / 96%) 20%, rgb(9 22 38 / 92%) 72%, rgb(20 16 42 / 82%)),
+    repeating-linear-gradient(0deg, transparent 0 5px, rgb(103 232 249 / 2%) 6px);
+}
+
+.system-grid {
+  background-image:
+    linear-gradient(rgb(103 232 249 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(103 232 249 / 4%) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(90deg, transparent, black 25%, black 75%, transparent);
+}
+
+.system-kicker {
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.system-value {
+  color: #f0fdff;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 24px rgb(103 232 249 / 16%);
+}
+
+.quest-step {
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.quest-step:hover {
+  border-color: rgb(103 232 249 / 28%);
+  transform: translateY(-1px);
+}
+
+.system-animation {
+  background:
+    radial-gradient(circle at center, rgb(34 211 238 / 12%), transparent 42%),
+    linear-gradient(145deg, #0c1c2c, #08101d);
+}
+
+.system-animation img {
+  filter: drop-shadow(0 0 20px rgb(34 211 238 / 14%));
+}
+
+.system-nav-link[aria-current="page"] {
+  border-color: rgb(103 232 249 / 24%);
+  background: linear-gradient(90deg, rgb(34 211 238 / 13%), rgb(34 211 238 / 4%));
+  color: #cffafe;
+  box-shadow: inset 2px 0 var(--accent), 0 0 24px rgb(34 211 238 / 5%);
+}
+
+.system-toast {
+  border: 1px solid rgb(103 232 249 / 28%);
+  background: rgb(7 16 29 / 94%);
+  color: #cffafe;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 45%), 0 0 24px rgb(34 211 238 / 12%);
+  backdrop-filter: blur(16px);
+}
+
+.achievement-emblem {
+  --relic-color: #a5f3fc;
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--relic-color);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--relic-color) 24%, transparent));
+}
+
+.achievement-emblem svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.relic-aura {
+  fill: color-mix(in srgb, var(--relic-color) 7%, transparent);
+  stroke: color-mix(in srgb, var(--relic-color) 22%, transparent);
+  stroke-width: 1;
+}
+
+.relic-frame {
+  fill: rgb(3 10 20 / 72%);
+  stroke: var(--relic-color);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.relic-frame-soft {
+  fill: none;
+  stroke: color-mix(in srgb, var(--relic-color) 44%, transparent);
+  stroke-width: 0.8;
+}
+
+.relic-symbol {
+  color: var(--relic-color);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.relic-orbit {
+  fill: none;
+  stroke: color-mix(in srgb, var(--relic-color) 50%, transparent);
+  stroke-dasharray: 2 5;
+  stroke-width: 1;
+  transform-origin: center;
+  animation: relic-orbit 18s linear infinite;
+}
+
+.relic-lock {
+  fill: #08111f;
+  stroke: #94a3b8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.achievement-emblem-locked {
+  filter: grayscale(0.85) drop-shadow(0 0 8px rgb(148 163 184 / 8%));
+}
+
+.achievement-emblem-unavailable {
+  opacity: 0.62;
+  filter: grayscale(0.65);
+}
+
+.relic-card-locked .achievement-emblem {
+  opacity: 0.72;
+}
+
+.relic-common { --relic-color: #a5f3fc; }
+.relic-rare { --relic-color: #60a5fa; }
+.relic-epic { --relic-color: #c4b5fd; }
+.relic-legendary { --relic-color: #fbbf24; }
+.relic-mythic { --relic-color: #f0abfc; }
+
+.rarity-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--rarity-color) 35%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rarity-color) 9%, transparent);
+  padding: 0.25rem 0.65rem;
+  color: var(--rarity-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rarity-common { --rarity-color: #a5f3fc; }
+.rarity-rare { --rarity-color: #60a5fa; }
+.rarity-epic { --rarity-color: #c4b5fd; }
+.rarity-legendary { --rarity-color: #fbbf24; }
+.rarity-mythic { --rarity-color: #f0abfc; }
+
+@keyframes relic-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 767px) {
+  .system-shell {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  }
+
+}

@@ -1,0 +1,77 @@
+batch_id: "002-frontend-meals-metrics"
+task_scope: "Connect meal logging and body-weight metrics screens to existing authenticated API contracts"
+status: "completed"
+
+upstream_artifacts_consumed:
+  - artifact: ".github/modernize/rearchitecture/artifacts/001-backend.md"
+    used_for: "Task-001 API contract index."
+  - artifact: ".github/modernize/rearchitecture/artifacts/001-backend-results.md"
+    used_for: "Backend activity API implementation and validation evidence."
+  - artifact: ".github/modernize/rearchitecture/artifacts/002-frontend.md"
+    used_for: "Prior frontend API-client boundaries and conventions."
+  - artifact: ".github/modernize/rearchitecture/artifacts/checkpoints/tasks-to-impl.yaml"
+    used_for: "Prior task implementation traceability."
+  - artifact: "server/src/routes/activity.ts"
+    used_for: "Nutrition/progress route methods, mutation requirements, and response serialization."
+  - artifact: "server/src/validation.ts"
+    used_for: "Meal, metric, and pagination request schema contracts."
+
+required_endpoints: []
+
+evidence_mapping:
+  - upstream: "activity.ts#/nutrition + validation.ts#mealSchema"
+    output: "src/services/api.js#meals"
+    evidence: "Focused client test covers paginated list, date-only create body, required idempotency and CSRF headers, update, and delete."
+  - upstream: "activity.ts#/progress + validation.ts#metricSchema + serializeMetric"
+    output: "src/services/api.js#metrics"
+    evidence: "Focused client test covers paginated list, backend weight/date response shape, create headers, update, and delete."
+  - upstream: "Diet.jsx/Fitness.jsx/Analytics.jsx current UI/date/empty-state behavior"
+    output: "Existing pages retained without presentation edits"
+    evidence: "Existing page calls now resolve to API-backed collection exports; no date or empty-state component code changed."
+
+files_changed:
+  - "src/services/api.js"
+  - "src/services/api.test.js"
+  - "dist/index.html"
+  - "dist/assets/index-L4JYcpE-.js"
+  - "dist/assets/index-po93ySeu.css"
+  - "dist/assets/index-B-P94fc7.js (replaced)"
+  - "dist/assets/index-ByMakP7S.css (replaced)"
+  - ".github/modernize/rearchitecture/artifacts/002-frontend-meals-metrics-frontend.md"
+  - ".github/modernize/rearchitecture/artifacts/002-frontend-meals-metrics-results.md"
+  - ".github/modernize/rearchitecture/artifacts/002-frontend-meals-metrics-batch-report.yaml"
+  - ".github/modernize/rearchitecture/artifacts/checkpoints/tasks-to-impl.yaml"
+  - ".github/modernize/rearchitecture/team/frontend/log.md"
+  - ".github/modernize/rearchitecture/learnings/frontend/activity-api-collections.md"
+
+test_results:
+  command: "npm test"
+  exit_code: 0
+  passed: 22
+  failed: 0
+  skipped: 0
+  failure_details: []
+
+lint_results:
+  command: "npx eslint src/services/api.js src/services/api.test.js"
+  exit_code: 0
+
+build_results:
+  command: "npx vite build"
+  exit_code: 0
+  covers_frontend: true
+  warning: "Existing JavaScript chunk exceeds 500 kB after minification."
+
+backend_contract_gaps:
+  missing_endpoints: []
+  supported_progress_fields: ["weight", "date"]
+  unsupported_progress_fields: "No body-fat, blood-pressure, or other health metrics are defined by the current backend contract; existing screen captures weight only."
+  test_coverage:
+    - "Backend tests cover nutrition create/idempotency, but not nutrition list/update/delete."
+    - "Backend tests do not exercise progress metric list/create/update/delete."
+  runtime_database_verification: "Not run; no live API, DB migration, credentials, or secrets used."
+
+preserved_behavior:
+  - "Existing screen UI was not changed."
+  - "Date-only payloads are passed through without Date conversion."
+  - "Existing today-only totals, date filters/sorting, and no-data empty states remain unchanged."

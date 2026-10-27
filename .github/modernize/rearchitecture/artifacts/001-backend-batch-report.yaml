@@ -1,0 +1,78 @@
+batch_id: "001"
+completed_tasks:
+  - "001-transform-persistent-api-and-data-layer"
+blocked_tasks: []
+files_changed:
+  "001-transform-persistent-api-and-data-layer":
+    - file: "server/src/routes/activity.ts"
+      change_type: "modified"
+      description: "Handle performed-set replacement transactionally, scope custom plan references to their owner, and preserve explicit null deadline updates."
+    - file: "server/src/validation.ts"
+      change_type: "modified"
+      description: "Add a non-empty partial workout update schema."
+    - file: "server/test/api.test.ts"
+      change_type: "created"
+      description: "Add nine isolated API tests using Prisma test doubles."
+    - file: "server/test/validation.test.ts"
+      change_type: "created"
+      description: "Add four unit tests for validation and timezone behavior."
+upstream_artifacts_consumed:
+  "001-transform-persistent-api-and-data-layer":
+    - artifact: ".github/modernize/vital-fitness-persistent-backend/plan.md"
+      used_for: "Phase 1 scope, architecture, and data-safety constraints."
+    - artifact: ".github/modernize/vital-fitness-persistent-backend/.metadata/tasks.json#001-transform-persistent-api-and-data-layer"
+      used_for: "Task acceptance criteria for persistent API, validation, ownership, and tests."
+evidence_mapping:
+  "001-transform-persistent-api-and-data-layer":
+    - upstream: "tasks.json#001 requirements: authenticated, validated, ownership-scoped operations"
+      output: "server/src/routes/activity.ts"
+      evidence: "server/test/api.test.ts: foreign plan rejection, user-scoped list, foreign workout delete, and set-update coverage"
+    - upstream: "tasks.json#001 requirements: persistence and idempotency"
+      output: "server/src/routes/activity.ts"
+      evidence: "server/test/api.test.ts: nutrition persistence and duplicate idempotency replay"
+    - upstream: "plan.md#Scope and Safety Constraints"
+      output: "No schema/migration change; test doubles only"
+      evidence: "npm test and npm run build passed; no migration command executed"
+traceability:
+  - requirement: "Complete persistent, secure fitness data services"
+    plan_item: "Phase 1 — Backend and data safety"
+    task: "001-transform-persistent-api-and-data-layer"
+    files:
+      - "server/src/routes/activity.ts"
+      - "server/src/validation.ts"
+      - "server/test/api.test.ts"
+      - "server/test/validation.test.ts"
+    status: "completed"
+protocol_violation: false
+errors: []
+warnings:
+  - severity: "WARNING"
+    message: "npm run lint exits 1 on three unchanged frontend files: AuthContext.jsx, GameContext.jsx, and useCountdown.js. ESLint config does not target TypeScript."
+  - severity: "INFO"
+    message: "No real-database integration or migration execution was performed because no test DB was supplied and the task forbids using an unprovided DB."
+  - severity: "INFO"
+    message: "The expected .github/modernize/rearchitecture context and backend memory files were absent; the supplied task plan and repository were used."
+test_results:
+  "001-transform-persistent-api-and-data-layer":
+    command: "npm test"
+    passed: 13
+    failed: 0
+    skipped: 0
+    failures: []
+build_results:
+  command: "npm run build"
+  exit_code: 0
+  typecheck_command: "npm run typecheck:server"
+  typecheck_exit_code: 0
+endpoint_probes:
+  method: "Supertest against Express app; Prisma dependencies replaced with test doubles"
+  results:
+    - "GET /api/workouts unauthenticated → 401"
+    - "POST /api/nutrition invalid payload → 400"
+    - "GET /api/workouts authenticated → 200"
+    - "POST /api/nutrition new idempotency key → 201"
+    - "POST /api/nutrition replayed idempotency key → 200"
+    - "PATCH /api/workouts/:id performed sets → 200"
+    - "POST /api/workouts with foreign plan → 404"
+    - "PATCH /api/progress/goals/:id deadline null → 200"
+    - "DELETE /api/workouts/:id not owned → 404"

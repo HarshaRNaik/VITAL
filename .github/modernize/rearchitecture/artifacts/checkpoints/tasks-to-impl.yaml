@@ -1,0 +1,356 @@
+metadata:
+  generated: "2026-10-25T01:09:20Z"
+  source_tasks: "Task 001 plan plus user-assigned bounded task 002 frontend auth, workout, meal/metrics, and dashboard/game progression integration slices"
+  last_updated: "2026-10-25T01:09:20Z"
+
+summary:
+  total_tasks: 5
+  completed_tasks: 5
+  in_progress_tasks: 0
+  pending_tasks: 0
+  completion_percentage: 100.0
+
+tasks:
+  - task_id: "001-transform-persistent-api-and-data-layer"
+    description: "Complete and verify persistent, secure fitness data services"
+    status: "completed"
+    implementation:
+      files_changed:
+        - file: "server/src/routes/activity.ts"
+          changes:
+            - change_type: "modified"
+              description: "Update performed sets transactionally, enforce custom workout-plan ownership, and support clearing a goal deadline."
+        - file: "server/src/validation.ts"
+          changes:
+            - change_type: "modified"
+              description: "Require at least one field in partial workout updates."
+        - file: "server/test/api.test.ts"
+          changes:
+            - change_type: "added"
+              description: "Add nine API tests with isolated Prisma test doubles."
+        - file: "server/test/validation.test.ts"
+          changes:
+            - change_type: "added"
+              description: "Add four validation/domain unit tests."
+    verification:
+      build_passed: true
+      test_results:
+        command: "npm test"
+        passed: 13
+        failed: 0
+        skipped: 0
+        failures: []
+      notes: "npm run build and npm run typecheck:server passed; no real DB or migration used. Full lint reports three errors in unmodified frontend files."
+    upstream_trace:
+      plan_item: "Phase 1 — Backend and data safety"
+      requirements:
+        - "Authenticated, validated, ownership-scoped persistence API"
+        - "Unit and API tests for persistence, validation, authorization, and idempotency"
+        - "Reviewed forward-only migration practices without destructive changes"
+      full_trace: "plan.md#Phase 1 + tasks.json#001 → server API changes → unit/API test evidence"
+  - task_id: "002-frontend-auth"
+    description: "Implement frontend API client and registration/login/session handling"
+    status: "completed"
+    implementation:
+      files_changed:
+        - file: "src/services/api.js"
+          changes:
+            - change_type: "modified"
+              description: "Add cookie-based auth requests, CSRF handling, API errors, and retain existing local activity helpers."
+        - file: "src/context/AuthContext.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Restore the user session from the API and delegate registration, login, and logout to auth endpoints."
+        - file: "src/pages/Login.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Submit credentials asynchronously and display API errors while retaining the login form."
+        - file: "src/pages/Register.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Submit registration asynchronously and align password length validation with the server."
+        - file: "src/components/ProtectedRoute.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Wait for session restoration before redirecting unauthenticated users."
+        - file: "src/components/NavBar.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Use API logout and display server logout errors."
+        - file: "src/services/api.test.js"
+          changes:
+            - change_type: "added"
+              description: "Test cookie credentials, CSRF protection/refresh, session lookup, and auth errors."
+    verification:
+      build_passed: true
+      test_results:
+        command: "npm test"
+        passed: 18
+        failed: 0
+        skipped: 0
+        failures: []
+      notes: "npx vite build passed. Focused ESLint reports one existing react-refresh export error in AuthContext. No real server/DB or migration was run; nine public GIFs remain byte-identical to their dist copies."
+    upstream_trace:
+      plan_item: "Task 002 — first bounded frontend auth/API-client portion"
+      requirements:
+        - "Use task-001 auth endpoint and cookie/CSRF contracts."
+        - "Preserve registration/login UI and animation GIFs."
+        - "Do not run real DB migrations or use/create real credentials."
+      full_trace: ".github/modernize/rearchitecture/artifacts/001-backend.md#task-001 contract → frontend API/auth flow → src/services/api.test.js + npm test + Vite build evidence"
+  - task_id: "002-frontend-workouts"
+    description: "Persist workouts, performed exercise sets, and completion state through existing APIs"
+    status: "completed"
+    implementation:
+      files_changed:
+        - file: "src/services/api.js"
+          changes:
+            - change_type: "modified"
+              description: "Add paginated workout/exercise clients and workout create/update/delete wrappers with CSRF and idempotency support."
+        - file: "src/pages/Fitness.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Connect workout history, manual create/edit/delete, and schema-compatible submission to the API."
+        - file: "src/pages/WorkoutPlayer.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Save performed sets, resolve catalogue references, and restore completion from API history."
+        - file: "src/services/api.test.js"
+          changes:
+            - change_type: "modified"
+              description: "Add focused tests for paginated API listing and workout create/update/delete contracts."
+        - file: "dist/index.html"
+          changes:
+            - change_type: "modified"
+              description: "Refresh frontend production build entry."
+        - file: "dist/assets/index-ByMakP7S.css"
+          changes:
+            - change_type: "modified"
+              description: "Refresh frontend production stylesheet."
+        - file: "dist/assets/index-B-P94fc7.js"
+          changes:
+            - change_type: "added"
+              description: "Generate frontend production JavaScript bundle."
+    verification:
+      build_passed: true
+      test_results:
+        command: "npm test"
+        passed: 20
+        failed: 0
+        skipped: 0
+        failures: []
+      notes: "Focused ESLint passed. Nine public GIFs match dist byte-for-byte. No live API/database, migration, or exercise seed was run."
+    upstream_trace:
+      plan_item: "Task 002 — next bounded frontend workout/exercise integration slice"
+      requirements:
+        - "Persist workout records and performed exercise sets through authenticated APIs."
+        - "Restore workout completion from server history and deduplicate retries."
+        - "Preserve current workout timer/UI and GIF assets."
+        - "Do not run live DB migrations or use/create credentials/secrets."
+      full_trace: ".github/modernize/rearchitecture/artifacts/001-backend-results.md#workout-contract → src/services/api.js + Fitness/WorkoutPlayer → src/services/api.test.js, npm test, Vite build, and GIF hash checks"
+  - task_id: "002-frontend-meals-metrics"
+    description: "Connect meal logging and weight/body metrics screens to the authenticated activity APIs"
+    status: "completed"
+    implementation:
+      files_changed:
+        - file: "src/services/api.js"
+          changes:
+            - change_type: "modified"
+              description: "Replace local meal/metric collections with paginated nutrition/progress API clients and idempotent create requests."
+        - file: "src/services/api.test.js"
+          changes:
+            - change_type: "modified"
+              description: "Cover nutrition/progress list, create, update, delete, CSRF, idempotency headers, and date preservation."
+        - file: "dist/index.html"
+          changes:
+            - change_type: "modified"
+              description: "Refresh frontend build entry."
+        - file: "dist/assets/index-L4JYcpE-.js"
+          changes:
+            - change_type: "added"
+              description: "Generated frontend bundle containing the API-backed activity clients."
+        - file: "dist/assets/index-po93ySeu.css"
+          changes:
+            - change_type: "added"
+              description: "Generated frontend stylesheet."
+        - file: "dist/assets/index-B-P94fc7.js"
+          changes:
+            - change_type: "removed"
+              description: "Replaced by the current production bundle."
+        - file: "dist/assets/index-ByMakP7S.css"
+          changes:
+            - change_type: "removed"
+              description: "Replaced by the current production stylesheet."
+    verification:
+      build_passed: true
+      test_results:
+        command: "npm test"
+        passed: 22
+        failed: 0
+        skipped: 0
+        failures: []
+      notes: "npx vite build and focused ESLint passed. Screens retain their existing date defaults, date-only comparisons, sorting, and empty-state rendering because callers now use API-backed service exports without presentation edits. No live API/database or migration was run."
+    upstream_trace:
+      plan_item: "Task 002 — bounded frontend meal and body/health metric integration slice"
+      requirements:
+        - "Use task-001 nutrition and progress API contracts for meal and weight record CRUD."
+        - "Preserve current UI, date handling, and empty states."
+        - "Do not run live DB migrations or use/create credentials/secrets."
+      full_trace: ".github/modernize/rearchitecture/artifacts/001-backend-results.md#evidence-mapping + server/src/routes/activity.ts#/nutrition,/progress + server/src/validation.ts#mealSchema,metricSchema → src/services/api.js → focused API client tests, npm test, and Vite build"
+  - task_id: "002-frontend-game-progression"
+    description: "Use persistent game progress for the dashboard, reward state, and supported activity rewards"
+    status: "completed"
+    implementation:
+      files_changed:
+        - file: "src/services/api.js"
+          changes:
+            - change_type: "modified"
+              description: "Add authenticated GET game-state and supported daily chat-reward clients."
+        - file: "src/context/GameContext.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Hydrate progress from the authenticated server state and remove localStorage XP/streak/badge authority."
+        - file: "src/context/AuthContext.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Return the server registration response so the initial game state can be applied."
+        - file: "src/pages/Register.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Apply the server-granted registration game state and reward notification."
+        - file: "src/pages/Diet.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Apply server game state returned by meal creation."
+        - file: "src/pages/Fitness.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Apply server game state returned by workout and weight creation; avoid claiming reward for duplicate workouts."
+        - file: "src/pages/WorkoutPlayer.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Apply canonical workout-reward state and use duplicate status for badge notification; keep only the existing local session UI hint."
+        - file: "src/pages/Assistant.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Persist the supported daily chat reward instead of maintaining a local chat reward flag."
+        - file: "src/pages/Hub.jsx"
+          changes:
+            - change_type: "modified"
+              description: "Read the coach quest completion from the persisted game state and display game-load errors."
+        - file: "src/services/api.test.js"
+          changes:
+            - change_type: "modified"
+              description: "Add focused tests for GET /api/game and the CSRF-protected chat reward contract."
+        - file: "dist/index.html"
+          changes:
+            - change_type: "modified"
+              description: "Refresh production entry with the current generated bundle."
+        - file: "dist/assets/index-po93ySeu.css"
+          changes:
+            - change_type: "modified"
+              description: "Refresh production stylesheet."
+        - file: "dist/assets/index-CLG-EEn4.js"
+          changes:
+            - change_type: "added"
+              description: "Generate production frontend bundle for the persistent game-state integration."
+    verification:
+      build_passed: true
+      test_results:
+        command: "npm test"
+        passed: 24
+        failed: 0
+        skipped: 0
+        failures: []
+      notes: "npm run build passed with a temporary no-credential DATABASE_URL value required by Prisma config; generation/typecheck/Vite build ran without DB connectivity or migrations. Vite reports the existing >500 kB chunk warning. Focused ESLint still reports the pre-existing react-refresh-only-export-components errors on context hooks."
+    upstream_trace:
+      plan_item: "Task 002 — next bounded dashboards/analytics and game progression integration slice"
+      requirements:
+        - "Use existing authenticated persistent APIs where contracts exist."
+        - "Preserve analytics calculations, visible UI, and workout rewards."
+        - "Do not invent endpoints or fall back to local/mock reward authority."
+        - "Document unsupported behavior and avoid DB migrations or real credentials."
+      upstream_artifacts:
+        - ".github/modernize/rearchitecture/artifacts/001-backend-results.md#game-and-activity-contracts"
+        - ".github/modernize/rearchitecture/artifacts/002-frontend-workouts-results.md#workout-reward-boundary"
+        - ".github/modernize/rearchitecture/artifacts/002-frontend-meals-metrics-results.md#analytics-data-access"
+      full_trace: "Existing GET /api/game, POST /api/game/rewards {type: chat}, registration/activity game payloads → gameApi + GameContext + existing pages → focused API tests, npm test, and npm run build"
+
+pending_tasks: []
+untracked_changes: []
+traceability_chain:
+  - chain_id: "001-PERSISTENT-API"
+    requirement: "Complete and verify persistent, secure fitness data services"
+    plan_phase: "Phase 1"
+    tasks:
+      - "001-transform-persistent-api-and-data-layer"
+    files:
+      - "server/src/routes/activity.ts"
+      - "server/src/validation.ts"
+      - "server/test/api.test.ts"
+      - "server/test/validation.test.ts"
+    status: "complete"
+  - chain_id: "002-FRONTEND-AUTH"
+    requirement: "Registration, login, and persisted session flow through the task-001 API without changing the existing UI assets"
+    plan_phase: "Task 002 — bounded frontend integration"
+    tasks:
+      - "002-frontend-auth"
+    files:
+      - "src/services/api.js"
+      - "src/context/AuthContext.jsx"
+      - "src/pages/Login.jsx"
+      - "src/pages/Register.jsx"
+      - "src/components/ProtectedRoute.jsx"
+      - "src/components/NavBar.jsx"
+      - "src/services/api.test.js"
+    status: "complete"
+  - chain_id: "002-FRONTEND-WORKOUTS"
+    requirement: "Persist workout and performed-set records and restore completion through existing API contracts while retaining workout/timer behavior"
+    plan_phase: "Task 002 — bounded frontend integration"
+    tasks:
+      - "002-frontend-workouts"
+    files:
+      - "src/services/api.js"
+      - "src/pages/Fitness.jsx"
+      - "src/pages/WorkoutPlayer.jsx"
+      - "src/services/api.test.js"
+    status: "complete"
+  - chain_id: "002-FRONTEND-MEALS-METRICS"
+    requirement: "Persist meal logs and body-weight measurements using existing authenticated API contracts without changing the current UI, date behavior, or empty states"
+    plan_phase: "Task 002 — bounded frontend integration"
+    tasks:
+      - "002-frontend-meals-metrics"
+    files:
+      - "src/services/api.js"
+      - "src/services/api.test.js"
+      - "src/pages/Diet.jsx"
+      - "src/pages/Fitness.jsx"
+      - "src/pages/Analytics.jsx"
+    status: "complete"
+  - chain_id: "002-FRONTEND-GAME-PROGRESSION"
+    requirement: "Use persistent game progress and existing API reward payloads for dashboard progression while preserving analytics and workout behavior"
+    plan_phase: "Task 002 — bounded frontend integration"
+    tasks:
+      - "002-frontend-game-progression"
+    files:
+      - "src/services/api.js"
+      - "src/context/GameContext.jsx"
+      - "src/context/AuthContext.jsx"
+      - "src/pages/Register.jsx"
+      - "src/pages/Diet.jsx"
+      - "src/pages/Fitness.jsx"
+      - "src/pages/WorkoutPlayer.jsx"
+      - "src/pages/Assistant.jsx"
+      - "src/pages/Hub.jsx"
+      - "src/services/api.test.js"
+    status: "complete"
+validation:
+  passed: true
+  errors: []
+  warnings:
+    - "No real-database integration run; test doubles used as required."
+    - "Focused ESLint reports the pre-existing react-refresh/only-export-components rule on the exported useAuth and useGame hooks."
+    - "Assistant answers remain local rule-based output; only its reward is persisted. The separate assistant-conversation contract was not integrated in this bounded task."
+    - "Backend tests cover nutrition create/idempotency but do not currently exercise nutrition list/update/delete or progress metric endpoints; route implementations and schemas are present."
+    - "No live database/API or catalogue seed was run; frontend game state is loaded from the authenticated API, with a local completed-session marker retained only as a UI resume hint."
+    - "Vite continues to report an oversized JavaScript chunk."
+  blocking_issues: []
