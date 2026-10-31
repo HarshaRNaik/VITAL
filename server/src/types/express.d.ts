@@ -12,6 +12,7 @@ declare global {
     interface Request {
       requestId: string;
       user?: AuthenticatedUser;
+      coachUser?: { id: string; accessToken: string };
     }
   }
 }

@@ -7,6 +7,18 @@ import { useGame } from '../context/game-context'
 import { WORKOUT_TYPES } from '../data/constants'
 import { DIFFICULTIES, EQUIPMENT_CATEGORIES, TRAINING_CATEGORIES, WORKOUTS } from '../data/workouts'
 import { today } from '../utils/helpers'
+import { recommendWorkouts } from '../utils/workout-recommendations'
+
+const HOME_PREFERENCES_KEY = 'vital-home-workout-preferences'
+const defaultHomePreferences = { equipment: 'No equipment', level: 'Beginner', duration: '30', muscle: 'Any muscle group' }
+
+function readHomePreferences() {
+  try {
+    return { ...defaultHomePreferences, ...JSON.parse(localStorage.getItem(HOME_PREFERENCES_KEY) || '{}') }
+  } catch {
+    return defaultHomePreferences
+  }
+}
 
 const emptyW = () => ({
   type: 'Cardio',
@@ -44,6 +56,7 @@ export default function Fitness() {
   const [muscleFilter, setMuscleFilter] = useState('All muscle groups')
   const [quickFilter, setQuickFilter] = useState('')
   const [selectedWorkoutId, setSelectedWorkoutId] = useState('')
+  const [homePreferences, setHomePreferences] = useState(readHomePreferences)
 
   async function load() {
     try {
@@ -203,6 +216,17 @@ export default function Fitness() {
     })
   }, [search, categoryFilter, equipmentFilter, difficultyFilter, durationFilter, muscleFilter, quickFilter])
   const selectedWorkout = WORKOUTS.find((item) => item.id === selectedWorkoutId)
+  const recommendedWorkouts = useMemo(() => recommendWorkouts(WORKOUTS, homePreferences), [homePreferences])
+
+  function updateHomePreference(key, value) {
+    setHomePreferences((current) => {
+      const next = { ...current, [key]: value }
+      try { localStorage.setItem(HOME_PREFERENCES_KEY, JSON.stringify(next)) } catch (error) {
+        console.warn('Could not save Home Workout preferences:', error)
+      }
+      return next
+    })
+  }
 
   return (
     <div className="page-enter space-y-5 pb-6">
@@ -210,6 +234,7 @@ export default function Fitness() {
       {/* Page Header */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-xp/20 via-white/5 to-transparent p-5">
         <div className="relative z-10">
+          <Link to="/workout" className="btn-ghost mb-2 inline-flex min-h-10 items-center text-xs">← Workout modes</Link>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-xp">
             FITNESS
           </p>
@@ -310,6 +335,28 @@ export default function Fitness() {
       </div>
 
       <section id="workout-library" className="space-y-4">
+        <section aria-label="Personalized home workout recommendations" className="system-panel rounded-2xl p-5 sm:p-6">
+          <div>
+            <p className="font-game text-xs text-cyan-200">YOUR HOME TRAINING SETUP</p>
+            <h2 className="mt-2 text-xl font-bold text-white">Recommendations that fit your equipment.</h2>
+            <p className="mt-1 text-sm text-gray-400">Change these any time. Gym-only plans are excluded when your equipment does not support them.</p>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label="Available equipment" value={homePreferences.equipment} onChange={(event) => updateHomePreference('equipment', event.target.value)} options={['No equipment', 'Dumbbells', 'Resistance bands', 'Gym equipment']} />
+            <Field label="Fitness level" value={homePreferences.level} onChange={(event) => updateHomePreference('level', event.target.value)} options={DIFFICULTIES} />
+            <Field label="Available time" value={homePreferences.duration} onChange={(event) => updateHomePreference('duration', event.target.value)} options={['15', '20', '30', '45', '60']} />
+            <Field label="Muscle focus" value={homePreferences.muscle} onChange={(event) => updateHomePreference('muscle', event.target.value)} options={['Any muscle group', ...muscleGroups]} />
+          </div>
+          {recommendedWorkouts.length === 0 ? <p className="mt-4 text-sm text-gray-400">No plans match all of these settings yet. Try a longer duration or choose any muscle group.</p> : (
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {recommendedWorkouts.map((item) => <article key={item.id} className="rounded-xl border border-cyan-200/10 bg-black/15 p-4">
+                <h3 className="font-semibold text-white">{item.name}</h3>
+                <p className="mt-1 text-xs text-gray-400">{item.durationMinutes} min · {item.difficulty} · {item.equipment}</p>
+                <button type="button" className="btn-ghost mt-3 min-h-10 w-full text-xs" onClick={() => { setSelectedWorkoutId(item.id); document.getElementById('workout-library')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>View compatible plan</button>
+              </article>)}
+            </div>
+          )}
+        </section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="font-game text-xs text-xp">WORKOUT LIBRARY</p>

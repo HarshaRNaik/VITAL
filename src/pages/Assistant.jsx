@@ -88,7 +88,7 @@ export default function Assistant() {
       console.error('Failed to save coach message:', error)
       retryRequest.current = { content, requestId }
       setInput(content)
-      setError("Your message couldn't be saved. Please try sending it again.")
+      setError(error.message || "Your message couldn't be saved. Please try sending it again.")
     } finally {
       setTyping(false)
     }

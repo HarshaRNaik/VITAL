@@ -24,22 +24,33 @@ without signing in; private history and changes require an account.
 See [`supabase/README.md`](./supabase/README.md) for migration, local testing,
 security, production deployment, and backup/recovery details.
 
+See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the Vercel frontend and Render
+Gemini Coach deployment setup. The browser uses Supabase for authentication and
+user data; the Render Coach API is separate from the retained legacy Prisma API.
+
 `VITE_` variables are public and are included in the browser bundle. Use only
 the Supabase publishable/anon key there. Never put a service-role key in a
 `VITE_` variable or frontend file, and do not commit `.env`.
 
 ## Data and compatibility
 
-Profiles, settings, workout plans, completed workouts and sets, nutrition,
-fitness metrics/goals, game progress, and coach conversations are stored in
-Supabase. Supabase Auth creates a profile and initial game state through the
-database trigger. RLS policies scope private rows to `auth.uid()`.
+Profiles, settings, Home Workout records, Gym Partner sessions and templates,
+workout plans, nutrition, fitness metrics/goals, game progress, and coach
+conversations are stored in Supabase. Active Gym Partner sessions can be
+resumed, and gym completion rewards are granted transactionally. Supabase Auth
+creates a profile and initial game state through the database trigger. RLS
+policies scope private rows to `auth.uid()`.
 
-The previous Express/Prisma backend and its database migrations are retained,
-but the current browser app no longer uses those endpoints. Existing records
-in the previous PostgreSQL database are not deleted or automatically assigned
-to Supabase accounts. Review and explicitly migrate legacy data only after
-matching account identities; do not infer ownership from email alone.
+The previous Express/Prisma authentication and activity endpoints remain
+separate and are not used by the browser app. A standalone Express Coach API
+uses Supabase access tokens and RLS-scoped reads to call Gemini; it does not
+use the legacy Prisma database. Existing records in the previous PostgreSQL
+database are not deleted or automatically assigned to Supabase accounts.
+Review and explicitly migrate legacy data only after matching account
+identities; do not infer ownership from email alone. Prisma client generation
+does not require `DATABASE_URL`; legacy database migration and seed commands
+do, and should only be run with the intended PostgreSQL connection string
+configured.
 
 ## Validation
 

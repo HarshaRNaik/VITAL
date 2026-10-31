@@ -10,6 +10,8 @@ import Analytics from './pages/Analytics'
 import Assistant from './pages/Assistant'
 import Profile from './pages/Profile'
 import Achievements from './pages/Achievements'
+import Workout from './pages/Workout'
+import GymWorkout from './pages/GymWorkout'
 
 export default function App() {
   return (
@@ -18,6 +20,8 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Hub />} />
+        <Route path="/workout" element={<Workout />} />
+        <Route path="/workout/gym" element={<GymWorkout />} />
         <Route path="/diet" element={<Diet />} />
         <Route path="/fitness" element={<Fitness />} />
         <Route path="/fitness/workout" element={<WorkoutPlayer />} />

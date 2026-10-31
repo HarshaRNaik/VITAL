@@ -4,7 +4,7 @@ import { useAuth } from '../context/auth-context'
 
 const links = [
   { to: '/', label: 'System', icon: '⌂' },
-  { to: '/fitness', label: 'Training', icon: '◇' },
+  { to: '/workout', label: 'Workout', icon: '◇' },
   { to: '/diet', label: 'Nutrition', icon: '◈' },
   { to: '/analytics', label: 'Analytics', icon: '▥' },
   { to: '/assistant', label: 'Coach', icon: '⌁' },

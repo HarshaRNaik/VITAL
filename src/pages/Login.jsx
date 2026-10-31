@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Field from '../components/Field'
+import BackButton from '../components/BackButton'
 import { useAuth } from '../context/auth-context'
 
 export default function Login() {
@@ -28,6 +29,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <form onSubmit={submit} className="card w-full max-w-sm">
+        <BackButton />
         <h1 className="font-game text-xp text-xl mb-1">VITAL</h1>
         <p className="text-gray-400 text-sm mb-4">Welcome back, player</p>
         <Field label="Email" name="email" type="email" value={f.email} onChange={set} />

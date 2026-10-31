@@ -10,8 +10,14 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
+.vercel
 *.local
 server/dist
+*.db
+*.sqlite
+*.sqlite3
+*.tmp
 .env
 .env.*
 !.env.example

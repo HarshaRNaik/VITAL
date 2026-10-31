@@ -2,13 +2,19 @@
   "name": "vital-fitness-app",
   "private": true,
   "version": "0.0.0",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "dev:server": "tsx watch --clear-screen=false server/src/index.ts",
+    "dev:coach": "tsx watch --clear-screen=false server/src/coach-index.ts",
     "build": "npm run build:server && vite build",
+    "build:frontend": "vite build",
     "build:server": "npm run db:generate && tsc -p server/tsconfig.json",
     "start:server": "node server/dist/index.js",
+    "start:coach": "node server/dist/coach-index.js",
     "db:generate": "prisma generate --config server/prisma.config.ts",
     "db:migrate:dev": "prisma migrate dev --config server/prisma.config.ts",
     "db:migrate:deploy": "prisma migrate deploy --config server/prisma.config.ts",
@@ -19,6 +25,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^2.32.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "@supabase/supabase-js": "^2.118.0",

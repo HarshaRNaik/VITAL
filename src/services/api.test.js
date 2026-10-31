@@ -24,12 +24,13 @@ describe('Supabase activity API', () => {
   })
 
   it('returns no private activity for an unauthenticated visitor', async () => {
-    const { meals, metrics, workouts } = await import('./api')
+    const { meals, metrics, workouts, gymWorkouts } = await import('./api')
 
     await expect(meals.list()).resolves.toEqual([])
     await expect(metrics.list()).resolves.toEqual([])
     await expect(workouts.list()).resolves.toEqual([])
-    expect(authMocks.getSignedInUser).toHaveBeenCalledTimes(3)
+    await expect(gymWorkouts.list()).resolves.toEqual([])
+    expect(authMocks.getSignedInUser).toHaveBeenCalledTimes(4)
   })
 
   it('requires sign-in before writing private records', async () => {
@@ -202,6 +203,107 @@ describe('Supabase activity API', () => {
         exercises: [expect.objectContaining({ exercise_id: 'bar-squat', sequence: 0 })],
       }),
     }))
+  })
+
+  it('saves gym workout drafts and completes them through the user-scoped reward RPC', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const id = '7d78d59d-5179-40ad-9565-4e268328c225'
+    const rpc = vi.fn().mockResolvedValue({
+      data: {
+        item: { id, status: 'COMPLETED', exercises: [] },
+        game: { totalXP: 25, streak: 1, badges: [] },
+        duplicate: false,
+      },
+      error: null,
+    })
+    authMocks.requireSupabase.mockReturnValue({ rpc })
+    const { gymWorkouts } = await import('./api')
+    const workout = {
+      name: 'Push day',
+      status: 'COMPLETED',
+      unit: 'kg',
+      startedAt: '2026-10-25T10:00:00.000Z',
+      durationSeconds: 1800,
+      exercises: [{
+        exerciseId: 'db-floor-press',
+        exerciseName: 'Dumbbell floor press',
+        focus: 'Chest and triceps',
+        equipment: 'Dumbbells',
+        sequence: 0,
+        notes: '',
+        sets: [{
+          setNumber: 1,
+          weightKg: 20,
+          reps: 10,
+          rpe: 8,
+          setType: 'WORKING',
+          completed: true,
+          notes: '',
+        }],
+      }],
+    }
+
+    await expect(gymWorkouts.save(id, workout)).resolves.toMatchObject({
+      item: { id, status: 'COMPLETED' },
+      duplicate: false,
+    })
+    expect(rpc).toHaveBeenCalledWith('save_gym_workout', {
+      p_workout_id: id,
+      p_item: expect.objectContaining({
+        status: 'COMPLETED',
+        unit: 'kg',
+        exercises: [expect.objectContaining({
+          exercise_id: 'db-floor-press',
+          sets: [expect.objectContaining({
+            weight_kg: 20,
+            set_type: 'WORKING',
+            completed: true,
+          })],
+        })],
+      }),
+    })
+    await expect(gymWorkouts.save(id, { ...workout, unit: 'stone' }))
+      .rejects.toMatchObject({ code: 'INVALID_INPUT' })
+  })
+
+  it('cancels only active gym sessions and persists gym-only workout templates', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const rpc = vi.fn()
+      .mockResolvedValueOnce({ data: true, error: null })
+      .mockResolvedValueOnce({
+        data: {
+          id: '7d78d59d-5179-40ad-9565-4e268328c225',
+          user_id: 'user-a',
+          name: 'Upper body',
+          exercises: [{ exercise_id: 'db-floor-press', sets: 3, reps: 10, rest_seconds: 90 }],
+        },
+        error: null,
+      })
+    authMocks.requireSupabase.mockReturnValue({ rpc })
+    const { gymWorkouts, gymWorkoutTemplates } = await import('./api')
+
+    await expect(gymWorkouts.cancel('7d78d59d-5179-40ad-9565-4e268328c225')).resolves.toBeUndefined()
+    expect(rpc).toHaveBeenCalledWith('cancel_gym_workout', {
+      p_workout_id: '7d78d59d-5179-40ad-9565-4e268328c225',
+    })
+    await expect(gymWorkoutTemplates.save(null, {
+      name: 'Upper body',
+      exercises: [{ exerciseId: 'db-floor-press', sets: 3, reps: 10, restSeconds: 90 }],
+    })).resolves.toMatchObject({
+      userId: 'user-a',
+      exercises: [{ exerciseId: 'db-floor-press', restSeconds: 90 }],
+    })
+    expect(rpc).toHaveBeenNthCalledWith(2, 'save_gym_workout_template', {
+      p_template_id: null,
+      p_item: {
+        name: 'Upper body',
+        exercises: [{ exercise_id: 'db-floor-press', sets: 3, reps: 10, rest_seconds: 90 }],
+      },
+    })
+    await expect(gymWorkoutTemplates.save(null, {
+      name: 'Empty template',
+      exercises: [],
+    })).rejects.toMatchObject({ code: 'INVALID_INPUT' })
   })
 
   it('reuses an activity request ID across retries and rejects invalid activity input', async () => {

@@ -7,7 +7,8 @@
    `migrations/20261025000000_supabase_persistence.sql`, then
    `migrations/20261026000000_atomic_writes_and_validation.sql`, then
    `migrations/20261027000000_chat_security_and_rate_limits.sql`, then
-   `migrations/20261028000000_level_five_relic.sql`.
+   `migrations/20261028000000_level_five_relic.sql`, then
+   `migrations/20261031000000_gym_workouts.sql`.
    With the CLI, link the project and run `supabase db push`. Alternatively,
    apply all four files in order in the Supabase SQL editor. Review the SQL
    before applying it to any shared database.
@@ -50,14 +51,17 @@ enabled, registration asks the user to confirm their address before signing in.
   Authentication → Rate Limits in the deployed project. The Express server's
   rate limiter protects only that legacy API; the browser app calls Supabase
   directly.
-- The Express API's current rate limiter uses its default in-process store.
-  If that legacy API is deployed with multiple instances, configure a shared
-  rate-limit store so requests cannot evade limits by landing on another
-  instance.
-- The current coach generates rule-based responses locally and does not call an
-  external AI provider. No AI API key is required. If a provider is added later,
-  call it only from a server-side Edge Function or trusted backend using a
-  server-side secret; never add the key to a `VITE_` variable or browser code.
+- The legacy Express API's rate limiter uses its default in-process store. The
+  separate Coach API also uses in-process request limits. Keep either service
+  to one instance or configure a shared rate-limit store before scaling out.
+- The Coach uses the official Gemini SDK only in the Render server process.
+  It verifies the caller's Supabase access token, then reads a bounded amount
+  of that user's recent activity with the same token so Supabase RLS remains
+  in force. The question and that activity summary are sent to the configured
+  Gemini model. Set `GEMINI_API_KEY` only in Render; never use a `VITE_` name
+  for it or expose it in browser code. Set `VITE_API_BASE_URL` to the Coach API
+  origin in Vercel. Development without this URL retains the local rule-based
+  Coach; production requires the API URL for authenticated Coach replies.
 - New Supabase identities receive profile, settings, and initial game-state
   rows from an `auth.users` trigger.
 - Existing Express/Prisma tables are not dropped or modified by this

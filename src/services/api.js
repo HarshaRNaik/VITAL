@@ -13,6 +13,7 @@ export class ApiError extends Error {
 }
 
 const initialGame = { totalXP: 0, streak: 0, lastActive: null, counts: {}, badges: [], chatToday: false }
+const coachApiBase = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '')
 const camelKey = (key) => key.replace(/_([a-z])/g, (_match, letter) => letter.toUpperCase())
 const dateSchema = z.iso.date()
 const amountSchema = z.number().finite().min(0).max(1_000_000)
@@ -87,6 +88,41 @@ const planSchema = z.object({
   difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']),
   exercises: z.array(planExerciseSchema).min(1).max(100),
 }).strict().refine((plan) => new Set(plan.exercises.map((exercise) => exercise.sequence)).size === plan.exercises.length, 'Exercise sequence numbers must be unique.')
+const gymSetSchema = z.object({
+  setNumber: z.number().int().positive().max(100),
+  weightKg: amountSchema.nullable(),
+  reps: z.number().int().positive().max(1000).nullable(),
+  rpe: z.number().finite().min(1).max(10).nullable(),
+  setType: z.enum(['WARM_UP', 'WORKING', 'DROP', 'FAILURE', 'REST_PAUSE']),
+  completed: z.boolean(),
+  notes: z.string().max(500).default(''),
+}).strict()
+const gymExerciseSchema = z.object({
+  exerciseId: z.string().trim().min(1).max(100),
+  exerciseName: z.string().trim().min(1).max(120),
+  focus: z.string().trim().max(120),
+  equipment: z.string().trim().max(80),
+  sequence: z.number().int().nonnegative().max(100),
+  notes: z.string().max(500).default(''),
+  sets: z.array(gymSetSchema).max(100),
+}).strict()
+const gymWorkoutSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  status: z.enum(['IN_PROGRESS', 'COMPLETED']),
+  unit: z.enum(['kg', 'lb']),
+  startedAt: z.iso.datetime({ offset: true }),
+  durationSeconds: z.number().int().nonnegative().max(86_400),
+  exercises: z.array(gymExerciseSchema).max(100),
+}).strict()
+const gymTemplateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  exercises: z.array(z.object({
+    exerciseId: z.string().trim().min(1).max(100),
+    sets: z.number().int().positive().max(30),
+    reps: z.number().int().positive().max(1000),
+    restSeconds: z.number().int().nonnegative().max(3600),
+  }).strict()).min(1).max(100),
+}).strict()
 
 function validateInput(schema, input, label) {
   const parsed = schema.safeParse(input)
@@ -395,6 +431,95 @@ export const workouts = {
   },
 }
 
+export const gymWorkouts = {
+  list: async () => (await privateList('gym_workouts', '*', 'updated_at'))
+    .map((item) => camelize(item)),
+  save: async (id, workout) => {
+    await requireSignedInUser()
+    const client = requireSupabase()
+    if (!z.uuid().safeParse(id).success) {
+      throw new ApiError('Invalid gym workout ID.', { code: 'INVALID_INPUT' })
+    }
+    const validated = validateInput(gymWorkoutSchema, workout, 'Invalid gym workout')
+    const saved = await resultOf(client.rpc('save_gym_workout', {
+      p_workout_id: id,
+      p_item: {
+        name: validated.name,
+        status: validated.status,
+        unit: validated.unit,
+        started_at: validated.startedAt,
+        duration_seconds: validated.durationSeconds,
+        exercises: validated.exercises.map((exercise) => ({
+          exercise_id: exercise.exerciseId,
+          exercise_name: exercise.exerciseName,
+          focus: exercise.focus,
+          equipment: exercise.equipment,
+          sequence: exercise.sequence,
+          notes: exercise.notes,
+          sets: exercise.sets.map((set) => ({
+            set_number: set.setNumber,
+            weight_kg: set.weightKg,
+            reps: set.reps,
+            rpe: set.rpe,
+            set_type: set.setType,
+            completed: set.completed,
+            notes: set.notes,
+          })),
+        })),
+      },
+    }))
+    return {
+      item: camelize(saved.item),
+      game: saved.game,
+      duplicate: saved.duplicate,
+    }
+  },
+  cancel: async (id) => {
+    await requireSignedInUser()
+    if (!z.uuid().safeParse(id).success) {
+      throw new ApiError('Invalid gym workout ID.', { code: 'INVALID_INPUT' })
+    }
+    const client = requireSupabase()
+    const cancelled = await resultOf(client.rpc('cancel_gym_workout', { p_workout_id: id }))
+    if (!cancelled) throw new ApiError('This gym workout is no longer active.', { code: 'WORKOUT_NOT_ACTIVE' })
+  },
+}
+
+export const gymWorkoutTemplates = {
+  list: async () => (await privateList('gym_workout_templates', '*', 'updated_at'))
+    .map((item) => camelize(item)),
+  save: async (id, template) => {
+    await requireSignedInUser()
+    const client = requireSupabase()
+    if (id && !z.uuid().safeParse(id).success) {
+      throw new ApiError('Invalid gym template ID.', { code: 'INVALID_INPUT' })
+    }
+    const validated = validateInput(gymTemplateSchema, template, 'Invalid gym workout template')
+    const saved = await resultOf(client.rpc('save_gym_workout_template', {
+      p_template_id: id || null,
+      p_item: {
+        name: validated.name,
+        exercises: validated.exercises.map((exercise) => ({
+          exercise_id: exercise.exerciseId,
+          sets: exercise.sets,
+          reps: exercise.reps,
+          rest_seconds: exercise.restSeconds,
+        })),
+      },
+    }))
+    return camelize(saved)
+  },
+  remove: async (id) => {
+    await requireSignedInUser()
+    if (!z.uuid().safeParse(id).success) {
+      throw new ApiError('Invalid gym template ID.', { code: 'INVALID_INPUT' })
+    }
+    const client = requireSupabase()
+    const deleted = await resultOf(client.rpc('delete_gym_workout_template', { p_template_id: id }))
+    if (!deleted) throw new ApiError('This gym workout template could not be found.', { code: 'TEMPLATE_NOT_FOUND' })
+  },
+}
+
 export const exerciseApi = {
   list: async () => MOVEMENTS,
 }
@@ -582,7 +707,36 @@ export const assistantApi = {
       }
     }
 
-    const response = await assistantReply(user.id, validatedContent)
+    let response
+    if (coachApiBase) {
+      const { data: { session }, error: sessionError } = await requireSupabase().auth.getSession()
+      if (sessionError) throw sessionError
+      if (!session?.access_token) throw new ApiError('Please sign in again to use the Coach.', { code: 'AUTH_REQUIRED' })
+      let coachResponse
+      try {
+        coachResponse = await fetch(`${coachApiBase}/api/coach/reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ content: validatedContent }),
+        })
+      } catch {
+        throw new ApiError('The Coach service could not be reached. Please try again shortly.', { code: 'COACH_UNAVAILABLE' })
+      }
+      const body = await coachResponse.json().catch(() => ({}))
+      if (!coachResponse.ok) {
+        throw new ApiError(body?.error?.message || 'The Coach could not answer right now.', {
+          code: body?.error?.code || 'COACH_UNAVAILABLE',
+        })
+      }
+      response = body.text
+      if (typeof response !== 'string' || !response.trim()) {
+        throw new ApiError('The Coach returned an empty response. Please try again.', { code: 'COACH_UNAVAILABLE' })
+      }
+    } else if (import.meta.env.PROD) {
+      throw new ApiError('The Coach service is not configured for this deployment.', { code: 'COACH_NOT_CONFIGURED' })
+    } else {
+      response = await assistantReply(user.id, validatedContent)
+    }
     const saved = await resultOf(client.rpc('save_assistant_exchange', {
       p_conversation_id: id,
       p_request_id: requestId,

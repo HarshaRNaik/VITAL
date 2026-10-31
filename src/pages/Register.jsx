@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Field from '../components/Field'
+import BackButton from '../components/BackButton'
 import { useAuth } from '../context/auth-context'
 import { useGame } from '../context/game-context'
 import { GOALS } from '../data/constants'
@@ -37,6 +38,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <form onSubmit={submit} className="card w-full max-w-sm">
+        <BackButton />
         <h1 className="font-game text-xp text-xl mb-1">VITAL</h1>
         <p className="text-gray-400 text-sm mb-4">Create your account and start earning XP</p>
         <Field label="Name" name="name" value={f.name} onChange={set} error={errors.name} />
