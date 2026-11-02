@@ -121,7 +121,7 @@ const plan = (id, name, description, category, equipment, difficulty, durationMi
   tags,
 })
 
-export const WORKOUTS = [
+const curatedWorkouts = [
   plan('beginner-full-body', 'Beginner Full Body', 'A calm first strength session using stable, low-impact movements.', 'Beginner workouts', 'Bodyweight only', 'Beginner', 15, ['Legs', 'Chest', 'Core'], [['chair-squat', 2, 8, 45], ['wall-push', 2, 10, 45], ['glute-bridge', 2, 10, 45], ['bird-dog', 2, 6, 30]], ['beginner', 'home', 'full body', 'under 15 minutes']),
   plan('bodyweight-upper', 'Bodyweight Upper Body', 'Build pressing strength with wall, incline, or floor variations.', 'Upper body', 'Bodyweight only', 'Beginner', 20, ['Chest', 'Arms', 'Upper back'], [['incline-push', 3, 10, 60], ['knee-push', 2, 8, 60], ['bird-dog', 3, 8, 45], ['knee-plank', 3, 20, 45]], ['home', 'bodyweight']),
   plan('bodyweight-lower', 'Bodyweight Lower Body', 'Controlled leg and glute strength with balance options.', 'Lower body', 'Bodyweight only', 'Beginner', 20, ['Quads', 'Glutes', 'Calves'], [['chair-squat', 3, 10, 60], ['reverse-lunge', 2, 8, 60], ['glute-bridge', 3, 12, 45], ['calf-raise', 3, 12, 30]], ['home', 'bodyweight']),
@@ -172,7 +172,182 @@ export const WORKOUTS = [
   plan('hybrid-beginner-circuit', 'Beginner Fitness Circuit', 'Simple exercises and short manageable intervals with ample recovery.', 'Mixed training courses', 'Bodyweight only', 'Beginner', 18, ['Full body'], [['chair-squat', 2, 8, 45], ['wall-push', 2, 8, 45], ['march', 1, 40, 30], ['glute-bridge', 2, 10, 45], ['bird-dog', 2, 6, 30]], ['home', 'beginner', 'mixed']),
   plan('hybrid-endurance-core', 'Endurance + Core', 'Steady low-impact aerobic blocks interspersed with core stability work.', 'Mixed training courses', 'Bodyweight only', 'Beginner', 25, ['Cardio', 'Core'], [['march', 1, 75, 30], ['dead-bug', 3, 8, 30], ['step-touch', 1, 60, 30], ['bird-dog', 3, 8, 30], ['shadow-box', 1, 60, 30]], ['home', 'mixed']),
   plan('weekly-balanced', 'Weekly Balanced Course', 'A three-session weekly course that separates strength, cardio, and mobility/recovery.', 'Mixed training courses', 'Mixed equipment', 'Beginner', 30, ['Full body'], [['db-goblet-squat', 2, 8, 60], ['band-row', 2, 12, 45], ['march', 1, 60, 30], ['cat-cow', 2, 8, 20], ['hip-flexor', 2, 30, 15]], ['mixed']),
+  plan('push-day', 'Push Day', 'A balanced chest, shoulder, and triceps session with dumbbells and bodyweight options.', 'Push day', 'Dumbbells', 'Intermediate', 35, ['Chest', 'Shoulders', 'Triceps'], [['db-floor-press', 3, 10, 75], ['db-shoulder-press', 2, 8, 60], ['db-lateral-raise', 2, 10, 45], ['db-overhead-triceps', 2, 10, 45], ['push-up', 2, 8, 60], ['db-dead-bug', 2, 8, 30], ['db-suitcase-carry', 2, 30, 45], ['shadow-box', 1, 40, 30]], ['gym', 'upper body', 'push day']),
+  plan('pull-day', 'Pull Day', 'A gym-based back, rear-shoulder, and biceps session using controlled rows and pulldowns.', 'Pull day', 'Mixed equipment', 'Intermediate', 40, ['Back', 'Upper back', 'Biceps'], [['machine-row', 3, 10, 75], ['machine-lat', 3, 10, 75], ['machine-cable', 2, 12, 60], ['db-rdl', 2, 10, 60], ['db-curl', 2, 10, 45], ['band-pull-apart', 2, 12, 45], ['bird-dog', 2, 8, 30], ['db-suitcase-carry', 2, 30, 45]], ['gym', 'upper body', 'pull day']),
 ]
+
+const noExternalEquipment = new Set(['Bodyweight only', 'No-equipment cardio'])
+const muscleMatchers = {
+  chest: /chest|pec|press|push[- ]?up/,
+  back: /back|row|lat|pull|posterior|deadlift|hinge/,
+  shoulders: /shoulder|overhead|lateral raise|upper back|face pull/,
+  arms: /arm|biceps|triceps|curl|extension/,
+  legs: /leg|quad|hamstring|glute|calf|squat|lunge|step-up|stairs/,
+  quads: /quad|leg|squat|lunge|step-up|stairs/,
+  glutes: /glute|hip|bridge|squat|lunge|hinge/,
+  hamstrings: /hamstring|posterior|hinge|deadlift|leg curl|rdl/,
+  calves: /calf/,
+  core: /core|oblique|plank|carry|brace|dead bug|bird dog/,
+  cardio: /cardio|walk|march|jog|step|shadow.box|conditioning/,
+  mobility: /mobility|stretch|rotation|spine|cat.cow/,
+}
+
+const sessionExceptions = {
+  'quick-move': 'This is a focused 5-minute movement break. Eight distinct exercises would exceed its time cap, so it stays intentionally short.',
+  'mobility-reset': 'This is a brief 10-minute mobility reset. Eight exercises would turn it into a longer workout, so the recovery sequence stays intentionally short.',
+  'band-mobility': 'This is a short, low-intensity mobility and activation session. Keeping it focused supports recovery without adding unnecessary volume.',
+  'yoga-recovery': 'This is a restorative flow. Keeping it to gentle mobility movements avoids turning recovery into another high-volume workout.',
+}
+
+function movementAreas(movement) {
+  const text = `${movement.focus} ${movement.name} ${movement.id}`.toLowerCase()
+  return new Set(Object.entries(muscleMatchers).filter(([, matcher]) => matcher.test(text)).map(([area]) => area))
+}
+
+function desiredAreas(workout) {
+  const text = `${workout.name} ${workout.category} ${workout.targetMuscles.join(' ')} ${workout.tags.join(' ')}`.toLowerCase()
+  const areas = new Set()
+  for (const area of Object.keys(muscleMatchers)) {
+    if (muscleMatchers[area].test(text)) areas.add(area)
+  }
+  if (/full body|hybrid|mixed|beginner workout/.test(text)) {
+    for (const area of ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio']) areas.add(area)
+  }
+  if (/push day/.test(text)) for (const area of ['chest', 'shoulders', 'arms', 'core']) areas.add(area)
+  if (/pull day/.test(text)) for (const area of ['back', 'shoulders', 'arms', 'core']) areas.add(area)
+  return areas
+}
+
+function exercisePattern(movement) {
+  const id = movement.id
+  if (/row|lat|pull-apart|face.pull/.test(id)) return 'pull'
+  if (/press|push|bench|ohp/.test(id)) return 'push'
+  if (/squat|lunge|leg-press|leg-extension|stairs/.test(id)) return 'knee-dominant'
+  if (/deadlift|rdl|hip-thrust|bridge|leg-curl/.test(id)) return 'hip-dominant'
+  if (/curl|triceps/.test(id)) return 'arm-isolation'
+  if (/plank|dead-bug|bird-dog|heel-tap|carry/.test(id)) return 'core'
+  if (/walk|march|jog|step|shadow-box|jumping-jack|burpee/.test(id)) return 'cardio'
+  if (/stretch|rotation|cat-cow/.test(id)) return 'mobility'
+  return id
+}
+
+function estimateSessionMinutes(exercises) {
+  const seconds = exercises.reduce((total, item) => {
+    const workSeconds = item.tracking === 'timed' ? item.durationSeconds : item.reps * 3.5
+    return total + item.sets * workSeconds + Math.max(0, item.sets - 1) * item.restSeconds
+  }, 0)
+  const transitions = Math.max(0, exercises.length - 1) * 25
+  return Math.ceil((seconds + transitions + 7 * 60) / 60)
+}
+
+function completeWorkout(workout) {
+  const shortNote = sessionExceptions[workout.id]
+  const seen = new Set()
+  let exercises = workout.exercises.filter((item) => {
+    if (seen.has(item.id)) return false
+    seen.add(item.id)
+    return true
+  })
+
+  if (!shortNote) {
+    const desired = desiredAreas(workout)
+    const equipment = new Set([...(workout.requiredEquipment || []), workout.equipment])
+    const candidates = MOVEMENTS
+      .filter((movement) => !seen.has(movement.id))
+      .filter((movement) => noExternalEquipment.has(movement.equipment) || equipment.has(movement.equipment))
+      .map((movement) => {
+        const areas = movementAreas(movement)
+        const relevance = [...areas].filter((area) => desired.has(area)).length
+        return { movement, areas, relevance, pattern: exercisePattern(movement) }
+      })
+      .filter((candidate) => candidate.relevance > 0)
+      .sort((a, b) => b.relevance - a.relevance || a.movement.id.localeCompare(b.movement.id))
+
+    const patternCounts = new Map()
+    for (const item of exercises) {
+      const pattern = exercisePattern(item)
+      patternCounts.set(pattern, (patternCounts.get(pattern) || 0) + 1)
+    }
+
+    const coreFocused = desired.has('core')
+      && !['chest', 'back', 'shoulders', 'arms', 'legs', 'cardio'].some((area) => desired.has(area))
+    const maxPattern = coreFocused ? 8 : 2
+    for (const candidate of candidates) {
+      if (exercises.length >= 8) break
+      const count = patternCounts.get(candidate.pattern) || 0
+      if (count >= maxPattern) continue
+      const sets = workout.difficulty === 'Beginner' ? 1 : 2
+      const value = candidate.movement.tracking === 'timed'
+        ? candidate.movement.defaultSeconds
+        : candidate.movement.defaultReps
+      exercises.push(ex(candidate.movement.id, sets, value, workout.difficulty === 'Beginner' ? 30 : 45))
+      seen.add(candidate.movement.id)
+      patternCounts.set(candidate.pattern, count + 1)
+    }
+
+    // If the available equipment and pattern balance still leave a short plan,
+    // allow a third movement from a pattern before declaring the limitation.
+    if (exercises.length < 8) {
+      for (const candidate of candidates) {
+        if (exercises.length >= 8) break
+        if (seen.has(candidate.movement.id) || (patternCounts.get(candidate.pattern) || 0) >= maxPattern + 1) continue
+        const sets = workout.difficulty === 'Beginner' ? 1 : 2
+        const value = candidate.movement.tracking === 'timed'
+          ? candidate.movement.defaultSeconds
+          : candidate.movement.defaultReps
+        exercises.push(ex(candidate.movement.id, sets, value, workout.difficulty === 'Beginner' ? 30 : 45))
+        seen.add(candidate.movement.id)
+        patternCounts.set(candidate.pattern, (patternCounts.get(candidate.pattern) || 0) + 1)
+      }
+    }
+
+    const maxSets = workout.difficulty === 'Beginner' ? 2 : 3
+    exercises = exercises.map((item, index) => ({
+      ...item,
+      sets: Math.min(item.sets, maxSets),
+      order: index + 1,
+    }))
+  } else {
+    exercises = exercises.map((item, index) => ({ ...item, order: index + 1 }))
+  }
+
+  const exerciseCountNote = shortNote || (exercises.length < 8
+    ? `Only ${exercises.length} distinct dataset movements match this plan and its equipment without repeating variations. The session stays at ${exercises.length} movements rather than adding unsuitable exercises.`
+    : '')
+  const durationMinutes = exerciseCountNote
+    ? workout.durationMinutes
+    : Math.max(workout.durationMinutes, estimateSessionMinutes(exercises))
+  const requiredEquipment = [...new Set(exercises.map((item) => item.equipment).filter((item) => !noExternalEquipment.has(item)))]
+  const tags = durationMinutes >= 15 ? workout.tags.filter((tag) => tag !== 'under 15 minutes') : workout.tags
+  const weeklySchedule = workout.weeklySchedule?.map((session) => {
+    if (session.focus === 'Strength' && exercises.length >= 8) {
+      const sessionExercises = exercises.slice(0, 8)
+      return {
+        ...session,
+        movementIds: sessionExercises.map((item) => item.id),
+        durationMinutes: estimateSessionMinutes(sessionExercises),
+      }
+    }
+    return {
+      ...session,
+      exerciseCountNote: session.movementIds.length < 8
+        ? `This ${session.durationMinutes}-minute ${session.focus.toLowerCase()} session is intentionally brief; eight distinct exercises would not fit its time and recovery goal.`
+        : '',
+    }
+  })
+
+  return {
+    ...workout,
+    exercises,
+    durationMinutes,
+    requiredEquipment,
+    tags,
+    exerciseCountNote,
+    ...(weeklySchedule ? { weeklySchedule } : {}),
+  }
+}
+
+export const WORKOUTS = curatedWorkouts.map(completeWorkout)
 
 export const TRAINING_CATEGORIES = [
   'Strength training',
@@ -185,6 +360,8 @@ export const TRAINING_CATEGORIES = [
   'Lower body',
   'Upper body',
   'Full body',
+  'Push day',
+  'Pull day',
   'Beginner workouts',
   'Mixed training courses',
 ]

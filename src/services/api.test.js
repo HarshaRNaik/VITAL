@@ -52,12 +52,13 @@ describe('Supabase activity API', () => {
         user_id: user.id,
         name: 'Strength session',
         date: '2026-10-25',
-        workout_sets: [{
-          id: 'set-a',
-          exercise_name: 'Squat',
+        workout_sets: Array.from({ length: 8 }, (_, index) => ({
+          id: `set-${index + 1}`,
+          exercise_name: `Movement ${index + 1}`,
+          exercise_sequence: index + 1,
           set_number: 1,
           reps: 8,
-        }],
+        })),
       },
       game: { totalXP: 25, streak: 1, badges: [] },
       duplicate: false,
@@ -68,38 +69,74 @@ describe('Supabase activity API', () => {
     const { workouts } = await import('./api')
     const sessionId = 'session-request-123'
 
-    await expect(workouts.add({
+    const savedWorkout = await workouts.add({
       sessionId,
       type: 'Guided',
       name: 'Strength session',
       duration: 12,
       date: '2026-10-25',
-      performedSets: [{
-        exerciseId: 'bar-squat',
-        exerciseSequence: 1,
-        exerciseName: 'Squat',
+      performedSets: Array.from({ length: 8 }, (_, index) => ({
+        exerciseId: `movement-${index + 1}`,
+        exerciseSequence: index + 1,
+        exerciseName: `Movement ${index + 1}`,
         setNumber: 1,
         reps: 8,
         restSeconds: 45,
-      }],
-    })).resolves.toMatchObject({
-      item: { id: 'workout-a', sets: [{ exerciseName: 'Squat', setNumber: 1 }] },
+      })),
+    })
+    expect(savedWorkout).toMatchObject({
+      item: { id: 'workout-a' },
       game: result.game,
       duplicate: false,
     })
+    expect(savedWorkout.item.sets).toHaveLength(8)
+    expect(savedWorkout.item.sets[7]).toMatchObject({ exerciseName: 'Movement 8', exerciseSequence: 8, setNumber: 1 })
 
     expect(rpc).toHaveBeenCalledWith('record_completed_workout', {
       p_item: expect.objectContaining({
         session_id: sessionId,
         client_request_id: sessionId,
-        performed_sets: [expect.objectContaining({
-          exercise_id: 'bar-squat',
+        performed_sets: expect.arrayContaining([expect.objectContaining({
+          exercise_id: 'movement-1',
           exercise_sequence: 1,
-          exercise_name: 'Squat',
+          exercise_name: 'Movement 1',
           set_number: 1,
-        })],
+        })]),
       }),
     })
+    expect(rpc.mock.calls[0][1].p_item.performed_sets).toHaveLength(8)
+  })
+
+  it('reloads all eight performed movements from workout history', async () => {
+    const user = { id: 'user-a' }
+    const rows = [{
+      id: 'workout-long',
+      user_id: user.id,
+      name: 'Eight movement session',
+      date: '2026-10-25',
+      workout_sets: Array.from({ length: 8 }, (_, index) => ({
+        id: `set-${index + 1}`,
+        exercise_name: `Movement ${index + 1}`,
+        exercise_sequence: index + 1,
+        set_number: 1,
+        reps: 8,
+      })),
+    }]
+    const query = {
+      select: vi.fn(), eq: vi.fn(), order: vi.fn(), range: vi.fn(),
+    }
+    query.select.mockReturnValue(query)
+    query.eq.mockReturnValue(query)
+    query.order.mockReturnValue(query)
+    query.range.mockResolvedValue({ data: rows, error: null })
+    authMocks.getSignedInUser.mockResolvedValue(user)
+    authMocks.requireSignedInUser.mockResolvedValue(user)
+    authMocks.requireSupabase.mockReturnValue({ from: vi.fn(() => query) })
+    const { workouts } = await import('./api')
+
+    const history = await workouts.list()
+    expect(history[0].sets).toHaveLength(8)
+    expect(history[0].sets.map((set) => set.exerciseSequence)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
   })
 
   it('accepts valid manually logged workouts without an exercise-set list', async () => {

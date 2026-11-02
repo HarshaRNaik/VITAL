@@ -331,6 +331,8 @@ export default function WorkoutPlayer() {
           <span className="badge">{plan.category}</span>
           <h1 className="mt-4 text-3xl font-extrabold">{sessionTitle}</h1>
           <p className="mt-2 max-w-2xl text-sm text-gray-300">{plan.description}</p>
+          {courseSession?.exerciseCountNote && <p role="note" className="mt-4 rounded-xl border border-xp/20 bg-xp/5 p-3 text-xs text-gray-300">{courseSession.exerciseCountNote}</p>}
+          {!courseSession && plan.exerciseCountNote && <p role="note" className="mt-4 rounded-xl border border-xp/20 bg-xp/5 p-3 text-xs text-gray-300">{plan.exerciseCountNote}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="badge">{sessionDuration} min {courseSession ? 'estimated' : plan.weeklySchedule ? 'course total' : 'estimated'}</span><span className="badge">{plan.difficulty}</span><span className="badge">{courseSession && sessionEquipment.length === 0 ? 'No external equipment' : sessionEquipment.join(', ') || plan.equipment}</span>
           </div>

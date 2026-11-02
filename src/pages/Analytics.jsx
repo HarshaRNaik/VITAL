@@ -17,11 +17,24 @@ export default function Analytics() {
   const [period, setPeriod] = useState('7')
   const [mealType, setMealType] = useState('All')
   const [exType, setExType] = useState('All')
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
-    Promise.all([meals.list(), workouts.list(), metrics.list()]).then(([a, c, d]) => {
-      setM(a); setW(c); setB(d)
-    })
+    let active = true
+    Promise.all([meals.list(), workouts.list(), metrics.list()])
+      .then(([mealList, workoutList, metricList]) => {
+        if (!active) return
+        setM(mealList); setW(workoutList); setB(metricList)
+      })
+      .catch((error) => {
+        console.error('Failed to load analytics history:', error)
+        if (active) setLoadError('Could not load your analytics history. Please refresh to try again.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => { active = false }
   }, [])
 
   const inRange = (d) => period === 'all' || d >= daysAgo(Number(period) - 1)
@@ -69,6 +82,9 @@ export default function Analytics() {
         <Field label="Meal type" value={mealType} onChange={(e) => setMealType(e.target.value)} options={['All', ...MEAL_TYPES]} />
         <Field label="Exercise type" value={exType} onChange={(e) => setExType(e.target.value)} options={['All', ...WORKOUT_TYPES]} />
       </div>
+
+      {loading && <p className="text-sm text-gray-400" role="status">Loading your recorded history…</p>}
+      {loadError && <p className="rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200" role="alert">{loadError}</p>}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="card"><p className="text-xs text-gray-400">Average calories on logged days</p><p className="mt-2 text-3xl font-extrabold">{avgCalories === null ? '—' : avgCalories.toLocaleString()}<span className="ml-1 text-xs font-medium text-gray-500">{avgCalories === null ? 'no meal data' : 'kcal'}</span></p></div>

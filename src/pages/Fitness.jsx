@@ -393,6 +393,7 @@ export default function Fitness() {
               </div>
               <button type="button" className="btn-ghost min-h-10" onClick={() => setSelectedWorkoutId('')}>Close details</button>
             </div>
+            {selectedWorkout.exerciseCountNote && <p role="note" className="mt-4 rounded-xl border border-xp/20 bg-xp/5 p-3 text-xs text-gray-300">{selectedWorkout.exerciseCountNote}</p>}
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               <span className="badge">{selectedWorkout.durationMinutes} min {selectedWorkout.weeklySchedule ? 'course total' : 'estimated'}</span>
               <span className="badge">{selectedWorkout.difficulty}</span>
@@ -415,6 +416,7 @@ export default function Fitness() {
                 return <li key={session.day} className="flex flex-col rounded-xl border border-white/5 bg-white/[0.03] p-3">
                   <p className="text-xs font-bold text-xp">{session.day} · {session.focus}</p>
                   <p className="mt-1 text-xs text-gray-400">{session.detail}</p>
+                  {session.exerciseCountNote && <p className="mt-2 text-[11px] text-xp">{session.exerciseCountNote}</p>}
                   <p className="mt-2 text-[11px] text-gray-500">{session.durationMinutes} min · {sessionEquipment.length ? sessionEquipment.join(', ') : 'No external equipment'}</p>
                   <Link to={`/fitness/workout?plan=${selectedWorkout.id}&courseSession=${sessionIndex}`} className="btn-ghost mt-3 min-h-10 justify-center text-xs">Start {session.day}</Link>
                 </li>
@@ -457,6 +459,7 @@ export default function Fitness() {
                   <span aria-hidden="true" className="rounded-xl bg-xp/10 p-2 text-xl">{item.equipment === 'Dumbbells' || item.equipment === 'Barbells and plates' || item.equipment === 'Kettlebells' ? '🏋️' : item.equipment === 'Gym machines' ? '🏢' : item.equipment === 'Resistance bands' ? '🟢' : item.category === 'Mixed training courses' ? '🔀' : item.category === 'Yoga and recovery' ? '🧘' : '🤸'}</span>
                 </div>
                 <p className="mt-2 flex-1 text-xs leading-relaxed text-gray-400">{item.description}</p>
+                {item.exerciseCountNote && <p className="mt-2 text-[11px] text-xp">{item.exerciseCountNote}</p>}
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   <span className="badge">{item.durationMinutes} min</span><span className="badge">{item.difficulty}</span><span className="badge">{item.equipment}</span>
                 </div>
