@@ -1,6 +1,6 @@
 begin;
 
-select plan(30);
+select plan(33);
 
 insert into auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -100,11 +100,12 @@ select is(
        'profiles', 'user_settings', 'workout_plans', 'workout_plan_exercises',
        'workouts', 'workout_sets', 'nutrition_logs', 'progress_metrics',
        'fitness_goals', 'game_state', 'game_rewards',
-       'assistant_conversations', 'assistant_messages'
+       'assistant_conversations', 'assistant_messages', 'gym_workouts',
+       'gym_workout_templates'
      ])
      and c.relrowsecurity),
-  13::bigint,
-  'RLS is enabled on every user-specific public table'
+  15::bigint,
+  'RLS is enabled on every user-owned public table, including Gym Workout data'
 );
 select ok(
   not has_table_privilege(current_user, 'public.assistant_conversations', 'INSERT')
@@ -208,6 +209,26 @@ select is(
 update public.workouts
 set name = 'Unauthorized change'
 where id = '00000000-0000-4000-8000-000000000201';
+delete from public.workouts
+where id = '00000000-0000-4000-8000-000000000201';
+
+select set_config('test.forged_owner_insert', 'not_checked', true);
+do $$
+begin
+  begin
+    insert into public.nutrition_logs (user_id, name, type, calories, date)
+    values ('00000000-0000-4000-8000-000000000101', 'Forged meal', 'Lunch', 400, current_date);
+    perform set_config('test.forged_owner_insert', 'allowed', true);
+  exception when insufficient_privilege then
+    perform set_config('test.forged_owner_insert', 'denied', true);
+  end;
+end;
+$$;
+select is(
+  current_setting('test.forged_owner_insert'),
+  'denied',
+  'another user cannot insert a row under the owner ID'
+);
 
 reset role;
 select is(
@@ -215,6 +236,33 @@ select is(
   'Private workout',
   'another user cannot change an owned workout'
 );
+select is(
+  (select count(*) from public.workouts where id = '00000000-0000-4000-8000-000000000201'),
+  1::bigint,
+  'another user cannot delete an owned workout'
+);
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000101', true);
+select set_config('test.forged_owner_update', 'not_checked', true);
+do $$
+begin
+  begin
+    update public.workouts
+    set user_id = '00000000-0000-4000-8000-000000000102'
+    where id = '00000000-0000-4000-8000-000000000201';
+    perform set_config('test.forged_owner_update', 'allowed', true);
+  exception when insufficient_privilege then
+    perform set_config('test.forged_owner_update', 'denied', true);
+  end;
+end;
+$$;
+select is(
+  current_setting('test.forged_owner_update'),
+  'denied',
+  'an owner cannot change a record ownership field'
+);
+reset role;
 
 select * from finish();
 rollback;

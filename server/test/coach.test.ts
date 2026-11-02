@@ -38,11 +38,28 @@ describe("VITAL Coach API", () => {
     expect(gemini.generateContent).not.toHaveBeenCalled();
   });
 
+  it("rejects invalid or expired Supabase tokens before retrieving private context", async () => {
+    const fetchMock = vi.fn(async () => response({ message: "token expired" }, 401));
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await request(coachApp)
+      .post("/api/coach/reply")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ content: "How am I doing?" })
+      .expect(401);
+    expect(result.body.error.code).toBe("UNAUTHENTICATED");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(gemini.generateContent).not.toHaveBeenCalled();
+  });
+
   it("validates requests and uses the caller's Supabase token for isolated context reads", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const url = String(input);
       if (url.includes("/auth/v1/user")) return response({ id: "user-1" });
       if (url.includes("user_settings")) return response([{ time_zone: "Asia/Kolkata" }]);
+      if (url.includes("profiles")) return response([{ goal: "Build strength" }]);
+      if (url.includes("fitness_goals")) return response([{ name: "Run 5K", metric: "distance", target_value: 5, unit: "km", deadline: null }]);
+      if (url.includes("assistant_conversations")) return response([{ id: "conversation-1" }]);
+      if (url.includes("assistant_messages")) return response([{ role: "user", content: "How can I recover after leg day?" }]);
       if (url.includes("/workouts?")) return response([{ name: "Leg day", type: "Strength", date: "2026-10-30", duration: 35, calories: 0 }]);
       if (url.includes("nutrition_logs")) return response([]);
       if (url.includes("progress_metrics")) return response([{ date: "2026-10-29", weight_kg: 72 }]);
@@ -57,7 +74,7 @@ describe("VITAL Coach API", () => {
       .send({ content: "How was my training?" })
       .expect(200, { text: "Good work on your leg day." });
 
-    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock).toHaveBeenCalledTimes(9);
     for (const [, options] of fetchMock.mock.calls) {
       expect((options as RequestInit).headers).toMatchObject({ Authorization: `Bearer ${accessToken}` });
     }
@@ -65,6 +82,10 @@ describe("VITAL Coach API", () => {
       model: "test-model",
       contents: expect.stringContaining("Leg day"),
     }));
+    const prompt = gemini.generateContent.mock.calls[0]?.[0]?.contents as string;
+    expect(prompt).toContain("Build strength");
+    expect(prompt).toContain("Run 5K");
+    expect(prompt).toContain("How can I recover after leg day?");
 
     const invalid = await request(coachApp)
       .post("/api/coach/reply")

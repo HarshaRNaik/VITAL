@@ -528,7 +528,19 @@ export const profileApi = {
   get: async () => {
     const user = await requireSignedInUser()
     const client = requireSupabase()
-    return { user: camelize(await resultOf(client.from('profiles').select('*').eq('id', user.id).single())) }
+    let profile = await resultOf(client.from('profiles').select('*').eq('id', user.id).maybeSingle())
+    if (!profile) {
+      const metadata = user.user_metadata || {}
+      const created = await client.from('profiles').insert({
+        id: user.id,
+        email: user.email || '',
+        name: String(metadata.name || metadata.full_name || '').slice(0, 100),
+        goal: String(metadata.goal || '').slice(0, 100),
+      }).select('*').maybeSingle()
+      if (created.error && created.error.code !== '23505') throw new ApiError(created.error.message || 'The profile could not be loaded.', { code: created.error.code })
+      profile = created.data || await resultOf(client.from('profiles').select('*').eq('id', user.id).single())
+    }
+    return { user: camelize(profile) }
   },
   update: async (profile) => {
     const user = await requireSignedInUser()

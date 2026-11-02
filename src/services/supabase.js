@@ -3,12 +3,27 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  const search = new URLSearchParams(window.location.search)
+  const hash = new URLSearchParams(window.location.hash.slice(1))
+  if (search.has('code') || hash.has('error') || search.has('error')) {
+    console.info('Supabase OAuth callback detected.', {
+      path: window.location.pathname,
+      authorizationCodePresent: search.has('code') || hash.has('code'),
+      error: search.get('error') || hash.get('error') || null,
+      errorCode: search.get('error_code') || hash.get('error_code') || null,
+      errorDescription: search.get('error_description') || hash.get('error_description') || null,
+    })
+  }
+}
+
 export const hasSupabaseConfig = Boolean(url && anonKey)
 export const supabase = hasSupabaseConfig
   ? createClient(url, anonKey, {
     auth: {
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      flowType: 'pkce',
       persistSession: true,
     },
   })

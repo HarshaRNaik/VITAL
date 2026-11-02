@@ -55,7 +55,12 @@ async function readUserContext(token: string) {
     return response.json() as Promise<T>;
   };
 
-  const settings = await get<Array<{ time_zone: string }>>("user_settings?select=time_zone&limit=1");
+  const [profileRows, settings, goals, conversations] = await Promise.all([
+    get<Array<{ goal: string }>>("profiles?select=goal&limit=1"),
+    get<Array<{ time_zone: string; workout_preference: string }>>("user_settings?select=time_zone,workout_preference&limit=1"),
+    get<Array<{ name: string; metric: string; target_value: number; unit: string; deadline: string | null }>>("fitness_goals?select=name,metric,target_value,unit,deadline&completed_at=is.null&order=updated_at.desc&limit=5"),
+    get<Array<{ id: string }>>("assistant_conversations?select=id&order=updated_at.desc&limit=1"),
+  ]);
   const timeZone = settings[0]?.time_zone || "UTC";
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone, year: "numeric", month: "2-digit", day: "2-digit",
@@ -63,14 +68,27 @@ async function readUserContext(token: string) {
   const from = new Date(`${today}T00:00:00.000Z`);
   from.setUTCDate(from.getUTCDate() - 6);
   const fromDate = from.toISOString().slice(0, 10);
-  const query = (select: string) => `select=${select}&date=gte.${fromDate}&order=date.desc&limit=10`;
+  const query = (select: string) => new URLSearchParams({ select, date: `gte.${fromDate}`, order: "date.desc", limit: "10" }).toString();
   const [workouts, meals, metrics] = await Promise.all([
     get<Array<{ name: string; type: string; date: string; duration: number; calories: number }>>(`workouts?${query("name,type,date,duration,calories")}`),
     get<Array<{ name: string; type: string; date: string; calories: number; protein: number }>>(`nutrition_logs?${query("name,type,date,calories,protein")}`),
     get<Array<{ date: string; weight_kg: number }>>("progress_metrics?select=date,weight_kg&order=date.desc&limit=10"),
   ]);
+  const conversationId = conversations[0]?.id;
+  const messages = conversationId
+    ? await get<Array<{ role: "user" | "assistant"; content: string }>>(`assistant_messages?${new URLSearchParams({ select: "role,content", conversation_id: `eq.${conversationId}`, order: "created_at.desc", limit: "6" })}`)
+    : [];
 
-  return { timeZone, workouts, meals, metrics };
+  return {
+    fitnessGoal: profileRows[0]?.goal || "",
+    goals: goals.map(({ name, metric, target_value, unit, deadline }) => ({ name, metric, target: target_value, unit, deadline })),
+    workoutPreference: settings[0]?.workout_preference || "",
+    timeZone,
+    workouts,
+    meals,
+    metrics,
+    recentCoachMessages: messages.reverse().map(({ role, content }) => ({ role, content: content.slice(0, 500) })),
+  };
 }
 
 const userLimiter = rateLimit({
@@ -95,7 +113,7 @@ api.post("/reply", coachAuth, userLimiter, async (req, res, next) => {
     const ai = new GoogleGenAI({ apiKey: coachConfig.GEMINI_API_KEY, httpOptions: { timeout: 25_000 } });
     const result = await ai.models.generateContent({
       model: coachConfig.GEMINI_MODEL,
-      contents: `Authenticated user request: ${parsed.data.content}\n\nRecent activity belonging only to this user (timezone ${context.timeZone}):\n${JSON.stringify(context)}`,
+      contents: `Authenticated user request: ${parsed.data.content}\n\nRelevant fitness context belonging only to this user (timezone ${context.timeZone}):\n${JSON.stringify(context)}`,
       config: {
         systemInstruction: "You are VITAL Coach, a practical fitness and nutrition assistant. Use only the user's supplied recent records for personal statistics. Never invent activity or measurements. Give general, cautious fitness guidance; do not diagnose or prescribe treatment. If records do not answer a personal question, say so. Keep replies concise and friendly.",
         temperature: 0.5,
