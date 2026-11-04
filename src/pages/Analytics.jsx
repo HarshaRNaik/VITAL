@@ -7,10 +7,30 @@ import Field from '../components/Field'
 import { meals, workouts, metrics } from '../services/api'
 import { MEAL_TYPES, WORKOUT_TYPES } from '../data/constants'
 import { daysAgo, sum } from '../utils/helpers'
+import { useTheme } from '../context/useTheme'
 
-const COLORS = ['#67e8f9', '#a78bfa', '#fb923c']
+const CHART_THEME = {
+  dark: {
+    series: ['#67e8f9', '#a78bfa', '#fb923c', '#60a5fa'],
+    grid: '#ffffff20',
+    axis: '#a6b1c5',
+    tooltipBackground: '#151e26',
+    tooltipBorder: '#ffffff30',
+    tooltipText: '#f8fafc',
+  },
+  light: {
+    series: ['#c62828', '#a91f1f', '#9a3412', '#6b3fa0'],
+    grid: '#e5e5e5',
+    axis: '#666666',
+    tooltipBackground: '#ffffff',
+    tooltipBorder: '#e5e5e5',
+    tooltipText: '#202124',
+  },
+}
 
 export default function Analytics() {
+  const { theme } = useTheme()
+  const chart = CHART_THEME[theme]
   const [m, setM] = useState([])
   const [w, setW] = useState([])
   const [b, setB] = useState([])
@@ -97,13 +117,13 @@ export default function Analytics() {
         {fm.length === 0 && fw.length === 0 ? empty : (
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={daily} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff12" />
-              <XAxis dataKey="date" stroke="#8290a3" tickLine={false} axisLine={false} />
-              <YAxis stroke="#8290a3" tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: '#151e26', border: '1px solid #ffffff20', borderRadius: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+              <XAxis dataKey="date" stroke={chart.axis} tickLine={false} axisLine={false} />
+              <YAxis stroke={chart.axis} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ background: chart.tooltipBackground, border: `1px solid ${chart.tooltipBorder}`, borderRadius: 12, color: chart.tooltipText }} />
               <Legend />
-              <Bar dataKey="Eaten" fill="#67e8f9" radius={[5, 5, 0, 0]} />
-              <Bar dataKey="Burned" fill="#fb923c" radius={[5, 5, 0, 0]} />
+              <Bar dataKey="Eaten" fill={chart.series[0]} radius={[5, 5, 0, 0]} />
+              <Bar dataKey="Burned" fill={chart.series[2]} radius={[5, 5, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -116,14 +136,14 @@ export default function Analytics() {
           {fw.length === 0 ? empty : (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={daily} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff12" />
-                <XAxis dataKey="date" stroke="#8290a3" tickLine={false} axisLine={false} />
-                <YAxis yAxisId="sessions" stroke="#8290a3" allowDecimals={false} tickLine={false} axisLine={false} />
-                <YAxis yAxisId="minutes" orientation="right" stroke="#8290a3" tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ background: '#151e26', border: '1px solid #ffffff20', borderRadius: 12 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                <XAxis dataKey="date" stroke={chart.axis} tickLine={false} axisLine={false} />
+                <YAxis yAxisId="sessions" stroke={chart.axis} allowDecimals={false} tickLine={false} axisLine={false} />
+                <YAxis yAxisId="minutes" orientation="right" stroke={chart.axis} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: chart.tooltipBackground, border: `1px solid ${chart.tooltipBorder}`, borderRadius: 12, color: chart.tooltipText }} />
                 <Legend />
-                <Bar yAxisId="sessions" dataKey="Workouts" fill="#67e8f9" radius={[5, 5, 0, 0]} />
-                <Bar yAxisId="minutes" dataKey="Minutes" fill="#60a5fa" radius={[5, 5, 0, 0]} />
+                <Bar yAxisId="sessions" dataKey="Workouts" fill={chart.series[0]} radius={[5, 5, 0, 0]} />
+                <Bar yAxisId="minutes" dataKey="Minutes" fill={chart.series[3]} radius={[5, 5, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -134,11 +154,11 @@ export default function Analytics() {
           {fb.length < 2 ? empty : (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={fb.map((x) => ({ date: x.date.slice(5), Weight: x.weight }))} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff12" />
-                <XAxis dataKey="date" stroke="#8290a3" tickLine={false} axisLine={false} />
-                <YAxis stroke="#8290a3" domain={['auto', 'auto']} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ background: '#151e26', border: '1px solid #ffffff20', borderRadius: 12 }} />
-                <Line type="monotone" dataKey="Weight" stroke="#fb923c" strokeWidth={3} dot={{ fill: '#fb923c', r: 3 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                <XAxis dataKey="date" stroke={chart.axis} tickLine={false} axisLine={false} />
+                <YAxis stroke={chart.axis} domain={['auto', 'auto']} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: chart.tooltipBackground, border: `1px solid ${chart.tooltipBorder}`, borderRadius: 12, color: chart.tooltipText }} />
+                <Line type="monotone" dataKey="Weight" stroke={chart.series[2]} strokeWidth={3} dot={{ fill: chart.series[2], r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -150,9 +170,9 @@ export default function Analytics() {
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie data={macros} dataKey="value" nameKey="name" outerRadius={90} label>
-                  {macros.map((_, idx) => <Cell key={idx} fill={COLORS[idx]} />)}
+                  {macros.map((_, idx) => <Cell key={idx} fill={chart.series[idx % chart.series.length]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: '#1a1f38', border: 'none' }} />
+                <Tooltip contentStyle={{ background: chart.tooltipBackground, border: `1px solid ${chart.tooltipBorder}`, color: chart.tooltipText }} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -166,11 +186,11 @@ export default function Analytics() {
         {byType.length === 0 ? empty : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={byType}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-              <XAxis dataKey="type" stroke="#aaa" />
-              <YAxis stroke="#aaa" allowDecimals={false} />
-              <Tooltip contentStyle={{ background: '#1a1f38', border: 'none' }} />
-              <Bar dataKey="Workouts" fill="#7c5cff" />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+              <XAxis dataKey="type" stroke={chart.axis} />
+              <YAxis stroke={chart.axis} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: chart.tooltipBackground, border: `1px solid ${chart.tooltipBorder}`, color: chart.tooltipText }} />
+              <Bar dataKey="Workouts" fill={chart.series[1]} />
             </BarChart>
           </ResponsiveContainer>
         )}

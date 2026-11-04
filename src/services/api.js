@@ -13,7 +13,12 @@ export class ApiError extends Error {
 }
 
 const initialGame = { totalXP: 0, streak: 0, lastActive: null, counts: {}, badges: [], chatToday: false }
-const coachApiBase = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '')
+// Production Coach requests stay same-origin so a local API URL can never be
+// embedded in the deployed frontend bundle. Local development may target the
+// standalone Coach server directly through VITE_API_BASE_URL.
+const coachApiBase = import.meta.env.PROD
+  ? ''
+  : import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '')
 const camelKey = (key) => key.replace(/_([a-z])/g, (_match, letter) => letter.toUpperCase())
 const dateSchema = z.iso.date()
 const amountSchema = z.number().finite().min(0).max(1_000_000)
@@ -440,7 +445,16 @@ export const gymWorkouts = {
     if (!z.uuid().safeParse(id).success) {
       throw new ApiError('Invalid gym workout ID.', { code: 'INVALID_INPUT' })
     }
-    const validated = validateInput(gymWorkoutSchema, workout, 'Invalid gym workout')
+    // The caller keeps the database-generated/requested ID on its workout object,
+    // while the RPC receives that ID separately. Reject mismatches, then validate
+    // only the mutable workout fields against the strict payload schema.
+    if (workout?.id !== undefined && workout.id !== id) {
+      throw new ApiError('Gym workout ID does not match the workout being saved.', { code: 'INVALID_INPUT' })
+    }
+    const workoutFields = workout == null
+      ? workout
+      : Object.fromEntries(Object.entries(workout).filter(([key]) => key !== 'id'))
+    const validated = validateInput(gymWorkoutSchema, workoutFields, 'Invalid gym workout')
     const saved = await resultOf(client.rpc('save_gym_workout', {
       p_workout_id: id,
       p_item: {
@@ -720,7 +734,7 @@ export const assistantApi = {
     }
 
     let response
-    if (coachApiBase) {
+    if (coachApiBase || import.meta.env.PROD) {
       const { data: { session }, error: sessionError } = await requireSupabase().auth.getSession()
       if (sessionError) throw sessionError
       if (!session?.access_token) throw new ApiError('Please sign in again to use the Coach.', { code: 'AUTH_REQUIRED' })
@@ -744,8 +758,6 @@ export const assistantApi = {
       if (typeof response !== 'string' || !response.trim()) {
         throw new ApiError('The Coach returned an empty response. Please try again.', { code: 'COACH_UNAVAILABLE' })
       }
-    } else if (import.meta.env.PROD) {
-      throw new ApiError('The Coach service is not configured for this deployment.', { code: 'COACH_NOT_CONFIGURED' })
     } else {
       response = await assistantReply(user.id, validatedContent)
     }

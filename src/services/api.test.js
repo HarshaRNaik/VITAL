@@ -303,6 +303,32 @@ describe('Supabase activity API', () => {
       .rejects.toMatchObject({ code: 'INVALID_INPUT' })
   })
 
+  it('accepts a matching workout id from the editor and rejects a mismatched id', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const id = '7d78d59d-5179-40ad-9565-4e268328c225'
+    const rpc = vi.fn().mockResolvedValue({
+      data: { item: { id, status: 'IN_PROGRESS', exercises: [] }, game: null, duplicate: false },
+      error: null,
+    })
+    authMocks.requireSupabase.mockReturnValue({ rpc })
+    const { gymWorkouts } = await import('./api')
+    const workout = {
+      id,
+      name: 'Push day',
+      status: 'IN_PROGRESS',
+      unit: 'kg',
+      startedAt: '2026-10-25T10:00:00.000Z',
+      durationSeconds: 0,
+      exercises: [],
+    }
+
+    await expect(gymWorkouts.save(id, workout)).resolves.toMatchObject({ item: { id } })
+    expect(rpc).toHaveBeenCalledTimes(1)
+    await expect(gymWorkouts.save('8d78d59d-5179-40ad-9565-4e268328c225', workout))
+      .rejects.toMatchObject({ code: 'INVALID_INPUT' })
+    expect(rpc).toHaveBeenCalledTimes(1)
+  })
+
   it('cancels only active gym sessions and persists gym-only workout templates', async () => {
     authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
     const rpc = vi.fn()

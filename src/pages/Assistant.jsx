@@ -11,6 +11,21 @@ const CHIPS = [
   'Suggest a workout',
 ]
 
+function coachMessageParts(text) {
+  const [answer, sourceText] = String(text).split('\n\nSources:\n')
+  const citations = (sourceText || '').split('\n').flatMap((line) => {
+    const match = line.match(/^\d+\.\s+(.+?)(?:\s+\((https:\/\/\S+)\))?$/)
+    if (!match) return []
+    let href = ''
+    try {
+      const parsed = new URL(match[2] || '')
+      if (parsed.protocol === 'https:') href = parsed.toString()
+    } catch { /* Keep an invalid or local citation as a plain source label. */ }
+    return [{ title: match[1], href }]
+  })
+  return { answer, citations }
+}
+
 export default function Assistant() {
   const { user } = useAuth()
   const { applyGame } = useGame()
@@ -104,7 +119,26 @@ export default function Assistant() {
       <div className="flex-1 space-y-3 overflow-y-auto pr-1" role="log" aria-label="Coach conversation" aria-live="polite">
         {visibleMessages.map((m, i) => (
           <div key={m.id || `greeting-${i}`} className={`flex ${m.from === 'me' ? 'justify-end' : 'justify-start'}`}>
-            <p className={`max-w-[88%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-[75%] ${m.from === 'me' ? 'rounded-br-md bg-xp font-medium text-[#06131d]' : 'rounded-bl-md border border-white/5 bg-white/[0.06] text-gray-200'}`}>{m.text}</p>
+            {m.from === 'me' ? (
+              <p className="max-w-[88%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-xp px-4 py-3 text-sm font-medium leading-relaxed text-[#06131d] sm:max-w-[75%]">{m.text}</p>
+            ) : (() => {
+              const { answer, citations } = coachMessageParts(m.text)
+              return (
+                <div className="max-w-[88%] rounded-2xl rounded-bl-md border border-white/5 bg-white/[0.06] px-4 py-3 text-sm leading-relaxed text-gray-200 sm:max-w-[75%]">
+                  <p className="whitespace-pre-wrap">{answer}</p>
+                  {citations.length > 0 && <div className="mt-3 border-t border-white/10 pt-2 text-xs">
+                    <p className="mb-1 font-semibold text-cyan-100">Exercise dataset sources</p>
+                    <ol className="list-inside list-decimal space-y-1">
+                      {citations.map((citation, sourceIndex) => <li key={`${citation.title}-${sourceIndex}`}>
+                        {citation.href
+                          ? <a className="underline underline-offset-2" href={citation.href} target="_blank" rel="noreferrer">{citation.title}</a>
+                          : citation.title}
+                      </li>)}
+                    </ol>
+                  </div>}
+                </div>
+              )
+            })()}
           </div>
         ))}
         {loading && <p className="text-sm text-gray-400" role="status">Loading your saved conversation…</p>}

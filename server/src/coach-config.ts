@@ -6,7 +6,8 @@ const schema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   APP_ORIGINS: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().trim().min(1).optional(),
+  GEMINI_MODEL: z.string().default("gemini-3.8-flash").transform((value) => value.trim() || "gemini-3.8-flash"),
+  GEMINI_FILE_SEARCH_STORE: z.string().trim().min(1).optional(),
   SUPABASE_URL: z.url().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
 });

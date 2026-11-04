@@ -11,8 +11,12 @@ without signing in; private history and changes require an account.
    [`supabase/migrations`](./supabase/migrations).
 2. Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and
    `VITE_SUPABASE_ANON_KEY` from the project's API settings.
-3. Add `http://localhost:5173` to the Supabase Auth site URL and redirect URL
-   allowlist. Email confirmation can remain enabled; users must confirm their
+3. For hosted Supabase Auth, set the Site URL to
+   `https://vital-cyan-beta.vercel.app` and allow both
+   `https://vital-cyan-beta.vercel.app/login` and
+   `http://localhost:5173/login` as redirect URLs. The app selects the local
+   callback during Vite development and the production Vercel callback in
+   deployed builds. Email confirmation can remain enabled; users must confirm their
    address before they can sign in.
 4. Install dependencies and start the frontend:
 
@@ -24,9 +28,10 @@ without signing in; private history and changes require an account.
 See [`supabase/README.md`](./supabase/README.md) for migration, local testing,
 security, production deployment, and backup/recovery details.
 
-See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the Vercel frontend and Render
-Gemini Coach deployment setup. The browser uses Supabase for authentication and
-user data; the Render Coach API is separate from the retained legacy Prisma API.
+See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the Vercel frontend and Gemini Coach
+Function setup. The browser uses Supabase for authentication and user data; the
+Coach API is configured for the same Vercel project, separately from the retained
+legacy Prisma API.
 
 `VITE_` variables are public and are included in the browser bundle. Use only
 the Supabase publishable/anon key there. Never put a service-role key in a

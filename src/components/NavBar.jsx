@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../context/auth-context'
+import ThemeToggle from './ThemeToggle'
 
 const links = [
   { to: '/', label: 'System', icon: '⌂' },
@@ -22,7 +23,7 @@ export default function NavBar() {
   }
 
   return (
-    <nav aria-label="Main navigation" className="fixed bottom-0 inset-x-0 z-20 flex justify-around border-t border-cyan-200/10 bg-[#070d18]/95 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:sticky md:top-0 md:min-h-screen md:w-64 md:flex-none md:flex-col md:justify-start md:gap-2 md:border-r md:border-t-0 md:p-5">
+    <nav aria-label="Main navigation" className="system-nav fixed bottom-0 inset-x-0 z-20 flex justify-around border-t border-cyan-200/10 bg-[#070d18]/95 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:sticky md:top-0 md:min-h-screen md:w-64 md:flex-none md:flex-col md:justify-start md:gap-2 md:border-r md:border-t-0 md:p-5">
       <div className="mb-8 hidden border-b border-cyan-100/10 pb-5 md:block">
         <p className="font-game text-xp text-lg">VITAL<span className="text-violet-300"> /</span> SYS</p>
         <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-gray-500">Player interface · online</p>
@@ -44,6 +45,8 @@ export default function NavBar() {
           </NavLink>
         ))}
       </div>
+      <ThemeToggle className="hidden md:mt-3 md:flex md:w-full" />
+      <ThemeToggle className="theme-toggle-mobile fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-3 z-30 shadow-lg md:hidden" />
       {user && (
         <div className="mt-auto hidden border-t border-cyan-100/10 pt-4 text-sm text-gray-400 md:block">
           <Link to="/profile" className="mb-3 flex min-w-0 items-center gap-3 rounded-lg p-2 hover:bg-white/[0.04]">

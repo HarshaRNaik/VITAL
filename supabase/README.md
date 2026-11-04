@@ -54,14 +54,14 @@ enabled, registration asks the user to confirm their address before signing in.
 - The legacy Express API's rate limiter uses its default in-process store. The
   separate Coach API also uses in-process request limits. Keep either service
   to one instance or configure a shared rate-limit store before scaling out.
-- The Coach uses the official Gemini SDK only in the Render server process.
+- The Coach uses the official Gemini SDK only in the server-side Vercel Function.
   It verifies the caller's Supabase access token, then reads a bounded amount
   of that user's recent activity with the same token so Supabase RLS remains
   in force. The question and that activity summary are sent to the configured
-  Gemini model. Set `GEMINI_API_KEY` only in Render; never use a `VITE_` name
-  for it or expose it in browser code. Set `VITE_API_BASE_URL` to the Coach API
-  origin in Vercel. Development without this URL retains the local rule-based
-  Coach; production requires the API URL for authenticated Coach replies.
+  Gemini model. Set `GEMINI_API_KEY` only in Vercel's server-side environment;
+  never use a `VITE_` name for it or expose it in browser code. Production calls
+  the same-origin `/api/coach/reply` Function. Local development can use
+  `VITE_API_BASE_URL=http://localhost:4000` with the Express Coach process.
 - New Supabase identities receive profile, settings, and initial game-state
   rows from an `auth.users` trigger.
 - Existing Express/Prisma tables are not dropped or modified by this

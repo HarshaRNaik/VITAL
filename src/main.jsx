@@ -5,15 +5,18 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { GameProvider } from './context/GameContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <GameProvider>
-          <App />
-        </GameProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <GameProvider>
+            <App />
+          </GameProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 )

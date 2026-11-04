@@ -5,6 +5,7 @@ import BackButton from '../components/BackButton'
 import GoogleMark from '../components/GoogleMark'
 import { useAuth } from '../context/auth-context'
 import { authErrorMessage } from '../context/auth-errors'
+import ThemeToggle from '../components/ThemeToggle'
 
 const resendDelaySeconds = 60
 
@@ -141,16 +142,18 @@ export default function Login() {
   const heading = isRecovery ? 'Choose a new password'
     : forgot ? 'Reset your password'
       : authMode === 'otp' ? 'Check your email'
-        : authMode === 'email' ? 'Continue with email'
+        : authMode === 'email' ? 'Sign in with email'
           : authMode === 'password' ? 'Welcome back, player'
             : 'Welcome to VITAL'
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      <ThemeToggle className="absolute right-4 top-4" />
       <form onSubmit={submit} className="card w-full max-w-sm">
         <BackButton />
         <h1 className="font-game text-xp text-xl mb-1">VITAL</h1>
         <p className="text-gray-400 text-sm mb-4">{heading}</p>
+        {!isRecovery && !forgot && authMode === 'email' && <p className="mb-3 text-xs text-gray-500">Email codes here are for existing accounts. New users can create an account first.</p>}
 
         {isRecovery && <div className="relative"><Field label="New password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={f.password} onChange={set} /><button type="button" className="btn-ghost absolute right-1 top-7 min-h-10 px-2 text-xs" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Hide' : 'Show'}</button></div>}
 
@@ -189,7 +192,7 @@ export default function Login() {
         {notice && <p role="status" className="text-emerald-300 text-sm mb-2">{notice}</p>}
 
         {isRecovery || forgot || authMode === 'email' || authMode === 'otp' || authMode === 'password'
-          ? <button className="btn w-full" disabled={submitting}>{submitting ? 'Please wait…' : isRecovery ? 'Update password' : forgot ? 'Send reset link' : authMode === 'email' ? 'Send six-digit code' : authMode === 'otp' ? 'Verify code' : 'Log in'}</button>
+          ? <button className="btn w-full" disabled={submitting}>{submitting ? 'Please wait…' : isRecovery ? 'Update password' : forgot ? 'Send reset link' : authMode === 'email' ? 'Send sign-in code' : authMode === 'otp' ? 'Verify sign-in code' : 'Log in'}</button>
           : <>
             <button type="button" onClick={googleSignIn} disabled={submitting} className="btn-ghost min-h-12 w-full justify-center gap-3 border border-white/15" aria-label="Continue with Google"><GoogleMark />Continue with Google</button>
             <div className="my-4 flex items-center gap-3 text-xs text-gray-500"><span className="h-px flex-1 bg-white/10" />OR<span className="h-px flex-1 bg-white/10" /></div>

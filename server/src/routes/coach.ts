@@ -8,6 +8,26 @@ import { HttpError } from "../middleware/http-error.js";
 type CoachRequest = { id: string; accessToken: string };
 const replySchema = z.object({ content: z.string().trim().min(1).max(500) }).strict();
 const api = Router();
+const noExerciseSourceText = "I couldn't retrieve a matching exercise entry from the VITAL FITNESS dataset, so I can't verify the exercise ID, instructions, or equipment right now. Please try again later or ask about another exercise.";
+const datasetDetailRequest = /\b(dataset|exercise\s+id|exercise\s+instructions|instructions?\s+for|equipment\s+(?:required|for)|which\s+exercises?|what\s+exercise|exercises?\s+(?:for|target)|how\s+to\s+perform|how\s+do\s+i\s+do)\b/i;
+const coachSystemInstruction = [
+  "You are VITAL Coach, an evidence-conscious fitness coach.",
+  "Use the File Search exercise dataset for exercise names, IDs, instructions, equipment, body parts, categories, targets, and muscle groups. Prefer retrieved dataset information for these details.",
+  "Never invent exercise IDs, instructions, equipment, or dataset entries. If a matching entry is not retrieved, say you could not verify it from the dataset; ask for the exercise name or missing details when needed.",
+  "Clearly distinguish information retrieved from the exercise dataset from general fitness knowledge. Do not present general knowledge as a dataset fact.",
+  "Use the authenticated user's supplied Supabase context only for that user's personal workout history, progress, goals, and profile. Never infer private information from another user or from the shared exercise dataset.",
+  "Do not diagnose, prescribe treatment, or give unsupported medical or nutritional advice. State uncertainty and ask a concise clarifying question when needed.",
+  "Never invent personal activity or measurements. If personal records do not answer a question, say so. Keep replies concise and friendly.",
+].join(" ");
+
+function hasExerciseDatasetRetrieval(result: { candidates?: Array<{ groundingMetadata?: { groundingChunks?: Array<{ retrievedContext?: { fileSearchStore?: string } }> } }> }, storeName: string): boolean {
+  return (result.candidates ?? []).some((candidate) =>
+    (candidate.groundingMetadata?.groundingChunks ?? []).some((chunk) => {
+      const context = chunk.retrievedContext;
+      return Boolean(context && (!context.fileSearchStore || context.fileSearchStore === storeName));
+    }),
+  );
+}
 
 async function authenticateSupabase(token: string): Promise<string> {
   if (!coachConfig.SUPABASE_URL || !coachConfig.SUPABASE_ANON_KEY) {
@@ -103,7 +123,7 @@ const userLimiter = rateLimit({
 api.post("/reply", coachAuth, userLimiter, async (req, res, next) => {
   const parsed = replySchema.safeParse(req.body);
   if (!parsed.success) return next(new HttpError(400, "VALIDATION_ERROR", "Enter a message of 1 to 500 characters."));
-  if (!coachConfig.GEMINI_API_KEY || !coachConfig.GEMINI_MODEL) {
+  if (!coachConfig.GEMINI_API_KEY || !coachConfig.GEMINI_MODEL || !coachConfig.GEMINI_FILE_SEARCH_STORE) {
     return next(new HttpError(503, "COACH_NOT_CONFIGURED", "The Coach service is not configured yet."));
   }
 
@@ -115,13 +135,31 @@ api.post("/reply", coachAuth, userLimiter, async (req, res, next) => {
       model: coachConfig.GEMINI_MODEL,
       contents: `Authenticated user request: ${parsed.data.content}\n\nRelevant fitness context belonging only to this user (timezone ${context.timeZone}):\n${JSON.stringify(context)}`,
       config: {
-        systemInstruction: "You are VITAL Coach, a practical fitness and nutrition assistant. Use only the user's supplied recent records for personal statistics. Never invent activity or measurements. Give general, cautious fitness guidance; do not diagnose or prescribe treatment. If records do not answer a personal question, say so. Keep replies concise and friendly.",
-        temperature: 0.5,
+        systemInstruction: coachSystemInstruction,
+        tools: [{ fileSearch: { fileSearchStoreNames: [coachConfig.GEMINI_FILE_SEARCH_STORE], topK: 5 } }],
         maxOutputTokens: 500,
       },
     });
-    const text = result.text?.trim();
+    const retrievedExerciseContext = hasExerciseDatasetRetrieval(result, coachConfig.GEMINI_FILE_SEARCH_STORE);
+    let text = datasetDetailRequest.test(parsed.data.content) && !retrievedExerciseContext
+      ? noExerciseSourceText
+      : result.text?.trim();
     if (!text) throw new Error("Empty Gemini response");
+    const citations = [...new Map((result.candidates ?? [])
+      .flatMap((candidate) => candidate.groundingMetadata?.groundingChunks ?? [])
+      .filter((chunk) => chunk.retrievedContext
+        && (!chunk.retrievedContext.fileSearchStore || chunk.retrievedContext.fileSearchStore === coachConfig.GEMINI_FILE_SEARCH_STORE))
+      .map((chunk) => chunk.retrievedContext!)
+      .map((context) => [context.uri || context.title || context.text || "", context] as const)
+      .filter(([key]) => key))]
+      .map(([, context]) => context)
+      .slice(0, 5);
+    if (citations.length && text !== noExerciseSourceText) {
+      text += `\n\nSources:\n${citations.map((source, index) => {
+        const uri = source.uri && /^https:\/\//i.test(source.uri) ? ` (${source.uri})` : "";
+        return `${index + 1}. ${source.title?.trim() || "Exercise dataset"}${uri}`;
+      }).join("\n")}`;
+    }
     res.json({ text });
   } catch (error) {
     const status = typeof error === "object" && error !== null && "status" in error ? error.status : undefined;

@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { AuthContext } from './auth-context'
 import { hasSupabaseConfig, supabase } from '../services/supabase'
 import { authErrorMessage } from './auth-errors'
-import { requestEmailOtp as sendEmailOtp, resendEmailOtp as resendEmailOtpCode, verifyEmailOtp as verifyEmailOtpCode } from '../services/email-otp'
+import {
+  requestEmailOtp as sendLoginEmailOtp,
+  resendEmailOtp as resendLoginEmailOtp,
+  requestSignupEmailOtp as sendSignupEmailOtp,
+  resendSignupEmailOtp as resendSignupEmailOtpCode,
+  verifyEmailOtp as verifyEmailOtpCode,
+} from '../services/email-otp'
+import { getAuthRedirectUrl } from '../services/auth-redirect'
 
 const initialGame = { totalXP: 50, streak: 0, lastActive: null, counts: { register: 1 }, badges: ['welcome'], chatToday: false }
 
@@ -87,11 +94,25 @@ export function AuthProvider({ children }) {
       const { data: result, error } = await supabase.auth.signUp({
         email: data.email.trim(),
         password: data.password,
-        options: { data: { name: data.name.trim(), goal: data.goal } },
+        options: {
+          data: { name: data.name.trim(), goal: data.goal },
+          emailRedirectTo: getAuthRedirectUrl('/login'),
+        },
       })
       if (error) throw error
+      if (!result.user) throw new Error('Supabase did not return a registered user. Please try again.')
+      if (Array.isArray(result.user.identities) && result.user.identities.length === 0) {
+        return 'An account may already exist for this email. Try signing in or resetting your password.'
+      }
       if (!result.session) return 'Check your email to confirm your account, then log in.'
       const signedInUser = publicUser(result.user)
+      if (!signedInUser.emailVerified) {
+        const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' })
+        if (signOutError) throw signOutError
+        setUser(null)
+        setStatus('ready')
+        return 'Verify your email before using your account. Check your inbox for the confirmation link.'
+      }
       setUser(signedInUser)
       setStatus('ready')
       return { user: signedInUser, game: initialGame }
@@ -124,7 +145,7 @@ export function AuthProvider({ children }) {
   async function requestEmailOtp(email) {
     try {
       if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
-      await sendEmailOtp(supabase.auth, email)
+      await sendLoginEmailOtp(supabase.auth, email)
       return null
     } catch (error) { return authErrorMessage(error) }
   }
@@ -132,7 +153,23 @@ export function AuthProvider({ children }) {
   async function resendEmailOtp(email) {
     try {
       if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
-      await resendEmailOtpCode(supabase.auth, email)
+      await resendLoginEmailOtp(supabase.auth, email)
+      return null
+    } catch (error) { return authErrorMessage(error) }
+  }
+
+  async function requestSignupOtp(email, profile) {
+    try {
+      if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
+      await sendSignupEmailOtp(supabase.auth, email, profile)
+      return null
+    } catch (error) { return authErrorMessage(error) }
+  }
+
+  async function resendSignupOtp(email, profile) {
+    try {
+      if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
+      await resendSignupEmailOtpCode(supabase.auth, email, profile)
       return null
     } catch (error) { return authErrorMessage(error) }
   }
@@ -151,7 +188,7 @@ export function AuthProvider({ children }) {
     try {
       if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
       const safeNext = typeof nextPath === 'string' && nextPath.startsWith('/') && !nextPath.startsWith('//') ? nextPath : '/'
-      const redirectTo = new URL('/login', window.location.origin)
+      const redirectTo = new URL(getAuthRedirectUrl('/login'))
       redirectTo.searchParams.set('next', safeNext)
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -176,7 +213,7 @@ export function AuthProvider({ children }) {
     try {
       if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: new URL('/login?mode=recovery', window.location.origin).toString(),
+        redirectTo: getAuthRedirectUrl('/login?mode=recovery'),
       })
       if (error) throw error
       return null
@@ -186,7 +223,7 @@ export function AuthProvider({ children }) {
   async function resendVerification(email) {
     try {
       if (!supabase) throw new Error('Supabase is not configured. Add the required VITE_SUPABASE environment variables.')
-      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: new URL('/login', window.location.origin).toString() } })
+      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: getAuthRedirectUrl('/login') } })
       if (error) throw error
       return null
     } catch (error) { return authErrorMessage(error) }
@@ -214,5 +251,5 @@ export function AuthProvider({ children }) {
     }
   }
 
-  return <AuthContext.Provider value={{ user, status, recovery, register, login, requestEmailOtp, resendEmailOtp, verifyEmailOtp, loginWithGoogle, resetPassword, resendVerification, updatePassword, logout }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, status, recovery, register, login, requestEmailOtp, resendEmailOtp, requestSignupOtp, resendSignupOtp, verifyEmailOtp, loginWithGoogle, resetPassword, resendVerification, updatePassword, logout }}>{children}</AuthContext.Provider>
 }

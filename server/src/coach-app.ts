@@ -5,6 +5,7 @@ import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 import { coachConfig } from "./coach-config.js";
 import { coachRouter } from "./routes/coach.js";
+import { getCoachHealth } from "./coach-health.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { HttpError } from "./middleware/http-error.js";
 
@@ -33,7 +34,10 @@ coachApp.use(rateLimit({
   legacyHeaders: false,
   message: { error: { code: "RATE_LIMITED", message: "Too many requests. Please try again shortly." } },
 }));
-coachApp.get("/health", (_req, res) => res.json({ status: "ok" }));
+coachApp.get(["/health", "/api/health", "/api/health/deep"], async (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(await getCoachHealth(req.path === "/api/health/deep"));
+});
 coachApp.use("/api/coach", coachRouter);
 coachApp.use((_req, _res, next) => next(new HttpError(404, "NOT_FOUND", "The requested API resource was not found.")));
 coachApp.use(errorHandler);

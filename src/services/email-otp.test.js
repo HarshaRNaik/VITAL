@@ -1,29 +1,60 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { requestEmailOtp, resendEmailOtp, verifyEmailOtp } from './email-otp'
+import {
+  requestEmailOtp,
+  resendEmailOtp,
+  requestSignupEmailOtp,
+  resendSignupEmailOtp,
+  verifyEmailOtp,
+} from './email-otp'
 
 describe('Supabase email OTP operations', () => {
   let auth
 
   beforeEach(() => {
+    vi.stubGlobal('window', { location: { origin: 'http://localhost:5173' } })
     auth = {
       signInWithOtp: vi.fn().mockResolvedValue({ error: null }),
       verifyOtp: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' }, session: { access_token: 'mock-token' } }, error: null }),
     }
   })
 
-  it('requests a code for a normalized email and allows first-time registration', async () => {
+  it('requests a sign-in code without creating an account', async () => {
     await requestEmailOtp(auth, '  New.User@Example.com  ')
     expect(auth.signInWithOtp).toHaveBeenCalledWith({
       email: 'new.user@example.com',
-      options: { shouldCreateUser: true },
+      options: { shouldCreateUser: false, emailRedirectTo: expect.stringMatching(/\/login$/) },
     })
   })
 
-  it('resends through Supabase email OTP with the same signup and login flow', async () => {
+  it('resends a sign-in code without creating an account', async () => {
     await resendEmailOtp(auth, 'member@example.com')
     expect(auth.signInWithOtp).toHaveBeenCalledWith({
       email: 'member@example.com',
-      options: { shouldCreateUser: true },
+      options: { shouldCreateUser: false, emailRedirectTo: expect.stringMatching(/\/login$/) },
+    })
+  })
+
+  it('requests account creation only through the explicit signup OTP flow', async () => {
+    await requestSignupEmailOtp(auth, '  New.User@Example.com  ', { name: '  Alex  ', goal: 'Strength' })
+    expect(auth.signInWithOtp).toHaveBeenCalledWith({
+      email: 'new.user@example.com',
+      options: {
+        shouldCreateUser: true,
+        data: { name: 'Alex', goal: 'Strength' },
+        emailRedirectTo: expect.stringMatching(/\/login$/),
+      },
+    })
+  })
+
+  it('resends signup codes using the same explicit registration intent and metadata', async () => {
+    await resendSignupEmailOtp(auth, 'member@example.com', { name: 'Sam', goal: 'Mobility' })
+    expect(auth.signInWithOtp).toHaveBeenCalledWith({
+      email: 'member@example.com',
+      options: {
+        shouldCreateUser: true,
+        data: { name: 'Sam', goal: 'Mobility' },
+        emailRedirectTo: expect.stringMatching(/\/login$/),
+      },
     })
   })
 
