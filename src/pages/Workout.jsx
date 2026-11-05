@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gymWorkouts, workouts } from '../services/api'
+import { coachApi } from '../services/coach'
+import { useAuth } from '../context/auth-context'
 
 const startOfWeek = () => {
   const date = new Date()
@@ -10,8 +12,10 @@ const startOfWeek = () => {
 }
 
 export default function Workout() {
+  const { user } = useAuth()
   const [stats, setStats] = useState({ home: 0, homeWeek: 0, gym: 0, gymWeek: 0 })
   const [error, setError] = useState('')
+  const [plans, setPlans] = useState([])
 
   useEffect(() => {
     let active = true
@@ -36,6 +40,21 @@ export default function Workout() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (!user) { setPlans([]); return undefined }
+    let active = true
+    coachApi.workoutPlans.list().then((items) => { if (active) setPlans(items) }).catch((loadError) => {
+      console.error('Failed to load saved workout plans:', loadError)
+      if (active) setError('Saved workout plans could not be loaded. Apply the coach plan database migration, then refresh.')
+    })
+    return () => { active = false }
+  }, [user])
+
+  async function removePlan(id) {
+    try { await coachApi.workoutPlans.remove(id); setPlans((items) => items.filter((plan) => plan.id !== id)) }
+    catch (removeError) { setError(removeError.message || 'Could not remove this plan.') }
+  }
+
   return (
     <div className="page-enter mx-auto max-w-5xl space-y-6 pb-6">
       <header className="hero-panel relative overflow-hidden p-6 sm:p-9">
@@ -47,6 +66,10 @@ export default function Workout() {
       </header>
 
       {error && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
+
+      {user && <section className="system-panel rounded-2xl p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-game text-xs text-cyan-200">SAVED PROGRAMS</p><h2 className="mt-2 text-xl font-bold">Your AI workout plans</h2></div><Link to="/coach" className="btn min-h-10">Ask AI Coach</Link></div>
+        {plans.length ? <ul className="mt-4 grid gap-3 sm:grid-cols-2">{plans.map((plan) => <li key={plan.id} className="rounded-xl border border-white/10 p-4"><h3 className="font-semibold">{plan.title}</h3><p className="mt-1 text-xs text-gray-400">{plan.difficulty} · {plan.days?.length || 0} training days</p><p className="mt-2 text-sm text-gray-300">{plan.description}</p><div className="mt-3 flex flex-wrap gap-2">{(plan.days || []).map((day) => <span key={day.day} className="rounded-md bg-white/5 px-2 py-1 text-xs">{day.day}: {day.exercises?.length || 0} exercises</span>)}</div><div className="mt-3 flex justify-between"><Link to="/coach" className="text-xs text-cyan-100 underline">Modify with Coach</Link><button className="text-xs text-red-300" onClick={() => removePlan(plan.id)}>Delete</button></div></li>)}</ul> : <p className="mt-3 text-sm text-gray-400">No saved AI plans yet.</p>}
+      </section>}
 
       <section aria-label="Workout modes" className="grid gap-4 md:grid-cols-2">
         <article className="system-panel group flex min-h-80 flex-col overflow-hidden rounded-2xl p-6 transition duration-200 hover:-translate-y-1 hover:border-cyan-200/30 sm:p-8">

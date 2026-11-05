@@ -9,12 +9,10 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "tsx watch --clear-screen=false server/src/index.ts",
-    "dev:coach": "tsx watch --clear-screen=false server/src/coach-index.ts",
     "build": "npm run build:server && vite build",
     "build:frontend": "vite build",
     "build:server": "npm run db:generate && tsc -p server/tsconfig.json",
     "start:server": "node server/dist/index.js",
-    "start:coach": "node server/dist/coach-index.js",
     "db:generate": "prisma generate --config server/prisma.config.ts",
     "db:migrate:dev": "prisma migrate dev --config server/prisma.config.ts",
     "db:migrate:deploy": "prisma migrate deploy --config server/prisma.config.ts",

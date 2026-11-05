@@ -1,6 +1,10 @@
-import { MOVEMENTS } from '../data/workouts'
 import { z } from 'zod'
 import { getSignedInUser, hasSupabaseConfig, requireSignedInUser, requireSupabase } from './supabase'
+import {
+  aggregateFitnessAnalytics,
+  calculatePaceSecondsPerKm,
+  calculateSpeedKph,
+} from '../domain/fitness-calculations'
 
 export class ApiError extends Error {
   constructor(message, { code, details } = {}) {
@@ -12,13 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-const initialGame = { totalXP: 0, streak: 0, lastActive: null, counts: {}, badges: [], chatToday: false }
-// Production Coach requests stay same-origin so a local API URL can never be
-// embedded in the deployed frontend bundle. Local development may target the
-// standalone Coach server directly through VITE_API_BASE_URL.
-const coachApiBase = import.meta.env.PROD
-  ? ''
-  : import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '')
+const initialGame = { totalXP: 0, streak: 0, lastActive: null, counts: {}, badges: [] }
 const camelKey = (key) => key.replace(/_([a-z])/g, (_match, letter) => letter.toUpperCase())
 const dateSchema = z.iso.date()
 const amountSchema = z.number().finite().min(0).max(1_000_000)
@@ -68,6 +66,72 @@ const metricSchema = z.object({
   weight: z.number().finite().positive().max(1000),
   date: dateSchema,
   requestId: z.string().regex(/^[A-Za-z0-9_-]{8,100}$/).optional(),
+}).strict()
+const requestIdSchema = z.string().regex(/^[A-Za-z0-9_-]{8,100}$/).optional()
+const bodyMeasurementSchema = z.object({
+  measurementType: z.enum(['height', 'waist', 'hip', 'chest', 'neck', 'arm', 'thigh']),
+  value: z.number().finite().positive().max(300),
+  unit: z.enum(['cm', 'in']),
+  measuredOn: dateSchema,
+  requestId: requestIdSchema,
+}).strict().refine((item) => item.unit !== 'in' || item.value <= 120, 'Measurements in inches must be 120 or less.')
+const activitySessionSchema = z.object({
+  activityType: z.enum(['walking', 'running', 'jogging', 'cycling', 'indoor_cardio', 'treadmill']),
+  source: z.literal('manual'),
+  startedAt: z.iso.datetime({ offset: true }),
+  endedAt: z.iso.datetime({ offset: true }),
+  durationSeconds: z.number().int().positive().max(604800),
+  distanceKm: z.number().finite().positive().max(100000).nullable().optional(),
+  calories: z.number().int().nonnegative().max(100000).nullable().optional(),
+  caloriesEstimated: z.boolean().default(false),
+  steps: z.number().int().nonnegative().max(1000000).nullable().optional(),
+  date: dateSchema,
+  requestId: requestIdSchema,
+}).strict().refine((item) => Date.parse(item.endedAt) > Date.parse(item.startedAt), 'Activity must end after it starts.')
+  .refine((item) => item.distanceKm === undefined || item.distanceKm === null
+    || (item.distanceKm >= 0.01 && item.durationSeconds / item.distanceKm >= 1
+      && item.durationSeconds / item.distanceKm <= 604800
+      && item.distanceKm / (item.durationSeconds / 3600) <= 1000), 'Activity distance and duration are outside supported limits.')
+const hydrationLogSchema = z.object({
+  amountMl: z.number().int().positive().max(10000),
+  consumedAt: z.iso.datetime({ offset: true }).optional(),
+  date: dateSchema,
+  requestId: requestIdSchema,
+}).strict()
+const habitSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  category: z.enum(['workout', 'walking', 'hydration', 'stretching', 'nutrition', 'recovery', 'meditation', 'custom']),
+  scheduleDays: z.array(z.number().int().min(0).max(6)).max(7).default([0, 1, 2, 3, 4, 5, 6]),
+  active: z.boolean().default(true),
+  reminder: z.record(z.string(), z.unknown()).default({}),
+}).strict()
+const habitCompletionSchema = z.object({
+  habitId: z.uuid(),
+  completedOn: dateSchema,
+  requestId: requestIdSchema,
+}).strict()
+const fastingSessionSchema = z.object({
+  scheduleHours: z.number().int().min(1).max(24),
+  startedAt: z.iso.datetime({ offset: true }).optional(),
+}).strict()
+const fitnessChallengeSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  goal: z.string().trim().min(1).max(80),
+  durationDays: z.union([z.literal(7), z.literal(14), z.literal(30)]),
+  schedule: z.array(z.record(z.string(), z.unknown())).min(7).max(30),
+  startedOn: dateSchema,
+  status: z.enum(['active', 'paused', 'completed', 'cancelled']).default('active'),
+}).strict().refine((challenge) => challenge.schedule.length === challenge.durationDays, 'Challenge schedule must match its duration.')
+const challengeCompletionSchema = z.object({
+  challengeId: z.uuid(),
+  challengeDay: z.number().int().min(1).max(30),
+  completedOn: dateSchema,
+}).strict()
+const workoutSessionStateSchema = z.object({
+  id: z.uuid(),
+  plan: z.record(z.string(), z.unknown()),
+  state: z.record(z.string(), z.unknown()),
+  status: z.enum(['ready', 'running', 'paused', 'completed', 'cancelled']),
 }).strict()
 const goalSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -128,7 +192,6 @@ const gymTemplateSchema = z.object({
     restSeconds: z.number().int().nonnegative().max(3600),
   }).strict()).min(1).max(100),
 }).strict()
-
 function validateInput(schema, input, label) {
   const parsed = schema.safeParse(input)
   if (!parsed.success) {
@@ -207,7 +270,7 @@ function mapPerformedSet(set) {
   }
 }
 
-function mapGame(row, chatToday = false) {
+function mapGame(row) {
   if (!row) return initialGame
   return {
     totalXP: row.total_xp,
@@ -215,70 +278,7 @@ function mapGame(row, chatToday = false) {
     lastActive: row.last_active,
     counts: row.counts || {},
     badges: row.badges || [],
-    chatToday,
   }
-}
-
-function dateKeyInTimeZone(date, timeZone = 'UTC') {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
-}
-
-async function assistantReply(userId, question) {
-  if (!userId) {
-    return "Sign in to ask about your personal activity. You can still explore workouts, nutrition, and progress screens."
-  }
-
-  const client = requireSupabase()
-  const settings = await resultOf(client.from('user_settings').select('time_zone').eq('user_id', userId).maybeSingle())
-  const today = dateKeyInTimeZone(new Date(), settings?.time_zone || 'UTC')
-  const firstDay = new Date(`${today}T00:00:00.000Z`)
-  firstDay.setUTCDate(firstDay.getUTCDate() - 6)
-  const from = firstDay.toISOString().slice(0, 10)
-  const [meals, workouts, metrics] = await Promise.all([
-    resultOf(client.from('nutrition_logs').select('date,calories,protein')
-      .eq('user_id', userId).gte('date', from).order('date', { ascending: true })),
-    resultOf(client.from('workouts').select('calories')
-      .eq('user_id', userId).gte('date', from)),
-    resultOf(client.from('progress_metrics').select('date,weight_kg')
-      .eq('user_id', userId).order('date', { ascending: true })),
-  ])
-  const recentMeals = meals.filter((meal) => meal.date >= from)
-  const text = question.toLowerCase()
-
-  if (text.includes('suggest') || text.includes('recommend')) {
-    if (text.includes('workout') || text.includes('exercise')) {
-      return workouts.length < 3
-        ? `You've completed ${workouts.length} workout(s) this week. Consider a comfortable walk or a bodyweight routine from your workout library.`
-        : `Great consistency with ${workouts.length} workouts this week. Consider a gentle mobility or recovery session.`
-    }
-    const loggedDays = Math.max(1, new Set(recentMeals.map((meal) => meal.date)).size)
-    const averageProtein = recentMeals.reduce((total, meal) => total + meal.protein, 0) / loggedDays
-    return averageProtein < 60
-      ? `Your protein averages about ${Math.round(averageProtein)}g on days with meal logs. Consider adding a protein source that fits your preferences.`
-      : `Your logged protein is averaging about ${Math.round(averageProtein)}g per logged day. A balanced meal can help you maintain that pattern.`
-  }
-
-  if (text.includes('calorie')) {
-    if (!recentMeals.length) return "You haven't logged any meals in the last 7 days."
-    const total = recentMeals.reduce((sum, meal) => sum + meal.calories, 0)
-    return `You logged ${Math.round(total)} kcal over the last 7 days (about ${Math.round(total / 7)} per day).`
-  }
-  if (text.includes('workout') || text.includes('exercise')) {
-    if (!workouts.length) return "No workouts are logged in the last 7 days. Choose a session from your workout library when you're ready."
-    return `You logged ${workouts.length} workout(s) in the last 7 days. Calories are shown only when you entered or estimated them.`
-  }
-  if (text.includes('weight') || text.includes('progress')) {
-    if (metrics.length < 2) return 'Log your weight at least twice and I can summarize the recorded change.'
-    const first = metrics[0]
-    const last = metrics.at(-1)
-    return `Your recorded weight changed by ${(last.weight_kg - first.weight_kg).toFixed(1)} kg from ${first.date} to ${last.date} (latest: ${last.weight_kg} kg).`
-  }
-  return 'Try asking about your logged calories, workouts, weight progress, or ask for a workout or meal suggestion.'
 }
 
 export const authApi = {
@@ -354,6 +354,35 @@ function activityCollection(table, mapper, columns, rewardType = null, recordRpc
       const validated = schema ? validateInput(schema.partial(), patch, 'Invalid activity update') : patch
       const saved = await resultOf(client.from(table).update(columns(validated)).eq('id', id).eq('user_id', user.id).select('*').single())
       return { item: mapper(camelize(saved)) }
+    },
+    remove: async (id) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      await resultOf(client.from(table).delete().eq('id', id).eq('user_id', user.id))
+    },
+  }
+}
+
+function loggedCollection(table, schema, columns, orderBy, mapper = camelize) {
+  return {
+    list: async () => (await privateList(table, '*', orderBy)).map(mapper),
+    add: async (item) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const validated = validateInput(schema, item, `Invalid ${table.replaceAll('_', ' ')}`)
+      const requestId = validated.requestId || crypto.randomUUID()
+      const row = { ...columns(validated), user_id: user.id, client_request_id: requestId }
+      let saved
+      let duplicate = false
+      try {
+        saved = await resultOf(client.from(table).insert(row).select('*').single())
+      } catch (error) {
+        if (error.code !== '23505') throw error
+        saved = await resultOf(client.from(table).select('*')
+          .eq('user_id', user.id).eq('client_request_id', requestId).single())
+        duplicate = true
+      }
+      return { item: mapper(camelize(saved)), duplicate }
     },
     remove: async (id) => {
       const user = await requireSignedInUser()
@@ -535,7 +564,8 @@ export const gymWorkoutTemplates = {
 }
 
 export const exerciseApi = {
-  list: async () => MOVEMENTS,
+  list: async () => (await import('../data/workouts')).MOVEMENTS,
+  searchDataset: async (options) => (await import('../data/exercise-catalog')).searchExerciseDataset(options),
 }
 
 export const profileApi = {
@@ -585,7 +615,20 @@ export const settingsApi = {
       timeZone: z.string().trim().min(1).max(100).optional(),
       workoutPreference: z.string().trim().max(500).optional(),
       emailNotifications: z.boolean().optional(),
+      hydrationTargetMl: z.number().int().min(250).max(10000).nullable().optional(),
+      hydrationUnit: z.enum(['ml', 'oz']).optional(),
+      fastingSchedule: z.record(z.string(), z.unknown()).nullable().optional(),
+      reminderPreferences: z.record(z.string(), z.unknown()).optional(),
+      dailyCalorieTarget: z.number().int().min(1200).max(8000).nullable().optional(),
+      proteinTargetGrams: z.number().int().min(0).max(1000).nullable().optional(),
+      carbsTargetGrams: z.number().int().min(0).max(2000).nullable().optional(),
+      fatTargetGrams: z.number().int().min(0).max(1000).nullable().optional(),
     }).strict().refine((value) => Object.keys(value).length > 0, 'At least one settings field is required.')
+      .refine((value) => {
+        const macroFields = ['proteinTargetGrams', 'carbsTargetGrams', 'fatTargetGrams']
+        const supplied = macroFields.filter((field) => Object.hasOwn(value, field))
+        return supplied.length === 0 || supplied.length === macroFields.length
+      }, 'Protein, carbohydrate, and fat targets must be updated together.')
     const parsed = validateInput(schema, settings, 'Invalid settings')
     if (parsed.timeZone) {
       try {
@@ -601,7 +644,7 @@ export const settingsApi = {
 }
 
 export const workoutPlans = {
-  list: async () => (await privateList('workout_plans', '*,workout_plan_exercises(*)', 'updated_at')).map(mapWorkoutPlan),
+  list: async () => Promise.all((await privateList('workout_plans', '*,workout_plan_exercises(*)', 'updated_at')).map(mapWorkoutPlan)),
   create: async (plan) => {
     await requireSignedInUser()
     const client = requireSupabase()
@@ -623,7 +666,7 @@ export const workoutPlans = {
         })),
       },
     }))
-    return { item: mapWorkoutPlan(camelize(saved)) }
+    return { item: await mapWorkoutPlan(camelize(saved)) }
   },
   update: async (id, plan) => {
     await requireSignedInUser()
@@ -646,7 +689,7 @@ export const workoutPlans = {
         })),
       },
     }))
-    return { item: mapWorkoutPlan(camelize(saved)) }
+    return { item: await mapWorkoutPlan(camelize(saved)) }
   },
   remove: async (id) => {
     const user = await requireSignedInUser()
@@ -655,8 +698,9 @@ export const workoutPlans = {
   },
 }
 
-function mapWorkoutPlan(row) {
+async function mapWorkoutPlan(row) {
   const { workoutPlanExercises = [], ...plan } = camelize(row)
+  const { MOVEMENTS } = await import('../data/workouts')
   return {
     ...plan,
     exercises: workoutPlanExercises.map((item) => ({
@@ -675,103 +719,241 @@ export const fitnessGoals = activityCollection('fitness_goals', camelize, (item)
   completed_at: item.completedAt || null,
 }), null, null, goalSchema, 'updated_at')
 
+const bodyMeasurements = loggedCollection('body_measurements', bodyMeasurementSchema, (item) => ({
+  measurement_type: item.measurementType,
+  value: item.value,
+  unit: item.unit,
+  measured_on: item.measuredOn,
+}), 'measured_on', (item) => ({ ...camelize(item), date: item.measuredOn }))
+
+const activitySessions = loggedCollection('activity_sessions', activitySessionSchema, (item) => {
+  const pace = item.distanceKm ? calculatePaceSecondsPerKm(item.distanceKm, item.durationSeconds) : null
+  const speed = item.distanceKm ? calculateSpeedKph(item.distanceKm, item.durationSeconds) : null
+  return {
+    activity_type: item.activityType,
+    source: item.source,
+    started_at: item.startedAt,
+    ended_at: item.endedAt,
+    duration_seconds: item.durationSeconds,
+    distance_km: item.distanceKm ?? null,
+    pace_seconds_per_km: pace,
+    speed_kph: speed,
+    calories: item.calories ?? null,
+    calories_estimated: item.caloriesEstimated,
+    steps: item.steps ?? null,
+    recorded_on: item.date,
+  }
+}, 'recorded_on', (item) => ({ ...camelize(item), date: item.recordedOn }))
+
+const hydrationLogs = loggedCollection('hydration_logs', hydrationLogSchema, (item) => ({
+  amount_ml: item.amountMl,
+  consumed_at: item.consumedAt || new Date().toISOString(),
+  recorded_on: item.date,
+}), 'recorded_on', (item) => ({ ...camelize(item), date: item.recordedOn }))
+
+export const fitnessTrackingApi = {
+  bodyMeasurements,
+  activitySessions,
+  hydrationLogs,
+  analytics: async () => {
+    const [workoutHistory, activities, mealHistory, measurements, hydration] = await Promise.all([
+      workouts.list(),
+      activitySessions.list(),
+      meals.list(),
+      bodyMeasurements.list(),
+      hydrationLogs.list(),
+    ])
+    return aggregateFitnessAnalytics({
+      workouts: workoutHistory,
+      activities,
+      meals: mealHistory,
+      measurements,
+      hydration,
+    })
+  },
+  habits: {
+    list: async () => (await privateList('fitness_habits', '*', 'updated_at')).map(camelize),
+    create: async (habit) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const item = validateInput(habitSchema, habit, 'Invalid habit')
+      return camelize(await resultOf(client.from('fitness_habits').insert({
+        user_id: user.id,
+        name: item.name,
+        category: item.category,
+        schedule_days: item.scheduleDays,
+        active: item.active,
+        reminder: item.reminder,
+      }).select('*').single()))
+    },
+    update: async (id, patch) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const item = validateInput(habitSchema.partial(), patch, 'Invalid habit update')
+      if (!Object.keys(item).length) throw new ApiError('Provide at least one habit field.', { code: 'INVALID_INPUT' })
+      const columns = Object.fromEntries(Object.entries(item).map(([key, value]) => [key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`), value]))
+      return camelize(await resultOf(client.from('fitness_habits').update(columns)
+        .eq('id', id).eq('user_id', user.id).select('*').single()))
+    },
+    remove: async (id) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      await resultOf(client.from('fitness_habits').delete().eq('id', id).eq('user_id', user.id))
+    },
+  },
+  completeHabit: async (completion) => {
+    const user = await requireSignedInUser()
+    const client = requireSupabase()
+    const item = validateInput(habitCompletionSchema, completion, 'Invalid habit completion')
+    const requestId = item.requestId || crypto.randomUUID()
+    let saved
+    let duplicate = false
+    try {
+      saved = await resultOf(client.from('habit_completions').insert({
+        user_id: user.id,
+        habit_id: item.habitId,
+        completed_on: item.completedOn,
+        client_request_id: requestId,
+      }).select('*').single())
+    } catch (error) {
+      if (error.code !== '23505') throw error
+      saved = await resultOf(client.from('habit_completions').select('*')
+        .eq('user_id', user.id).eq('habit_id', item.habitId).eq('completed_on', item.completedOn).single())
+      duplicate = true
+    }
+    return { item: camelize(saved), duplicate }
+  },
+  listHabitCompletions: async (habitId) => {
+    const user = await requireSignedInUser()
+    const client = requireSupabase()
+    return (await resultOf(client.from('habit_completions').select('*')
+      .eq('user_id', user.id).eq('habit_id', habitId).order('completed_on', { ascending: false }))).map(camelize)
+  },
+  fasting: {
+    list: async () => (await privateList('fasting_sessions', '*', 'started_at')).map(camelize),
+    start: async (session) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const item = validateInput(fastingSessionSchema, session, 'Invalid fasting session')
+      const startedAt = item.startedAt || new Date().toISOString()
+      const targetEndedAt = new Date(Date.parse(startedAt) + item.scheduleHours * 3600000).toISOString()
+      try {
+        return camelize(await resultOf(client.from('fasting_sessions').insert({
+          user_id: user.id,
+          schedule_hours: item.scheduleHours,
+          started_at: startedAt,
+          target_ended_at: targetEndedAt,
+          status: 'active',
+        }).select('*').single()))
+      } catch (error) {
+        if (error.code === '23505') throw new ApiError('An active fasting session already exists.', { code: 'FASTING_ALREADY_ACTIVE' })
+        throw error
+      }
+    },
+    finish: async (id, status = 'completed', endedAt = new Date().toISOString()) => {
+      if (!['completed', 'cancelled'].includes(status)) throw new ApiError('Invalid fasting session status.', { code: 'INVALID_INPUT' })
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const saved = await resultOf(client.from('fasting_sessions').update({ status, ended_at: endedAt })
+        .eq('id', id).eq('user_id', user.id).eq('status', 'active').select('*').maybeSingle())
+      if (!saved) throw new ApiError('This fasting session is not active or could not be found.', { code: 'FASTING_SESSION_NOT_ACTIVE' })
+      return camelize(saved)
+    },
+  },
+  challenges: {
+    list: async () => (await privateList('fitness_challenges', '*', 'started_on')).map(camelize),
+    create: async (challenge) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const item = validateInput(fitnessChallengeSchema, challenge, 'Invalid fitness challenge')
+      return camelize(await resultOf(client.from('fitness_challenges').insert({
+        user_id: user.id,
+        name: item.name,
+        goal: item.goal,
+        duration_days: item.durationDays,
+        schedule: item.schedule,
+        started_on: item.startedOn,
+        status: item.status,
+      }).select('*').single()))
+    },
+    setStatus: async (id, status) => {
+      if (!['active', 'paused', 'completed', 'cancelled'].includes(status)) throw new ApiError('Invalid challenge status.', { code: 'INVALID_INPUT' })
+      await requireSignedInUser()
+      const client = requireSupabase()
+      return camelize(await resultOf(client.rpc('set_fitness_challenge_status', {
+        p_challenge_id: id,
+        p_status: status,
+      })))
+    },
+    completeDay: async (completion) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const item = validateInput(challengeCompletionSchema, completion, 'Invalid challenge completion')
+      const challenge = await resultOf(client.from('fitness_challenges').select('duration_days,status')
+        .eq('id', item.challengeId).eq('user_id', user.id).single())
+      if (challenge.status !== 'active') throw new ApiError('Only active challenges can record a completion.', { code: 'CHALLENGE_NOT_ACTIVE' })
+      if (item.challengeDay > challenge.duration_days) throw new ApiError('Challenge day exceeds its scheduled duration.', { code: 'INVALID_INPUT' })
+      try {
+        const saved = await resultOf(client.from('challenge_completions').insert({
+          user_id: user.id,
+          challenge_id: item.challengeId,
+          challenge_day: item.challengeDay,
+          completed_on: item.completedOn,
+        }).select('*').single())
+        return { item: camelize(saved), duplicate: false }
+      } catch (error) {
+        if (error.code !== '23505') throw error
+        const saved = await resultOf(client.from('challenge_completions').select('*')
+          .eq('user_id', user.id).eq('challenge_id', item.challengeId).eq('challenge_day', item.challengeDay).single())
+        return { item: camelize(saved), duplicate: true }
+      }
+    },
+    listCompletions: async (challengeId) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      return (await resultOf(client.from('challenge_completions').select('*')
+        .eq('user_id', user.id).eq('challenge_id', challengeId).order('challenge_day', { ascending: true }))).map(camelize)
+    },
+  },
+  workoutSessions: {
+    list: async () => (await privateList('workout_session_states', '*', 'updated_at')).map(camelize),
+    get: async (id) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      return camelize(await resultOf(client.from('workout_session_states').select('*')
+        .eq('id', id).eq('user_id', user.id).maybeSingle()))
+    },
+    save: async (session) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      const item = validateInput(workoutSessionStateSchema, session, 'Invalid workout session state')
+      if (new TextEncoder().encode(JSON.stringify({ plan: item.plan, state: item.state })).length > 262_144) {
+        throw new ApiError('Workout session state exceeds the allowed size.', { code: 'INVALID_INPUT' })
+      }
+      return camelize(await resultOf(client.from('workout_session_states').upsert({
+        id: item.id,
+        user_id: user.id,
+        plan: item.plan,
+        state: item.state,
+        status: item.status,
+      }, { onConflict: 'id' }).select('*').single()))
+    },
+    remove: async (id) => {
+      const user = await requireSignedInUser()
+      const client = requireSupabase()
+      await resultOf(client.from('workout_session_states').delete().eq('id', id).eq('user_id', user.id))
+    },
+  },
+}
+
 export const gameApi = {
   get: async () => {
     if (!hasSupabaseConfig) return { game: initialGame }
     const user = await getSignedInUser()
     if (!user) return { game: initialGame }
     const client = requireSupabase()
-    const [state, settings] = await Promise.all([
-      resultOf(client.from('game_state').select('*').eq('user_id', user.id).maybeSingle()),
-      resultOf(client.from('user_settings').select('time_zone').eq('user_id', user.id).maybeSingle()),
-    ])
+    const state = await resultOf(client.from('game_state').select('*').eq('user_id', user.id).maybeSingle())
     if (!state) return { game: initialGame }
-    const today = dateKeyInTimeZone(new Date(), settings?.time_zone || 'UTC')
-    const reward = await resultOf(client.from('game_rewards').select('id').eq('user_id', user.id).eq('idempotency_key', `chat:${today}`).maybeSingle())
-    return { game: mapGame(state, Boolean(reward)) }
-  },
-  rewardChat: async () => createReward('chat', dateKeyInTimeZone(new Date())),
-}
-
-export const assistantApi = {
-  listConversations: async () => privateList('assistant_conversations', '*', 'updated_at').then((items) => items.map(camelize)),
-  createConversation: async () => {
-    if (!hasSupabaseConfig || !(await getSignedInUser())) return { id: 'guest', title: 'New conversation', messages: [] }
-    const client = requireSupabase()
-    return camelize(await resultOf(client.rpc('create_assistant_conversation')))
-  },
-  getConversation: async (id) => {
-    if (id === 'guest') return { id, title: 'New conversation', messages: [] }
-    const user = await requireSignedInUser()
-    const client = requireSupabase()
-    const conversation = await resultOf(client.from('assistant_conversations').select('*').eq('id', id).eq('user_id', user.id).single())
-    const messages = await resultOf(client.from('assistant_messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }))
-    return { ...camelize(conversation), messages: messages.map(camelize) }
-  },
-  sendMessage: async (id, content, requestId = crypto.randomUUID()) => {
-    const validatedContent = validateInput(z.string().trim().min(1).max(500), content, 'Invalid message')
-    const user = hasSupabaseConfig ? await getSignedInUser() : null
-    if (id === 'guest' || !user) {
-      return {
-        userMessage: { id: requestId, role: 'user', content: validatedContent },
-        assistantMessage: { id: `${requestId}-reply`, role: 'assistant', content: await assistantReply(null, validatedContent) },
-        game: null,
-        duplicate: false,
-      }
-    }
-    const client = requireSupabase()
-    const existing = await resultOf(client.from('assistant_messages').select('*')
-      .eq('conversation_id', id).eq('client_request_id', requestId).eq('role', 'user').maybeSingle())
-    if (existing) {
-      const assistantMessage = await resultOf(client.from('assistant_messages').select('*')
-        .eq('conversation_id', id).eq('client_request_id', requestId).eq('role', 'assistant').single())
-      return {
-        userMessage: camelize(existing),
-        assistantMessage: camelize(assistantMessage),
-        game: await createReward('chat', dateKeyInTimeZone(new Date())),
-        duplicate: true,
-      }
-    }
-
-    let response
-    if (coachApiBase || import.meta.env.PROD) {
-      const { data: { session }, error: sessionError } = await requireSupabase().auth.getSession()
-      if (sessionError) throw sessionError
-      if (!session?.access_token) throw new ApiError('Please sign in again to use the Coach.', { code: 'AUTH_REQUIRED' })
-      let coachResponse
-      try {
-        coachResponse = await fetch(`${coachApiBase}/api/coach/reply`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ content: validatedContent }),
-        })
-      } catch {
-        throw new ApiError('The Coach service could not be reached. Please try again shortly.', { code: 'COACH_UNAVAILABLE' })
-      }
-      const body = await coachResponse.json().catch(() => ({}))
-      if (!coachResponse.ok) {
-        throw new ApiError(body?.error?.message || 'The Coach could not answer right now.', {
-          code: body?.error?.code || 'COACH_UNAVAILABLE',
-        })
-      }
-      response = body.text
-      if (typeof response !== 'string' || !response.trim()) {
-        throw new ApiError('The Coach returned an empty response. Please try again.', { code: 'COACH_UNAVAILABLE' })
-      }
-    } else {
-      response = await assistantReply(user.id, validatedContent)
-    }
-    const saved = await resultOf(client.rpc('save_assistant_exchange', {
-      p_conversation_id: id,
-      p_request_id: requestId,
-      p_user_content: validatedContent,
-      p_assistant_content: response,
-    }))
-    return {
-      userMessage: camelize(saved.userMessage),
-      assistantMessage: camelize(saved.assistantMessage),
-      game: saved.game,
-      duplicate: saved.duplicate,
-    }
+    return { game: mapGame(state) }
   },
 }

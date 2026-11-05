@@ -411,8 +411,6 @@ export const ModelName = {
   Exercise: 'Exercise',
   WorkoutPlan: 'WorkoutPlan',
   WorkoutPlanExercise: 'WorkoutPlanExercise',
-  AssistantConversation: 'AssistantConversation',
-  AssistantMessage: 'AssistantMessage',
   SecurityAuditEvent: 'SecurityAuditEvent'
 } as const
 
@@ -429,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "legacyImport" | "fitnessGoal" | "user" | "userSettings" | "authSession" | "workout" | "workoutSet" | "meal" | "progressMetric" | "gameState" | "gameReward" | "exercise" | "workoutPlan" | "workoutPlanExercise" | "assistantConversation" | "assistantMessage" | "securityAuditEvent"
+    modelProps: "legacyImport" | "fitnessGoal" | "user" | "userSettings" | "authSession" | "workout" | "workoutSet" | "meal" | "progressMetric" | "gameState" | "gameReward" | "exercise" | "workoutPlan" | "workoutPlanExercise" | "securityAuditEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1469,154 +1467,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    AssistantConversation: {
-      payload: Prisma.$AssistantConversationPayload<ExtArgs>
-      fields: Prisma.AssistantConversationFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AssistantConversationFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AssistantConversationFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>
-        }
-        findFirst: {
-          args: Prisma.AssistantConversationFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AssistantConversationFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>
-        }
-        findMany: {
-          args: Prisma.AssistantConversationFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>[]
-        }
-        create: {
-          args: Prisma.AssistantConversationCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>
-        }
-        createMany: {
-          args: Prisma.AssistantConversationCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AssistantConversationCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>[]
-        }
-        delete: {
-          args: Prisma.AssistantConversationDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>
-        }
-        update: {
-          args: Prisma.AssistantConversationUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>
-        }
-        deleteMany: {
-          args: Prisma.AssistantConversationDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AssistantConversationUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AssistantConversationUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>[]
-        }
-        upsert: {
-          args: Prisma.AssistantConversationUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantConversationPayload>
-        }
-        aggregate: {
-          args: Prisma.AssistantConversationAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAssistantConversation>
-        }
-        groupBy: {
-          args: Prisma.AssistantConversationGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AssistantConversationGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AssistantConversationCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AssistantConversationCountAggregateOutputType> | number
-        }
-      }
-    }
-    AssistantMessage: {
-      payload: Prisma.$AssistantMessagePayload<ExtArgs>
-      fields: Prisma.AssistantMessageFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AssistantMessageFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AssistantMessageFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>
-        }
-        findFirst: {
-          args: Prisma.AssistantMessageFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AssistantMessageFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>
-        }
-        findMany: {
-          args: Prisma.AssistantMessageFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>[]
-        }
-        create: {
-          args: Prisma.AssistantMessageCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>
-        }
-        createMany: {
-          args: Prisma.AssistantMessageCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AssistantMessageCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>[]
-        }
-        delete: {
-          args: Prisma.AssistantMessageDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>
-        }
-        update: {
-          args: Prisma.AssistantMessageUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>
-        }
-        deleteMany: {
-          args: Prisma.AssistantMessageDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AssistantMessageUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AssistantMessageUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>[]
-        }
-        upsert: {
-          args: Prisma.AssistantMessageUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AssistantMessagePayload>
-        }
-        aggregate: {
-          args: Prisma.AssistantMessageAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAssistantMessage>
-        }
-        groupBy: {
-          args: Prisma.AssistantMessageGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AssistantMessageGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AssistantMessageCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AssistantMessageCountAggregateOutputType> | number
-        }
-      }
-    }
     SecurityAuditEvent: {
       payload: Prisma.$SecurityAuditEventPayload<ExtArgs>
       fields: Prisma.SecurityAuditEventFieldRefs
@@ -1946,29 +1796,6 @@ export const WorkoutPlanExerciseScalarFieldEnum = {
 export type WorkoutPlanExerciseScalarFieldEnum = (typeof WorkoutPlanExerciseScalarFieldEnum)[keyof typeof WorkoutPlanExerciseScalarFieldEnum]
 
 
-export const AssistantConversationScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  title: 'title',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type AssistantConversationScalarFieldEnum = (typeof AssistantConversationScalarFieldEnum)[keyof typeof AssistantConversationScalarFieldEnum]
-
-
-export const AssistantMessageScalarFieldEnum = {
-  id: 'id',
-  conversationId: 'conversationId',
-  clientRequestId: 'clientRequestId',
-  role: 'role',
-  content: 'content',
-  createdAt: 'createdAt'
-} as const
-
-export type AssistantMessageScalarFieldEnum = (typeof AssistantMessageScalarFieldEnum)[keyof typeof AssistantMessageScalarFieldEnum]
-
-
 export const SecurityAuditEventScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2101,20 +1928,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
- * Reference to a field of type 'AssistantRole'
- */
-export type EnumAssistantRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssistantRole'>
-    
-
-
-/**
- * Reference to a field of type 'AssistantRole[]'
- */
-export type ListEnumAssistantRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssistantRole[]'>
     
 
 /**
@@ -2282,8 +2095,6 @@ export type GlobalOmitConfig = {
   exercise?: Prisma.ExerciseOmit
   workoutPlan?: Prisma.WorkoutPlanOmit
   workoutPlanExercise?: Prisma.WorkoutPlanExerciseOmit
-  assistantConversation?: Prisma.AssistantConversationOmit
-  assistantMessage?: Prisma.AssistantMessageOmit
   securityAuditEvent?: Prisma.SecurityAuditEventOmit
 }
 

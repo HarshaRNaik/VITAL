@@ -79,10 +79,6 @@ export const metricSchema = z.object({
   date,
 }).strict();
 
-export const rewardSchema = z.object({
-  type: z.literal("chat"),
-}).strict();
-
 const planExerciseSchema = z.object({
   exerciseId: z.string().trim().min(1).max(100),
   sequence: z.number().int().nonnegative().max(100),
@@ -113,10 +109,6 @@ export const legacyImportSchema = z.object({
   meals: z.array(z.record(z.string(), z.unknown())).max(500).default([]),
   metrics: z.array(z.record(z.string(), z.unknown())).max(500).default([]),
 }).strict().refine((value) => value.workouts.length + value.meals.length + value.metrics.length > 0, "There is no local activity to import.");
-
-export const assistantMessageSchema = z.object({
-  content: z.string().trim().min(1).max(500),
-}).strict();
 
 export const paginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),

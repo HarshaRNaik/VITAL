@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AchievementEmblem from '../components/AchievementEmblem'
-import { meals, workouts } from '../services/api'
+import { meals, settingsApi, workouts } from '../services/api'
 import { useGame } from '../context/game-context'
 import { useAuth } from '../context/auth-context'
 import { BADGES } from '../data/badges'
@@ -20,6 +20,8 @@ export default function Hub() {
   const [recentActivity, setRecentActivity] = useState([])
   const [loadError, setLoadError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [calorieTarget, setCalorieTarget] = useState(DAILY_CALORIE_TARGET)
+  const [targetUserId, setTargetUserId] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -46,9 +48,24 @@ export default function Hub() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (!user) return undefined
+    let active = true
+    settingsApi.get()
+      .then(({ settings }) => {
+        if (active) {
+          setTargetUserId(user.id)
+          setCalorieTarget(settings.dailyCalorieTarget || DAILY_CALORIE_TARGET)
+        }
+      })
+      .catch((error) => console.error('Failed to load dashboard nutrition target:', error))
+    return () => { active = false }
+  }, [user])
+
+  const activeCalorieTarget = user && targetUserId === user.id ? calorieTarget : DAILY_CALORIE_TARGET
   const eaten = sum(todayMeals, 'calories')
-  const calorieProgress = Math.min(Math.round((eaten / DAILY_CALORIE_TARGET) * 100), 100)
-  const hasActivityToday = todayMeals.length > 0 || todayWorkouts.length > 0 || game.chatToday
+  const calorieProgress = Math.min(Math.round((eaten / activeCalorieTarget) * 100), 100)
+  const hasActivityToday = todayMeals.length > 0 || todayWorkouts.length > 0
   const mobilityToday = todayWorkouts.some((workout) => /mobility|recovery|yoga/i.test(
     `${workout.planCategory || ''} ${workout.name || ''}`
   ))
@@ -203,7 +220,7 @@ export default function Hub() {
               </li>
               ))}
           </ul>
-          <p className="mt-3 text-[10px] leading-relaxed text-gray-500">XP is awarded by the existing saved workout, meal, and coach actions. Quest completion is derived from those records and adds no duplicate reward.</p>
+          <p className="mt-3 text-[10px] leading-relaxed text-gray-500">XP is awarded by saved workout and meal actions. Quest completion is derived from those records and adds no duplicate reward.</p>
           {!user && <p className="mt-3 rounded-lg border border-violet-200/15 bg-violet-200/[0.04] p-3 text-xs text-gray-300">Guest mode does not load or save private quest progress. <Link to="/login" className="font-semibold text-cyan-200 hover:text-white">Sign in to sync ↗</Link></p>}
         </div>
 
@@ -233,9 +250,9 @@ export default function Hub() {
             </div>
             <div className="flex items-end justify-between gap-3">
               <p className="system-value text-3xl font-extrabold">{user ? eaten.toLocaleString() : '—'} <span className="text-xs font-semibold text-gray-500">{user ? 'kcal' : 'sign in'}</span></p>
-              <p className="text-xs text-gray-500">{user ? `${eaten.toLocaleString()} / ${DAILY_CALORIE_TARGET.toLocaleString()} kcal target` : 'Sign in to sync your nutrition logs.'}</p>
+              <p className="text-xs text-gray-500">{user ? `${eaten.toLocaleString()} / ${activeCalorieTarget.toLocaleString()} kcal target` : 'Sign in to sync your nutrition logs.'}</p>
             </div>
-            <div className="progress-track mt-3" role="progressbar" aria-label="Daily calorie target" aria-valuemin="0" aria-valuemax={DAILY_CALORIE_TARGET} aria-valuenow={eaten}>
+            <div className="progress-track mt-3" role="progressbar" aria-label="Daily calorie target" aria-valuemin="0" aria-valuemax={activeCalorieTarget} aria-valuenow={eaten}>
               <div className="progress-fill" style={{ width: `${calorieProgress}%` }} />
             </div>
             <p className="mt-3 text-xs text-gray-500">Total training: <span className="text-gray-300">{loading ? 'Syncing…' : user ? `${totalMinutes.toLocaleString()} minutes` : 'sign in to sync'}</span> · Completed sessions: <span className="text-gray-300">{loading ? '—' : user ? allWorkouts.length : '—'}</span></p>

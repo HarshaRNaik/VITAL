@@ -768,6 +768,892 @@ p {
 
 }
 
+/* Public VITAL Fitness landing page */
+.landing-page {
+  --landing-panel: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  --landing-border: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  --landing-preview: linear-gradient(145deg, #10243a, #08111e 72%);
+  overflow: hidden;
+  color: var(--text-primary);
+  background:
+    radial-gradient(ellipse at 82% 10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 34rem),
+    radial-gradient(ellipse at 4% 28%, color-mix(in srgb, #a3e635 5%, transparent), transparent 30rem),
+    var(--bg-primary);
+}
+
+.landing-page section[id] {
+  scroll-margin-top: 6rem;
+}
+
+.landing-wrap {
+  width: min(100% - 2rem, 78rem);
+  margin-inline: auto;
+}
+
+.landing-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--landing-border);
+  background: color-mix(in srgb, var(--bg-primary) 78%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.landing-header-inner {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.landing-navigation {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.landing-header-actions,
+.landing-mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.landing-mobile-actions,
+.landing-menu-button {
+  display: none;
+}
+
+.landing-menu-button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--landing-border);
+  border-radius: 0.75rem;
+  background: var(--landing-panel);
+  color: var(--text-primary);
+  font-size: 1.3rem;
+}
+
+.landing-brand {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.landing-brand-mark {
+  display: grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  color: var(--accent);
+  font-size: 1.15rem;
+  letter-spacing: -0.08em;
+}
+
+.landing-nav-link,
+.landing-sign-in {
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.landing-nav-link:hover,
+.landing-sign-in:hover {
+  color: var(--text-primary);
+}
+
+.landing-hero-copy {
+  animation: fade-in-up 520ms ease both;
+}
+
+.landing-hero-visual {
+  animation: fade-in-up 650ms 80ms ease both;
+}
+
+.landing-hero-image {
+  position: absolute;
+  right: -0.5rem;
+  bottom: -1.5rem;
+  z-index: 2;
+  display: flex;
+  max-width: min(20rem, 76%);
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid var(--landing-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(14px);
+}
+
+.landing-hero-image img,
+.landing-exercise-visual img {
+  flex: none;
+  object-fit: contain;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 0.75rem;
+  background: #08111e;
+}
+
+.landing-hero-image strong,
+.landing-hero-image small {
+  display: block;
+}
+
+.landing-hero-image strong {
+  font-size: 0.8rem;
+}
+
+.landing-hero-image small {
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.landing-skip-link {
+  position: absolute;
+  z-index: 20;
+  top: 0.5rem;
+  left: 0.5rem;
+  transform: translateY(-160%);
+  border-radius: 0.5rem;
+  background: var(--accent);
+  padding: 0.7rem 1rem;
+  color: #07111b;
+  font-weight: 700;
+}
+
+.landing-skip-link:focus {
+  transform: translateY(0);
+}
+
+.landing-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.landing-hero::before {
+  position: absolute;
+  z-index: -1;
+  top: 2rem;
+  right: -12rem;
+  width: 34rem;
+  height: 34rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 9%, transparent);
+  border-radius: 50%;
+  content: "";
+}
+
+.landing-eyebrow {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.landing-eyebrow > span {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-right: 0.55rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 75%, transparent);
+}
+
+.landing-highlight {
+  background: linear-gradient(100deg, var(--accent), #bef264 80%);
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-preview-label {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 0.7rem 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-preview {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--landing-border));
+  border-radius: 1.35rem;
+  background: var(--landing-preview);
+  box-shadow: 0 32px 90px rgb(0 0 0 / 30%), inset 0 1px rgb(255 255 255 / 5%);
+}
+
+.landing-preview-kicker {
+  color: #93a4b9;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.landing-preview-orb {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 1px solid rgb(103 232 249 / 28%);
+  border-radius: 50%;
+  color: #a5f3fc;
+  font-weight: 800;
+}
+
+.landing-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.9rem;
+  background: rgb(255 255 255 / 3%);
+  padding: 0.85rem;
+}
+
+.landing-preview-index {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: rgb(103 232 249 / 10%);
+  color: #a5f3fc;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.landing-preview-index-warm {
+  background: rgb(251 191 36 / 10%);
+  color: #fcd34d;
+}
+
+.landing-preview-arrow {
+  color: #6f8298;
+}
+
+.landing-preview-chart {
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.9rem;
+  background: rgb(255 255 255 / 2%);
+  padding: 1rem;
+}
+
+.landing-preview-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #8190a4;
+  font-size: 0.62rem;
+}
+
+.landing-preview-legend > span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #67e8f9;
+}
+
+.landing-preview-foot {
+  border-top: 1px solid rgb(255 255 255 / 8%);
+  padding: 0.8rem 1rem;
+  color: #93a4b9;
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.landing-decoration {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.landing-decoration-one {
+  top: 16%;
+  right: -1.2rem;
+  width: 5.2rem;
+  height: 5.2rem;
+}
+
+.landing-decoration-two {
+  bottom: -1.5rem;
+  left: -1.8rem;
+  width: 7rem;
+  height: 7rem;
+  border-color: color-mix(in srgb, #a3e635 18%, transparent);
+}
+
+.landing-feature-section {
+  border-top: 1px solid var(--landing-border);
+}
+
+.landing-feature-card {
+  position: relative;
+  min-height: 15rem;
+  border: 1px solid var(--landing-border);
+  border-radius: 1.1rem;
+  background: var(--landing-panel);
+  padding: 1.35rem;
+  transition: border-color var(--transition-normal), transform var(--transition-normal);
+}
+
+.landing-feature-icon {
+  display: inline-grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  color: var(--accent);
+  font-size: 1.25rem;
+}
+
+.landing-feature-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--landing-border));
+}
+
+.landing-feature-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.landing-coach-panel,
+.landing-cta {
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--landing-border));
+  border-radius: 1.3rem;
+  background:
+    radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 50%),
+    var(--landing-panel);
+  box-shadow: var(--shadow-card);
+}
+
+.landing-chat,
+.landing-nutrition-preview,
+.landing-analytics-card {
+  border: 1px solid var(--landing-border);
+  border-radius: 1.1rem;
+  background: var(--landing-panel);
+  padding: 1.15rem;
+  box-shadow: var(--shadow-card);
+}
+
+.landing-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--landing-border);
+  padding-bottom: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.landing-chat-header > span:last-child,
+.landing-demo-badge {
+  margin-left: auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  border-radius: 999px;
+  padding: 0.3rem 0.5rem;
+  color: var(--accent);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.landing-chat-status {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.landing-chat-message {
+  margin-top: 1rem;
+  border: 1px solid var(--landing-border);
+  border-radius: 0.85rem;
+  padding: 0.9rem;
+}
+
+.landing-chat-message > strong {
+  color: var(--accent);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+}
+
+.landing-chat-message p {
+  margin: 0.4rem 0 0;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.landing-chat-user {
+  margin-left: 2rem;
+  background: color-mix(in srgb, var(--accent) 5%, var(--landing-panel));
+}
+
+.landing-chat-plan {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.landing-chat-plan span {
+  display: flex;
+  gap: 0.65rem;
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  padding: 0.55rem;
+  color: var(--accent);
+  font-size: 0.68rem;
+}
+
+.landing-chat-plan b {
+  color: var(--text-primary);
+}
+
+.landing-chat-note {
+  margin: 0.65rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  text-align: right;
+}
+
+.landing-workout-showcase {
+  align-items: stretch;
+}
+
+.landing-exercise-visual {
+  display: flex;
+  min-height: 18rem;
+  align-items: center;
+  gap: 1.25rem;
+  border: 1px solid var(--landing-border);
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(ellipse at 85% 20%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 38%),
+    var(--landing-panel);
+  padding: 1.5rem;
+}
+
+.landing-exercise-visual img {
+  width: 5.25rem;
+  height: 5.25rem;
+}
+
+.landing-workout-types {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.landing-workout-type {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--landing-border);
+  border-radius: 0.85rem;
+  background: var(--landing-panel);
+  padding: 0.55rem 0.75rem;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.landing-workout-type:hover {
+  transform: translateX(3px);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--landing-border));
+}
+
+.landing-workout-type-icon {
+  display: grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  color: var(--accent);
+}
+
+.landing-workout-type strong,
+.landing-workout-type small {
+  display: block;
+}
+
+.landing-workout-type strong {
+  font-size: 0.8rem;
+}
+
+.landing-workout-type small {
+  margin-top: 0.12rem;
+  color: var(--text-secondary);
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.landing-workout-type > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.landing-nutrition-panel {
+  border: 1px solid var(--landing-border);
+  border-radius: 1.3rem;
+  background: var(--landing-panel);
+  box-shadow: var(--shadow-card);
+}
+
+.landing-macro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.4rem;
+}
+
+.landing-macro-grid > div {
+  min-width: 0;
+  border: 1px solid var(--landing-border);
+  border-radius: 0.75rem;
+  padding: 0.7rem;
+}
+
+.landing-macro-grid small,
+.landing-macro-grid strong {
+  display: block;
+}
+
+.landing-macro-grid small {
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+}
+
+.landing-macro-grid strong {
+  margin-top: 0.15rem;
+  font-size: 0.95rem;
+}
+
+.landing-macro-grid strong i {
+  color: var(--text-muted);
+  font-size: 0.67rem;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.landing-macro-track {
+  display: block;
+  height: 0.25rem;
+  overflow: hidden;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+.landing-macro-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.landing-macro-calories { width: 78%; }
+.landing-macro-protein { width: 62%; }
+.landing-macro-carbs { width: 70%; }
+.landing-macro-fat { width: 56%; }
+
+.landing-meals {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.landing-meals span {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  border-bottom: 1px solid var(--landing-border);
+  padding: 0.5rem 0;
+  font-size: 0.7rem;
+}
+
+.landing-meals b {
+  color: var(--text-primary);
+}
+
+.landing-meals i {
+  color: var(--text-secondary);
+  font-style: normal;
+}
+
+.landing-analytics-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.landing-analytics-list li::before {
+  margin-right: 0.55rem;
+  color: var(--accent);
+  content: "✓";
+}
+
+.landing-analytics-chart {
+  display: flex;
+  height: 14rem;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+  border-bottom: 1px solid var(--landing-border);
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(25% - 1px), var(--landing-border) 25%);
+  padding: 0 0.35rem;
+}
+
+.landing-analytics-chart span {
+  width: 100%;
+  height: var(--bar-height);
+  border-radius: 0.45rem 0.45rem 0 0;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--accent) 30%, transparent), var(--accent));
+  opacity: 0.8;
+}
+
+.landing-chart-caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.landing-steps {
+  position: relative;
+}
+
+.landing-step {
+  border: 1px solid var(--landing-border);
+  border-radius: 1rem;
+  background: var(--landing-panel);
+  padding: 1.35rem;
+}
+
+.landing-step > span {
+  display: inline-grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.landing-step h3 {
+  margin: 1rem 0 0;
+}
+
+.landing-step p {
+  margin: 0.5rem 0 0;
+  font-size: 0.87rem;
+  line-height: 1.6;
+}
+
+.landing-text-link {
+  color: var(--accent);
+}
+
+.landing-text-link:hover {
+  color: var(--accent-hover);
+}
+
+.landing-footer {
+  border-top: 1px solid var(--landing-border);
+}
+
+.landing-footer-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 1.5rem;
+  padding-block: 1.75rem;
+}
+
+.landing-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.landing-footer-links a:hover {
+  color: var(--text-primary);
+}
+
+.landing-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 450ms ease, transform 450ms ease;
+}
+
+.landing-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html[data-theme="light"] .landing-page {
+  --landing-panel: #ffffff;
+  --landing-preview: linear-gradient(145deg, #202a35, #101820 72%);
+}
+
+html[data-theme="light"] .landing-page .landing-header {
+  background: rgb(255 255 255 / 88%);
+}
+
+html[data-theme="light"] .landing-page .landing-preview-label,
+html[data-theme="light"] .landing-page .landing-preview-foot {
+  color: #656a70;
+}
+
+@media (max-width: 1023px) {
+  .landing-menu-button {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+  }
+
+  .landing-navigation {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 1rem;
+    left: 1rem;
+    display: none;
+    align-items: stretch;
+    gap: 0.2rem;
+    border: 1px solid var(--landing-border);
+    border-radius: 1rem;
+    background: var(--bg-primary);
+    padding: 0.75rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .landing-navigation.is-open {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .landing-navigation .landing-nav-link {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    border-radius: 0.6rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .landing-navigation .landing-nav-link:hover {
+    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  }
+
+  .landing-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border-top: 1px solid var(--landing-border);
+    margin-top: 0.4rem;
+    padding: 0.6rem 0.25rem 0.15rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-wrap {
+    width: min(100% - 1.25rem, 78rem);
+  }
+
+  .landing-feature-card {
+    min-height: auto;
+  }
+
+  .landing-hero::before {
+    top: 14rem;
+    right: -19rem;
+    width: 28rem;
+    height: 28rem;
+  }
+
+  .landing-header-inner {
+    min-height: 68px;
+  }
+
+  .landing-header-actions {
+    display: none;
+  }
+
+  .landing-menu-button {
+    margin-left: auto;
+  }
+
+  .landing-hero-image {
+    right: 0;
+    bottom: -1rem;
+  }
+
+  .landing-exercise-visual {
+    min-height: 14rem;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .landing-footer-content {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .landing-footer-links {
+    justify-content: flex-start;
+  }
+}
+
 /* White and red light theme. Accent colors stay centralized so the same
    component styles work in both themes. */
 html[data-theme="light"] {

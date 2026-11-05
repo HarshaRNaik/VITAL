@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Execution tasks for VITAL Fitness production repair, Gemini Coach integration, public landing page, and verification.",
+  "tasks": [
+    {
+      "id": "001-repair-existing-integrations",
+      "type": "transform",
+      "description": "Audit and repair feasible existing VITAL Fitness integrations",
+      "reason": "The user requested an end-to-end production repair across existing application flows while preserving architecture, authentication, and user data.",
+      "requirements": "Inspect the current repository and worktree before editing. Audit and repair feasible backend, AI, workout, nutrition, dashboard, and analytics integrations, preserving current architecture, auth behavior, existing routes, and user-owned data. Integrate rather than revert or overwrite the user's pre-existing changes, especially modified server/src/routes/coach.ts, server/test/coach.test.ts, server/test/vercel-coach-adapter.test.ts and untracked api/coach/, api/health.ts, api/health/, data/, exercises-dataset-main/, and Gemini preparation scripts. Do not edit .env or production settings; do not perform destructive database operations; do not deploy, commit, or stage. Add or update focused tests for changed behavior.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "id": "002-integrate-gemini-ai-coach",
+      "type": "transform",
+      "description": "Complete the Gemini AI Coach integration",
+      "reason": "The Coach is an explicit part of the requested production repair and should work within the existing application architecture.",
+      "requirements": "Review and integrate with the existing Coach server/API implementation, related tests, data, and preparation scripts without discarding pre-existing work. Preserve authentication and user-data access controls. Verify request handling, expected responses, and failure behavior with mocks or other non-billable local checks only. Do not make paid Gemini calls, expose credentials, edit .env/.env.local or production settings, deploy, or perform destructive database operations. Document any missing external credentials or service configuration as a blocker rather than claiming live integration success.",
+      "dependencies": [
+        "001-repair-existing-integrations"
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "id": "003-create-public-landing-page",
+      "type": "transform",
+      "description": "Create a professional public landing page at the root route",
+      "reason": "The user requested a polished public entry point while retaining existing account and application navigation.",
+      "requirements": "Make the root route a premium, responsive, accessible VITAL Fitness landing page. Preserve the existing login, registration, dashboard, and other routes and provide clear navigation to them. Use only accurate capability-based marketing; label demo content as illustrative; do not invent user statistics or use fake media URLs. Address SEO/performance basics, semantic accessibility, keyboard use, and reduced-motion preferences. Preserve existing authentication and user data behavior. Add focused tests for the landing page and navigation. Do not edit environment or production settings and do not deploy.",
+      "dependencies": [
+        "002-integrate-gemini-ai-coach"
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "id": "004-security-and-final-verification",
+      "type": "security",
+      "description": "Check dependency security and verify the completed changes",
+      "reason": "Security and safe production-readiness validation are required before considering the requested repair complete.",
+      "requirements": "Perform a scoped dependency vulnerability review and address confirmed findings with the smallest safe change, preserving existing user work. Do not change .env/.env.local or production settings, disclose secrets, deploy, commit, stage, make paid Gemini calls, or perform destructive database operations. Run focused tests for changed behavior and the repository production build; report exact commands and observed results, changed files, external configuration blockers, and limitations. Do not claim tests, production behavior, or external integrations passed unless actually verified.",
+      "dependencies": [
+        "003-create-public-landing-page"
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "vital-fitness-production-repair",
+    "projectName": "VITAL Fitness",
+    "language": "typescript",
+    "createdAt": "2026-11-04T09:44:30.859+05:30",
+    "version": "1.0"
+  }
+}

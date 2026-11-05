@@ -35,8 +35,8 @@ export default function Login() {
   const [otp, setOtp] = useState('')
   const [resendSeconds, setResendSeconds] = useState(0)
   const isRecovery = recovery || searchParams.get('mode') === 'recovery'
-  const nextPath = location.state?.from || searchParams.get('next') || '/'
-  const safeNext = typeof nextPath === 'string' && nextPath.startsWith('/') && !nextPath.startsWith('//') ? nextPath : '/'
+  const nextPath = location.state?.from || searchParams.get('next') || '/dashboard'
+  const safeNext = typeof nextPath === 'string' && nextPath.startsWith('/') && !nextPath.startsWith('//') ? nextPath : '/dashboard'
   const set = (e) => setF((current) => ({ ...current, [e.target.name]: e.target.value }))
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function Login() {
         const err = await updatePassword(f.password)
         if (err) return setError(err)
         setNotice('Your password has been updated.')
-        nav('/', { replace: true })
+        nav('/dashboard', { replace: true })
       } finally { setSubmitting(false) }
       return
     }

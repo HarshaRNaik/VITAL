@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import ExerciseAnimation from '../components/ExerciseAnimation'
 import { WORKOUTS } from '../data/workouts'
 import { useGame } from '../context/game-context'
-import { exerciseApi, workouts } from '../services/api'
+import { completedPerformedSets, restoreWorkoutProgress } from '../domain/workout-engine'
+import { exerciseApi, fitnessTrackingApi, workouts } from '../services/api'
 import { today } from '../utils/helpers'
 
 const DEFAULT_PLAN_ID = 'beginner-full-body'
@@ -17,25 +18,31 @@ export default function WorkoutPlayer() {
   const { applyGame, game } = useGame()
   const planId = searchParams.get('plan') || DEFAULT_PLAN_ID
   const matchedPlan = WORKOUTS.find((item) => item.id === planId)
-  const plan = matchedPlan || WORKOUTS.find((item) => item.id === DEFAULT_PLAN_ID)
+  const fallbackPlan = WORKOUTS.find((item) => item.id === DEFAULT_PLAN_ID)
+  const plan = matchedPlan || fallbackPlan
   const courseSessionParam = searchParams.get('courseSession')
   const courseSessionIndex = courseSessionParam === null ? null : Number.parseInt(courseSessionParam, 10)
   const validCourseSession = courseSessionIndex === null
     || (Number.isInteger(courseSessionIndex) && String(courseSessionIndex) === courseSessionParam && Boolean(plan.weeklySchedule?.[courseSessionIndex]))
   const courseSession = validCourseSession && courseSessionIndex !== null ? plan.weeklySchedule?.[courseSessionIndex] : null
-  const courseExercises = courseSession ? plan.exercises.filter((item) => courseSession.movementIds.includes(item.id)) : null
+  const courseExercises = useMemo(
+    () => courseSession ? plan.exercises.filter((item) => courseSession.movementIds.includes(item.id)) : null,
+    [courseSession, plan.exercises],
+  )
   const activeExercises = courseExercises?.length ? courseExercises : plan.exercises
   const sessionTitle = courseSession ? `${plan.name} · ${courseSession.day}` : plan.name
   const sessionDuration = courseSession?.durationMinutes ?? plan.durationMinutes
   const sessionEquipment = courseSession
     ? [...new Set(activeExercises.map((item) => item.equipment).filter((item) => item !== 'Bodyweight only' && item !== 'No-equipment cardio'))]
     : plan.requiredEquipment
+
   const routeSessionParam = searchParams.get('session') || ''
   const routeSession = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(routeSessionParam)
     ? routeSessionParam
     : ''
   const [sessionId, setSessionId] = useState(routeSession === 'new' ? '' : routeSession)
   const [started, setStarted] = useState(Boolean(routeSession && routeSession !== 'new'))
+  const [sessionCheckedId, setSessionCheckedId] = useState('')
   const [finished, setFinished] = useState(false)
   const [index, setIndex] = useState(0)
   const [setNumber, setSetNumber] = useState(1)
@@ -55,6 +62,7 @@ export default function WorkoutPlayer() {
   const restRef = useRef(0)
   const completionStarted = useRef(false)
   const exerciseCatalogPromise = useRef(null)
+  const recoverySaveQueue = useRef(Promise.resolve())
   const badgeIdsBefore = useRef(game.badges)
   const rewardPending = useRef(false)
   const exercise = activeExercises[index]
@@ -82,21 +90,86 @@ export default function WorkoutPlayer() {
 
   useEffect(() => {
     if (!routeSession || routeSession === 'new') return
+    let active = true
     workouts.list()
-      .then((items) => {
+      .then(async (items) => {
         const saved = items.find((item) => item.sessionId === routeSession)
         if (saved) {
-          setStarted(false)
-          setFinished(true)
-          setRecordedDuration(Number(saved.durationSeconds) || (Number(saved.duration) || 1) * 60)
-          setRecordedExerciseCount(Number(saved.exercisesCompleted ?? activeExercises.length))
+          if (active) {
+            setStarted(false)
+            setFinished(true)
+            setRecordedDuration(Number(saved.durationSeconds) || (Number(saved.duration) || 1) * 60)
+            setRecordedExerciseCount(Number(saved.exercisesCompleted ?? activeExercises.length))
+          }
+          return
+        }
+        try {
+          const recovery = await fitnessTrackingApi.workoutSessions.get(routeSession)
+          if (!active || !recovery) return
+          const restored = restoreWorkoutProgress(recovery, { planId: plan.id, exercises: activeExercises })
+          setIndex(restored.index)
+          setSetNumber(restored.setNumber)
+          setStatus(restored.status)
+          setCompletedSets(restored.completedSets)
+          secondsRef.current = restored.secondsLeft
+          restRef.current = restored.restLeft
+          setSecondsLeft(secondsRef.current)
+          setRestLeft(restRef.current)
+          elapsedRef.current = restored.elapsedSeconds
+          setElapsedDisplay(elapsedRef.current)
+          setStarted(true)
+        } catch (recoveryError) {
+          console.error('Failed to restore guided workout progress:', recoveryError)
+          if (active) {
+            setError('Saved progress could not be restored. Your workout history is unchanged; you can start a new session.')
+            setStarted(false)
+          }
         }
       })
       .catch((loadError) => {
         console.error('Failed to load completed workout:', loadError)
-        setError('Could not verify the saved workout status. You can continue, and the server will prevent duplicate records.')
+        if (active) {
+          setError('Could not verify the saved workout status. Your existing workout history is unchanged.')
+          setStarted(false)
+        }
       })
-  }, [routeSession, activeExercises.length])
+      .finally(() => {
+        if (active) setSessionCheckedId(routeSession)
+      })
+    return () => { active = false }
+  }, [routeSession, activeExercises, plan.id])
+  const sessionLoading = Boolean(routeSession && routeSession !== 'new' && sessionCheckedId !== routeSession)
+
+  useEffect(() => {
+    if (!started || !sessionId || finished || sessionLoading) return undefined
+    const timer = window.setTimeout(() => {
+      const stateStatus = status === 'rest' ? 'running'
+        : status === 'restPaused' ? 'paused'
+          : status === 'complete' ? 'completed' : status
+      const checkpoint = {
+        id: sessionId,
+        plan: { id: plan.id, name: sessionTitle },
+        state: {
+          index,
+          setNumber,
+          status,
+          secondsLeft: secondsRef.current,
+          restLeft: restRef.current,
+          completedSets,
+          elapsedSeconds: elapsedRef.current,
+        },
+        status: stateStatus,
+      }
+      recoverySaveQueue.current = recoverySaveQueue.current
+        .catch(() => undefined)
+        .then(() => fitnessTrackingApi.workoutSessions.save(checkpoint))
+        .catch((saveError) => {
+          console.error('Failed to save guided workout recovery progress:', saveError)
+          setError('Workout progress could not be synced. Keep this session open until the connection returns.')
+        })
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [started, sessionId, finished, sessionLoading, status, index, setNumber, completedSets, plan.id, sessionTitle])
 
   useEffect(() => {
     if (!rewardPending.current) return
@@ -137,6 +210,11 @@ export default function WorkoutPlayer() {
   function beginWorkout() {
     const id = sessionId || crypto.randomUUID()
     setSessionId(id)
+    const initialSeconds = activeExercises[0].durationSeconds || 0
+    secondsRef.current = initialSeconds
+    setSecondsLeft(initialSeconds)
+    setIndex(0)
+    setSetNumber(1)
     const params = new URLSearchParams(searchParams)
     params.set('plan', plan.id)
     params.set('session', id)
@@ -187,18 +265,7 @@ export default function WorkoutPlayer() {
       setCatalogWarning(missingExerciseReference
         ? 'Some exercise references are not in the server catalogue; those sets will be saved by name.'
         : '')
-      const performedSets = activeExercises.flatMap((item, itemIndex) => (
-        Array.from({ length: item.sets }, (_, setIndex) => ({
-          exerciseId: exerciseIds.has(item.id) ? item.id : null,
-          exerciseSequence: itemIndex + 1,
-          exerciseName: item.name,
-          setNumber: setIndex + 1,
-          ...(item.tracking === 'reps'
-            ? { reps: item.reps }
-            : { durationSeconds: item.durationSeconds }),
-          restSeconds: item.restSeconds,
-        }))
-      ))
+      const performedSets = completedPerformedSets(activeExercises, nextCompletedSets, exerciseIds)
       const record = {
         type: 'Guided',
         name: sessionTitle,
@@ -216,6 +283,12 @@ export default function WorkoutPlayer() {
         sessionId,
       }
       const saved = await workouts.add(record)
+      try {
+        await recoverySaveQueue.current
+        await fitnessTrackingApi.workoutSessions.remove(sessionId)
+      } catch (cleanupError) {
+        console.error('Failed to remove completed workout recovery state:', cleanupError)
+      }
       if (!saved.duplicate) {
         badgeIdsBefore.current = game.badges
         rewardPending.current = true
@@ -291,6 +364,10 @@ export default function WorkoutPlayer() {
     )
   }
 
+  if (sessionLoading) {
+    return <p className="p-8 text-center text-sm text-gray-400" role="status">Loading your saved workout session…</p>
+  }
+
   if (finished) {
     const duration = recordedDuration ?? elapsedDisplay
     const exerciseCount = recordedExerciseCount ?? completedExerciseCount
@@ -309,7 +386,7 @@ export default function WorkoutPlayer() {
           {newBadges.length > 0 && <p className="mt-5 font-semibold text-xp">🎉 Achievement unlocked: {newBadges.join(', ')}</p>}
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <button className="btn min-h-12" onClick={() => nav('/fitness')}>Back to library</button>
-            <button className="btn-ghost min-h-12" onClick={() => { setFinished(false); setStarted(false); setSessionId(''); setCompletedSets([]); setIndex(0); setSetNumber(1); setError(''); completionStarted.current = false; const params = new URLSearchParams({ plan: plan.id }); if (courseSessionIndex !== null) params.set('courseSession', String(courseSessionIndex)); setSearchParams(params, { replace: true }) }}>Repeat this workout</button>
+            <button className="btn-ghost min-h-12" onClick={() => { setFinished(false); setStarted(false); setSessionId(''); setCompletedSets([]); setIndex(0); setSetNumber(1); setError(''); completionStarted.current = false; const params = new URLSearchParams(searchParams); params.delete('session'); params.set('plan', plan.id); if (courseSessionIndex !== null) params.set('courseSession', String(courseSessionIndex)); setSearchParams(params, { replace: true }) }}>Repeat this workout</button>
           </div>
         </div>
         <div className="card">
@@ -358,7 +435,7 @@ export default function WorkoutPlayer() {
               <p className="mt-1 text-xs text-xp">Easier option: {item.easier}</p>
             </li>)}
           </ol>
-          <p className="mt-5 rounded-xl border border-streak/20 bg-streak/5 p-3 text-xs text-gray-300">Use a controlled pace and suitable load. Stop if you experience pain, dizziness, or other concerning symptoms. For barbell movements, use the listed safety setup and ask a qualified coach if unsure.</p>
+          <p className="mt-5 rounded-xl border border-streak/20 bg-streak/5 p-3 text-xs text-gray-300">Use a controlled pace and suitable load. Stop if you experience pain, dizziness, or other concerning symptoms. For barbell movements, use the listed safety setup and ask a qualified fitness professional if unsure.</p>
           {(!plan.weeklySchedule || courseSession) && <button className="btn mt-5 min-h-12 px-6" onClick={beginWorkout}>Start {courseSession ? courseSession.day : 'workout'} <span aria-hidden="true">→</span></button>}
         </div>
       </section>

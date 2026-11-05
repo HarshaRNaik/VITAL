@@ -44,6 +44,131 @@ describe('Supabase activity API', () => {
       .rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
   })
 
+  it('requires macro targets to be saved as a complete set', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const from = vi.fn()
+    authMocks.requireSupabase.mockReturnValue({ from })
+    const { settingsApi } = await import('./api')
+
+    await expect(settingsApi.update({ proteinTargetGrams: 120 }))
+      .rejects.toMatchObject({ code: 'INVALID_INPUT' })
+    expect(from).not.toHaveBeenCalled()
+  })
+
+  it('requires sign-in for new fitness tracking and resumable session writes', async () => {
+    const { fitnessTrackingApi } = await import('./api')
+    await expect(fitnessTrackingApi.bodyMeasurements.add({ measurementType: 'waist', value: 80, unit: 'cm', measuredOn: '2026-10-25' }))
+      .rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
+    await expect(fitnessTrackingApi.activitySessions.add({
+      activityType: 'walking', source: 'manual', startedAt: '2026-10-25T10:00:00Z',
+      endedAt: '2026-10-25T10:30:00Z', durationSeconds: 1800, date: '2026-10-25',
+    })).rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
+    await expect(fitnessTrackingApi.hydrationLogs.add({ amountMl: 300, date: '2026-10-25' }))
+      .rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
+    await expect(fitnessTrackingApi.habits.create({ name: 'Walk', category: 'walking' }))
+      .rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
+    await expect(fitnessTrackingApi.fasting.start({ scheduleHours: 16 }))
+      .rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
+    await expect(fitnessTrackingApi.workoutSessions.save({
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      plan: { id: 'plan' }, state: { status: 'ready' }, status: 'ready',
+    })).rejects.toMatchObject({ code: 'AUTH_REQUIRED' })
+  })
+
+  it('validates activity timing before database writes', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const from = vi.fn()
+    authMocks.requireSupabase.mockReturnValue({ from })
+    const { fitnessTrackingApi } = await import('./api')
+
+    await expect(fitnessTrackingApi.activitySessions.add({
+      activityType: 'walking',
+      source: 'manual',
+      startedAt: '2026-10-25T10:30:00Z',
+      endedAt: '2026-10-25T10:00:00Z',
+      durationSeconds: 1800,
+      date: '2026-10-25',
+    })).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+    expect(from).not.toHaveBeenCalled()
+  })
+
+  it('rejects unverified device sources and pace values outside database bounds', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const from = vi.fn()
+    authMocks.requireSupabase.mockReturnValue({ from })
+    const { fitnessTrackingApi } = await import('./api')
+
+    await expect(fitnessTrackingApi.activitySessions.add({
+      activityType: 'walking',
+      source: 'device',
+      startedAt: '2026-10-25T10:00:00Z',
+      endedAt: '2026-10-25T10:01:00Z',
+      durationSeconds: 60,
+      distanceKm: 1,
+      date: '2026-10-25',
+    })).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+    await expect(fitnessTrackingApi.activitySessions.add({
+      activityType: 'walking',
+      source: 'manual',
+      startedAt: '2026-10-25T10:00:00Z',
+      endedAt: '2026-11-01T10:00:00Z',
+      durationSeconds: 604800,
+      distanceKm: 0.01,
+      date: '2026-10-25',
+    })).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+    expect(from).not.toHaveBeenCalled()
+  })
+
+  it('derives activity pace and speed before persisting a validated session', async () => {
+    const user = { id: 'user-a' }
+    const query = { insert: vi.fn(), select: vi.fn(), single: vi.fn() }
+    query.insert.mockReturnValue(query)
+    query.select.mockReturnValue(query)
+    query.single.mockResolvedValue({
+      data: { id: 'activity-a', user_id: user.id, distance_km: 5, duration_seconds: 1500, recorded_on: '2026-10-25' },
+      error: null,
+    })
+    authMocks.requireSignedInUser.mockResolvedValue(user)
+    const from = vi.fn(() => query)
+    authMocks.requireSupabase.mockReturnValue({ from })
+    const { fitnessTrackingApi } = await import('./api')
+
+    await expect(fitnessTrackingApi.activitySessions.add({
+      activityType: 'running',
+      source: 'manual',
+      startedAt: '2026-10-25T10:00:00Z',
+      endedAt: '2026-10-25T10:25:00Z',
+      durationSeconds: 1500,
+      distanceKm: 5,
+      date: '2026-10-25',
+      requestId: 'activity-request-123',
+    })).resolves.toMatchObject({ item: { id: 'activity-a', date: '2026-10-25' }, duplicate: false })
+    expect(query.insert).toHaveBeenCalledWith(expect.objectContaining({
+      user_id: user.id,
+      activity_type: 'running',
+      pace_seconds_per_km: 300,
+      speed_kph: 12,
+      client_request_id: 'activity-request-123',
+    }))
+  })
+
+  it('persists challenge status transitions through the owner-checked RPC', async () => {
+    authMocks.requireSignedInUser.mockResolvedValue({ id: 'user-a' })
+    const rpc = vi.fn().mockResolvedValue({
+      data: { id: 'challenge-a', user_id: 'user-a', status: 'paused', status_history: [{ from: 'active', to: 'paused' }] },
+      error: null,
+    })
+    authMocks.requireSupabase.mockReturnValue({ rpc })
+    const { fitnessTrackingApi } = await import('./api')
+
+    await expect(fitnessTrackingApi.challenges.setStatus('challenge-a', 'paused'))
+      .resolves.toMatchObject({ id: 'challenge-a', status: 'paused', statusHistory: [{ from: 'active', to: 'paused' }] })
+    expect(rpc).toHaveBeenCalledWith('set_fitness_challenge_status', {
+      p_challenge_id: 'challenge-a',
+      p_status: 'paused',
+    })
+  })
+
   it('persists completed workouts and their exercise sets through the database transaction', async () => {
     const user = { id: 'user-a' }
     const result = {
@@ -402,22 +527,6 @@ describe('Supabase activity API', () => {
       .rejects.toMatchObject({ code: 'INVALID_INPUT' })
   })
 
-  it('persists assistant conversations through the rate-limited RPC', async () => {
-    authMocks.getSignedInUser.mockResolvedValue({ id: 'user-a' })
-    const rpc = vi.fn().mockResolvedValue({
-      data: { id: 'conversation-a', title: 'New conversation' },
-      error: null,
-    })
-    authMocks.requireSupabase.mockReturnValue({ rpc })
-    const { assistantApi } = await import('./api')
-
-    await expect(assistantApi.createConversation()).resolves.toMatchObject({ id: 'conversation-a' })
-    expect(rpc).toHaveBeenCalledWith('create_assistant_conversation')
-
-    rpc.mockResolvedValueOnce({ data: { rateLimited: true }, error: null })
-    await expect(assistantApi.createConversation()).rejects.toMatchObject({ code: 'RATE_LIMITED' })
-  })
-
   it('fails closed when Supabase session retrieval fails', async () => {
     authMocks.getSignedInUser.mockRejectedValue(new Error('Session refresh failed'))
     authMocks.requireSignedInUser.mockImplementation(async () => {
@@ -444,4 +553,6 @@ describe('Supabase activity API', () => {
     ]))
     expect(authMocks.getSignedInUser).not.toHaveBeenCalled()
   })
+
+
 })

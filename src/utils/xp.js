@@ -4,7 +4,6 @@ export const REWARDS = {
   workout: 25,
   exercise: 10,
   weight: 15,
-  chat: 5,
 }
 
 // XP needed to go from level n to n+1

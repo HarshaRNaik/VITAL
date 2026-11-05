@@ -6,7 +6,6 @@ export const REWARDS = {
   workout: 25,
   exercise: 10,
   weight: 15,
-  chat: 5,
 } as const;
 
 const BADGES = [
@@ -15,7 +14,6 @@ const BADGES = [
   { id: "first-workout", test: (counts: Record<string, number>, _streak: number) => (counts.workout ?? 0) >= 1 },
   { id: "ten-meals", test: (counts: Record<string, number>, _streak: number) => (counts.meal ?? 0) >= 10 },
   { id: "ten-workouts", test: (counts: Record<string, number>, _streak: number) => (counts.workout ?? 0) >= 10 },
-  { id: "chatty", test: (counts: Record<string, number>, _streak: number) => (counts.chat ?? 0) >= 1 },
   { id: "streak3", test: (_counts: Record<string, number>, streak: number) => streak >= 3 },
   { id: "streak7", test: (_counts: Record<string, number>, streak: number) => streak >= 7 },
 ];
@@ -51,18 +49,12 @@ export async function readGameState(tx: Prisma.TransactionClient, userId: string
     }),
     tx.userSettings.findUnique({ where: { userId }, select: { timeZone: true } }),
   ]);
-  const activityDate = dateKeyInTimeZone(new Date(), settings?.timeZone || "UTC");
-  const chatReward = await tx.gameReward.findUnique({
-    where: { userId_idempotencyKey: { userId, idempotencyKey: `chat:${activityDate}` } },
-    select: { id: true },
-  });
   return {
     totalXP: state.totalXP,
     streak: state.streak,
     lastActive: state.lastActive ? toDateKey(state.lastActive) : null,
     counts: jsonCounts(state.counts),
     badges: state.badges,
-    chatToday: Boolean(chatReward),
   };
 }
 

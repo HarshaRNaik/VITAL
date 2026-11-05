@@ -9,7 +9,7 @@ describe('achievement relic records', () => {
     const ids = BADGES.map((badge) => badge.id)
     expect(ids).toEqual([
       'welcome', 'first-meal', 'first-workout', 'ten-meals', 'ten-workouts',
-      'chatty', 'streak3', 'streak7', 'lvl5',
+      'streak3', 'streak7', 'lvl5',
     ])
     expect(new Set(ids).size).toBe(ids.length)
   })

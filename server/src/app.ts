@@ -10,7 +10,6 @@ import { csrfProtection } from "./middleware/csrf.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { HttpError } from "./middleware/http-error.js";
 import { activityRouter } from "./routes/activity.js";
-import { assistantRouter } from "./routes/assistant.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 
@@ -82,6 +81,5 @@ app.use("/api/auth/login", authLimiter);
 app.use("/api/auth", authRouter);
 app.use("/api", usersRouter);
 app.use("/api", activityRouter);
-app.use("/api", assistantRouter);
 app.use("/api", (_req, _res, next) => next(new HttpError(404, "NOT_FOUND", "The requested API resource was not found.")));
 app.use(errorHandler);

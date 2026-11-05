@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import Field from '../components/Field'
-import { meals } from '../services/api'
+import { meals, settingsApi } from '../services/api'
+import { useAuth } from '../context/auth-context'
 import { useGame } from '../context/game-context'
 import { DAILY_CALORIE_TARGET, MEAL_TYPES } from '../data/constants'
 import { today } from '../utils/helpers'
+import { Link } from 'react-router-dom'
+import { coachApi } from '../services/coach'
 
 const empty = () => ({
   name: '',
@@ -13,6 +16,7 @@ const empty = () => ({
   carbs: '',
   fat: '',
   date: today(),
+  nutritionEstimated: false,
 })
 
 function validate(f) {
@@ -35,6 +39,7 @@ function validate(f) {
 }
 
 export default function Diet() {
+  const { user } = useAuth()
   const { applyGame } = useGame()
   const mealRequestId = useRef(null)
 
@@ -44,6 +49,14 @@ export default function Diet() {
   const [errors, setErrors] = useState({})
   const [feedback, setFeedback] = useState('')
   const [saving, setSaving] = useState(false)
+  const [targets, setTargets] = useState({
+    calories: DAILY_CALORIE_TARGET,
+    protein: null,
+    carbs: null,
+    fat: null,
+  })
+  const [targetsUserId, setTargetsUserId] = useState(null)
+  const [plans, setPlans] = useState([])
 
   const set = (e) => {
     mealRequestId.current = null
@@ -68,6 +81,40 @@ export default function Diet() {
         setFeedback('Could not load meal history. Please refresh to try again.')
       })
   }, [])
+
+  useEffect(() => {
+    if (!user) return undefined
+    let active = true
+    settingsApi.get()
+      .then(({ settings }) => {
+        if (active) {
+          setTargetsUserId(user.id)
+          setTargets({
+            calories: settings.dailyCalorieTarget || DAILY_CALORIE_TARGET,
+            protein: settings.proteinTargetGrams,
+            carbs: settings.carbsTargetGrams,
+            fat: settings.fatTargetGrams,
+          })
+        }
+      })
+      .catch((error) => console.error('Failed to load nutrition targets:', error))
+    return () => { active = false }
+  }, [user])
+
+  useEffect(() => {
+    if (!user) { setPlans([]); return undefined }
+    let active = true
+    coachApi.nutritionPlans.list().then((items) => { if (active) setPlans(items) }).catch((error) => {
+      console.error('Failed to load saved nutrition plans:', error)
+      if (active) setFeedback('Saved nutrition plans could not be loaded. Apply the coach plan database migration, then refresh.')
+    })
+    return () => { active = false }
+  }, [user])
+
+  async function removePlan(id) {
+    try { await coachApi.nutritionPlans.remove(id); setPlans((items) => items.filter((plan) => plan.id !== id)) }
+    catch (error) { setFeedback(error.message || 'Could not remove this plan.') }
+  }
 
   async function submit(e) {
     e.preventDefault()
@@ -151,24 +198,31 @@ export default function Diet() {
       total + Number(meal.fat || 0),
     0
   )
+  const activeTargets = user && targetsUserId === user.id
+    ? targets
+    : { calories: DAILY_CALORIE_TARGET, protein: null, carbs: null, fat: null }
 
   function mealIcon(type) {
     switch (type) {
       case 'Breakfast':
-        return '🌅'
+        return 'ðŸŒ…'
       case 'Lunch':
-        return '☀️'
+        return 'â˜€ï¸'
       case 'Dinner':
-        return '🌙'
+        return 'ðŸŒ™'
       case 'Snack':
-        return '🍎'
+        return 'ðŸŽ'
       default:
-        return '🍽️'
+        return 'ðŸ½ï¸'
     }
   }
 
   return (
     <div className="page-enter space-y-5 pb-6">
+
+      {user && <section className="card"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-xp">SAVED PLANS</p><h2 className="mt-2 text-xl font-bold">AI nutrition plans</h2></div><Link to="/coach" className="btn min-h-10">Ask AI Coach</Link></div>
+        {plans.length ? <ul className="mt-4 grid gap-3 sm:grid-cols-2">{plans.map((plan) => { const daily = plan.days?.[0] || {}; return <li key={plan.id} className="rounded-xl border border-white/10 p-4"><h3 className="font-semibold">{plan.title}</h3><p className="mt-1 text-xs text-gray-400">{plan.dietary_notes} · {daily.calories || '—'} kcal/day</p><p className="mt-2 text-xs text-gray-300">Protein {daily.macros?.protein ?? '—'}g · Carbs {daily.macros?.carbohydrates ?? '—'}g · Fat {daily.macros?.fats ?? '—'}g</p><div className="mt-3 space-y-2">{(daily.meals || []).map((meal, index) => <div key={`${meal.name}-${index}`}><p className="text-sm font-medium">{meal.name}</p><p className="text-xs text-gray-400">{meal.foods?.map((food) => `${food.item} (${food.quantity})`).join(' · ')}</p></div>)}</div><div className="mt-3 flex justify-between"><Link to="/coach" className="text-xs text-cyan-100 underline">Modify with Coach</Link><button className="text-xs text-red-300" onClick={() => removePlan(plan.id)}>Delete</button></div></li> })}</ul> : <p className="mt-3 text-sm text-gray-400">No saved AI plans yet.</p>}
+      </section>}
 
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-xp/20 via-white/5 to-transparent p-5">
@@ -178,7 +232,7 @@ export default function Diet() {
           </p>
 
           <h1 className="mt-2 text-2xl md:text-3xl font-bold">
-            Fuel your body. 🥗
+            Fuel your body. ðŸ¥—
           </h1>
 
           <p className="mt-1 max-w-xl text-sm text-gray-400">
@@ -208,13 +262,13 @@ export default function Diet() {
               </p>
             </div>
 
-            <span className="text-xl">🔥</span>
+            <span className="text-xl">ðŸ”¥</span>
           </div>
 
-          <div className="progress-track mt-3" role="progressbar" aria-label="Daily calorie target" aria-valuemin="0" aria-valuemax={DAILY_CALORIE_TARGET} aria-valuenow={totalCalories}>
-            <div className="progress-fill" style={{ width: `${Math.min((totalCalories / DAILY_CALORIE_TARGET) * 100, 100)}%` }} />
+          <div className="progress-track mt-3" role="progressbar" aria-label="Daily calorie target" aria-valuemin="0" aria-valuemax={activeTargets.calories} aria-valuenow={totalCalories}>
+            <div className="progress-fill" style={{ width: `${Math.min((totalCalories / activeTargets.calories) * 100, 100)}%` }} />
           </div>
-          <p className="mt-2 text-[11px] text-gray-500">{totalCalories.toLocaleString()} / {DAILY_CALORIE_TARGET.toLocaleString()} kcal today</p>
+          <p className="mt-2 text-[11px] text-gray-500">{totalCalories.toLocaleString()} / {activeTargets.calories.toLocaleString()} kcal today</p>
         </div>
 
         <div className="card">
@@ -232,10 +286,10 @@ export default function Diet() {
               </p>
             </div>
 
-            <span className="text-xl">🥩</span>
+            <span className="text-xl">ðŸ¥©</span>
           </div>
 
-          <p className="mt-2 text-[11px] text-gray-500">Today</p>
+          <p className="mt-2 text-[11px] text-gray-500">{activeTargets.protein === null ? 'Today' : `${totalProtein} / ${activeTargets.protein} g target`}</p>
         </div>
 
         <div className="card">
@@ -253,10 +307,10 @@ export default function Diet() {
               </p>
             </div>
 
-            <span className="text-xl">🍚</span>
+            <span className="text-xl">ðŸš</span>
           </div>
 
-          <p className="mt-2 text-[11px] text-gray-500">Today</p>
+          <p className="mt-2 text-[11px] text-gray-500">{activeTargets.carbs === null ? 'Today' : `${totalCarbs} / ${activeTargets.carbs} g target`}</p>
         </div>
 
         <div className="card">
@@ -274,10 +328,10 @@ export default function Diet() {
               </p>
             </div>
 
-            <span className="text-xl">🥑</span>
+            <span className="text-xl">ðŸ¥‘</span>
           </div>
 
-          <p className="mt-2 text-[11px] text-gray-500">Today</p>
+          <p className="mt-2 text-[11px] text-gray-500">{activeTargets.fat === null ? 'Today' : `${totalFat} / ${activeTargets.fat} g target`}</p>
         </div>
       </div>
 
@@ -293,11 +347,11 @@ export default function Diet() {
                 {editId ? 'EDIT MEAL' : 'LOG FUEL'}
               </h2>
 
-              <p className="mt-1 text-xs text-gray-500">{editId ? 'Update your meal information' : 'Record what you have eaten · daily totals update from today’s entries'}</p>
+              <p className="mt-1 text-xs text-gray-500">{editId ? 'Update your meal information' : 'Record what you have eaten Â· daily totals update from todayâ€™s entries'}</p>
             </div>
 
             <span className="text-xl">
-              {editId ? '✏️' : '🥗'}
+              {editId ? 'âœï¸' : 'ðŸ¥—'}
             </span>
           </div>
 
@@ -364,10 +418,11 @@ export default function Diet() {
             error={errors.date}
           />
 
+          {form.nutritionEstimated && <p className="mb-3 rounded-lg border border-xp/15 bg-xp/5 p-3 text-xs text-gray-300">These nutrition values are estimates. Review them before logging.</p>}
           {feedback && <p role="status" className={`mb-3 text-sm ${feedback.startsWith('Could not') ? 'text-red-300' : 'text-good'}`}>{feedback}</p>}
           <div className="flex gap-2 pt-1">
             <button className="btn min-h-11 flex-1" disabled={saving}>
-              {saving ? 'Saving…' : editId ? 'Save changes' : 'Add meal (+10 XP)'}
+              {saving ? 'Savingâ€¦' : editId ? 'Save changes' : 'Add meal (+10 XP)'}
             </button>
 
             {editId && (
@@ -396,15 +451,15 @@ export default function Diet() {
                 MEAL HISTORY
               </h2>
 
-              <p className="mt-1 text-xs text-gray-500">Your recorded meals · daily nutrition totals above show today only</p>
+              <p className="mt-1 text-xs text-gray-500">Your recorded meals Â· daily nutrition totals above show today only</p>
             </div>
 
-            <span className="text-xl">📋</span>
+            <span className="text-xl">ðŸ“‹</span>
           </div>
 
           {list.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
-              <div className="text-4xl">🥗</div>
+              <div className="text-4xl">ðŸ¥—</div>
 
               <p className="mt-3 font-semibold">
                 No meals yet
@@ -434,12 +489,12 @@ export default function Diet() {
                       </p>
 
                       <p className="mt-0.5 text-xs text-gray-500">
-                        {m.type} · {m.date}
+                        {m.type} Â· {m.date}
                       </p>
 
                       <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-gray-400">
                         <span>
-                          🔥 {m.calories} kcal
+                          ðŸ”¥ {m.calories} kcal{m.nutritionEstimated ? ' Â· estimate' : ''}
                         </span>
 
                         <span>

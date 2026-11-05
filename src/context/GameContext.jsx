@@ -5,7 +5,7 @@ import { gameApi } from '../services/api'
 import { REWARDS, getLevelInfo } from '../utils/xp'
 import { BADGES } from '../data/badges'
 
-const initial = { totalXP: 0, streak: 0, lastActive: null, counts: {}, badges: [], chatToday: false }
+const initial = { totalXP: 0, streak: 0, lastActive: null, counts: {}, badges: [] }
 
 export function GameProvider({ children }) {
   const { user, status: authStatus } = useAuth()
@@ -74,7 +74,6 @@ export function GameProvider({ children }) {
         workout: 'Workout completed',
         exercise: 'Exercise logged',
         weight: 'Progress updated',
-        chat: 'Coach session complete',
         register: 'Player profile created',
       }[rewardType] || 'Progress saved'
       setToast({

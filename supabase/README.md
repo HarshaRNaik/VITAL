@@ -8,10 +8,25 @@
    `migrations/20261026000000_atomic_writes_and_validation.sql`, then
    `migrations/20261027000000_chat_security_and_rate_limits.sql`, then
    `migrations/20261028000000_level_five_relic.sql`, then
-   `migrations/20261031000000_gym_workouts.sql`.
-   With the CLI, link the project and run `supabase db push`. Alternatively,
-   apply all four files in order in the Supabase SQL editor. Review the SQL
-   before applying it to any shared database.
+   `migrations/20261031000000_gym_workouts.sql`, then
+   `migrations/20261104000000_coach_generated_plans.sql`, then
+   `migrations/20261105000000_fitness_tracking_engines.sql`.
+   For a new project, open each of the seven listed files and execute its
+   complete SQL contents in the Supabase SQL editor, in exactly that order.
+   Do not run `supabase db push` against this historical migration directory
+   without first reconciling its migration history; it may apply the excluded
+   legacy files as well. The fitness tracking
+   migration is additive and adds tracking tables and target columns to
+   `user_settings`. Review it against the target
+   project's schema and take a verified backup before applying it. Do not apply
+   it directly to production without the normal review and release process.
+   The timestamped chat migration remains a historical record; do not apply it
+   when setting up a new project. The generated-plan migration is required for
+   AI Coach saves and adds owner-scoped tables with RLS. The original persistence
+   migration also contains legacy conversation objects and functions. Existing deployments may
+   already have their objects and data. If you choose to remove those legacy
+   objects and data, review `optional-cleanup/remove_ai_coach.sql` manually
+   after taking a verified backup. The optional cleanup has not been run.
 3. In the project's Auth URL settings, add the app URL (for local development,
    `http://localhost:5173`) and its redirect URL.
 4. Copy `.env.example` to `.env` and set:
@@ -42,26 +57,19 @@ enabled, registration asks the user to confirm their address before signing in.
 - Workout creation and exercise-set writes, workout edits, and custom workout
   plan writes run as single database transactions. Activity forms reuse request
   IDs when retrying a failed submission, preventing duplicate records.
-- Assistant conversation and message writes use authenticated RPCs instead of
-  direct table writes. The database applies per-user per-minute limits to
-  conversation creation and message submissions, and workout reward keys must
-  match the canonical workout session key.
+- Workout reward keys must match the canonical workout session key.
 - Supabase Auth endpoints have provider-side rate limits. Configure and review
   sign-in, sign-up, email/SMS delivery, and token verification limits under
-  Authentication → Rate Limits in the deployed project. The Express server's
+  Authentication â†’ Rate Limits in the deployed project. The Express server's
   rate limiter protects only that legacy API; the browser app calls Supabase
   directly.
-- The legacy Express API's rate limiter uses its default in-process store. The
-  separate Coach API also uses in-process request limits. Keep either service
-  to one instance or configure a shared rate-limit store before scaling out.
-- The Coach uses the official Gemini SDK only in the server-side Vercel Function.
-  It verifies the caller's Supabase access token, then reads a bounded amount
-  of that user's recent activity with the same token so Supabase RLS remains
-  in force. The question and that activity summary are sent to the configured
-  Gemini model. Set `GEMINI_API_KEY` only in Vercel's server-side environment;
-  never use a `VITE_` name for it or expose it in browser code. Production calls
-  the same-origin `/api/coach/reply` Function. Local development can use
-  `VITE_API_BASE_URL=http://localhost:4000` with the Express Coach process.
+- The legacy Express API's rate limiter uses its default in-process store.
+  Keep that service to one instance or configure a shared rate-limit store
+  before scaling out.
+- The application uses Supabase Auth and Postgres with the signed-in user's
+  token. The Vercel `/api/coach/generate` function verifies that token, reads
+  only that user's profile and saved plans through RLS, and keeps
+  `GEMINI_API_KEY` on the server.
 - New Supabase identities receive profile, settings, and initial game-state
   rows from an `auth.users` trigger.
 - Existing Express/Prisma tables are not dropped or modified by this
@@ -72,7 +80,7 @@ enabled, registration asks the user to confirm their address before signing in.
 
 The SQL tests create two temporary auth users, verify owner reads across all
 private record types, verify the second user cannot read the first user's
-records, and verify a cross-user workout update cannot change the owner’s row.
+records, and verify a cross-user workout update cannot change the ownerâ€™s row.
 Run against a local Supabase stack:
 
 ```powershell
@@ -81,9 +89,9 @@ supabase test db
 ```
 
 The SQL suite checks owner reads, cross-user row isolation, RLS activation on
-each private public table, denied direct writes to assistant history, and
+each private public table, and
 canonical workout reward keys. It also verifies that crossing the existing
-1,500 XP level-five threshold persists the corresponding relic. Run it after
+  1,500 XP level-five threshold persists the corresponding relic. Run it after
 every migration against a local Supabase stack and in the deployment pipeline
 before promotion.
 
@@ -93,6 +101,10 @@ before promotion.
   the project's publishable/anon key in the frontend hosting environment.
   Never set a service-role key, database password, or AI provider key as a
   `VITE_` variable.
+- For Vercel, configure `GEMINI_API_KEY`, `SUPABASE_URL`, and
+  `SUPABASE_ANON_KEY` as server-side variables. The Supabase server values use
+  the same project URL and publishable/anon key as the `VITE_` variables.
+  `GEMINI_MODEL` is optional and defaults to `gemini-3.8-flash`.
 - Keep the legacy Express `DATABASE_URL` only in the server's secret manager.
   Restrict database network access, use TLS, rotate credentials, and do not
   print connection strings or auth tokens in application logs.
@@ -132,3 +144,12 @@ before promotion.
 The browser can be built and unit-tested without project credentials, but live
 authentication, persistence, and two-user isolation require a configured
 Supabase project or local Supabase stack.
+
+## Fitness tracking migration
+
+The `20261105000000_fitness_tracking_engines.sql` migration adds owner-scoped
+activity, measurement, hydration, habit, fasting, challenge, and workout
+  recovery tables, plus calorie and macro target columns. It does not configure
+  native device-health access, background reminders, or offline synchronization.
+After applying it to a disposable local Supabase stack, run
+`supabase test db` and the app test suite before promoting the migration.

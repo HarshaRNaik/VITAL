@@ -88,16 +88,6 @@ export type WorkoutPlan = Prisma.WorkoutPlanModel
  */
 export type WorkoutPlanExercise = Prisma.WorkoutPlanExerciseModel
 /**
- * Model AssistantConversation
- * 
- */
-export type AssistantConversation = Prisma.AssistantConversationModel
-/**
- * Model AssistantMessage
- * 
- */
-export type AssistantMessage = Prisma.AssistantMessageModel
-/**
  * Model SecurityAuditEvent
  * 
  */

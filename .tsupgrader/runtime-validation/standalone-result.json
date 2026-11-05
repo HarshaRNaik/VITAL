@@ -1,0 +1,151 @@
+{
+  "planHash": "a6c90286973002ecb5f3b177d470d7da194bb815bdf814cdb09c9985606d55ac",
+  "phase": "standalone",
+  "recordedAtUtc": "2026-11-04T11:51:28.2790879Z",
+  "retryCount": 1,
+  "resetBaseline": false,
+  "complete": true,
+  "result": {
+    "setupSucceeded": true,
+    "setupDurationMs": 0,
+    "setupFailureOutput": null,
+    "assertions": [
+      {
+        "name": "tests-pass",
+        "kind": "process",
+        "verificationMethod": "test-results",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "npm notice run vital-fitness-app@0.0.0 test\r\nnpm notice run vitest run\r\n\r\n RUN  v5.0.5 C:/projects/VITAL-FITNESS_APP\r\n\r\n\r\n Test Files  16 passed (16)\r\n      Tests  125 passed (125)\r\n   Start at  17:21:05\r\n   Duration  1.99s (import 54%, tests 29%, transform 14%, worker 3%)\r\n\r\n",
+        "durationMs": 3345,
+        "testResults": {
+          "testFramework": "vitest",
+          "runnerDetectedFrom": "package_json",
+          "testsTotal": 125,
+          "testsPassed": 125,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "parseFailed": false
+        }
+      },
+      {
+        "name": "project-lint",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "npm notice run vital-fitness-app@0.0.0 lint\r\nnpm notice run eslint .\r\n",
+        "durationMs": 7842
+      },
+      {
+        "name": "server-typecheck",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "npm notice run vital-fitness-app@0.0.0 typecheck:server\r\nnpm notice run tsc -p server/tsconfig.json --noEmit\r\n",
+        "durationMs": 1503
+      },
+      {
+        "name": "production-build",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "npm notice run vital-fitness-app@0.0.0 build\r\nnpm notice run npm run build:server \u0026\u0026 vite build\r\nnpm notice run vital-fitness-app@0.0.0 build:server\r\nnpm notice run npm run db:generate \u0026\u0026 tsc -p server/tsconfig.json\r\nnpm notice run vital-fitness-app@0.0.0 db:generate\r\nnpm notice run prisma generate --config server/prisma.config.ts\r\nLoaded Prisma config from server\\prisma.config.ts.\r\n\r\nPrisma schema loaded from server\\prisma\\schema.prisma.\r\n\r\n\u2714 Generated Prisma Client (7.10.1) to .\\server\\src\\generated\\prisma in 245ms\r\n\r\n\u001B[36mvite v8.3.3 \u001B[32mbuilding client environment for production...\u001B[36m\u001B[39m\r\ntransforming...\r\n\u2713 1190 modules transformed.\r\nrendering chunks...\r\ncomputing gzip size...\r\ndist/index.html                              1.31 kB \u2502 gzip:   0.58 kB\r\ndist/assets/index-fY2Rcdl8.css              90.79 kB \u2502 gzip:  16.75 kB\r\ndist/assets/constants-CqiJju3q.js            0.18 kB \u2502 gzip:   0.16 kB\r\ndist/assets/helpers-UB8TNs4n.js              0.26 kB \u2502 gzip:   0.19 kB\r\ndist/assets/Field-28nmwk9C.js                0.87 kB \u2502 gzip:   0.40 kB\r\ndist/assets/GoogleMark-C1i9GSsN.js           1.81 kB \u2502 gzip:   0.84 kB\r\ndist/assets/ExerciseAnimation-E-Riqyz_.js    3.30 kB \u2502 gzip:   1.16 kB\r\ndist/assets/Workout-CM0r3Whz.js              7.22 kB \u2502 gzip:   1.80 kB\r\ndist/assets/Register-CkAtPZrX.js             7.80 kB \u2502 gzip:   2.59 kB\r\ndist/assets/Login-DdXplZ45.js               11.14 kB \u2502 gzip:   3.21 kB\r\ndist/assets/Achievements-CktRpbA_.js        11.15 kB \u2502 gzip:   2.95 kB\r\ndist/assets/Assistant-BCP0s2zY.js           13.35 kB \u2502 gzip:   3.76 kB\r\ndist/assets/Profile-Dl267IAz.js             14.76 kB \u2502 gzip:   3.67 kB\r\ndist/assets/Diet-DhLwYxoL.js                20.68 kB \u2502 gzip:   4.76 kB\r\ndist/assets/Hub-Dbczq__T.js                 22.91 kB \u2502 gzip:   5.05 kB\r\ndist/assets/jsx-dev-runtime-CTd9gy9j.js     28.25 kB \u2502 gzip:   9.19 kB\r\ndist/assets/WorkoutPlayer-3oopbbiA.js       35.62 kB \u2502 gzip:   8.76 kB\r\ndist/assets/workouts-CXni1taM.js            37.97 kB \u2502 gzip:  10.63 kB\r\ndist/assets/LandingPage-Cs6idcso.js         38.66 kB \u2502 gzip:   7.14 kB\r\ndist/assets/GymWorkout-amhG54NL.js          41.69 kB \u2502 gzip:   9.38 kB\r\ndist/assets/Fitness-Bt6DkdaJ.js             44.25 kB \u2502 gzip:   9.13 kB\r\ndist/assets/exercise-catalog-Q4uNu8XE.js   158.42 kB \u2502 gzip:  16.27 kB\r\ndist/assets/Analytics-CMn-Dszx.js          437.96 kB \u2502 gzip: 123.32 kB\r\ndist/assets/index-DJxyln3M.js              957.57 kB \u2502 gzip: 280.97 kB\r\n\r\n\u001B[33m[plugin builtin:vite-reporter] \r\n(!) Some chunks are larger than 500 kB after minification. Consider:\r\n- Using dynamic import() to code-split the application\r\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\r\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\u001B[39m\r\n\u001B[32m\u2713 built in 1.67s\u001B[39m\r\n",
+        "durationMs": 7707
+      },
+      {
+        "name": "register-route-serves",
+        "kind": "http-probe",
+        "verificationMethod": "http-status",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": null,
+        "outputSample": "HTTP 200\n\u003C!doctype html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n  \u003Chead\u003E\n    \u003Cscript type=\u0022module\u0022\u003Eimport { injectIntoGlobalHook } from \u0022/@react-refresh\u0022;\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () =\u003E {};\nwindow.$RefreshSig$ = () =\u003E (type) =\u003E type;\u003C/script\u003E\n\n    \u003Cscript type=\u0022module\u0022 src=\u0022/@vite/client\u0022\u003E\u003C/script\u003E\n\n    \u003Cmeta charset=\u0022UTF-8\u0022 /\u003E\n    \u003Clink rel=\u0022icon\u0022 type=\u0022image/svg\u002Bxml\u0022 href=\u0022/favicon.svg\u0022 /\u003E\n    \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022 /\u003E\n    \u003Cmeta name=\u0022description\u0022 content=\u0022Plan workouts, record nutrition, and follow your progress in one private fitness workspace.\u0022 /\u003E\n    \u003Cmeta name=\u0022theme-color\u0022 content=\u0022#050912\u0022 /\u003E\n    \u003Cmeta property=\u0022og:type\u0022 content=\u0022website\u0022 /\u003E\n    \u003Cmeta property=\u0022og:title\u0022 content=\u0022VITAL Fitness \u2014 Your private fitness workspace\u0022 /\u003E\n    \u003Cmeta property=\u0022og:description\u0022 content=\u0022Plan workouts, record nutrition, and follow your progress in one private fitness workspace.\u0022 /\u003E\n    \u003Cscript\u003E\n      try {\n        const theme = localStorage.getItem(\u0027vital-theme\u0027) === \u0027light\u0027 ? \u0027light\u0027 : \u0027dark\u0027\n        document.documentElement.dataset.theme = theme\n        document.documentElement.style.colorScheme = theme\n      } catch {}\n    \u003C/script\u003E\n    \u003Ctitle\u003EVITAL Fitness \u2014 Your private fitness workspace\u003C/title\u003E\n  \u003C/head\u003E\n  \u003Cbody\u003E\n    \u003Cdiv id=\u0022root\u0022\u003E\u003C/div\u003E\n    \u003Cscript type=\u0022module\u0022 src=\u0022/src/main.jsx\u0022\u003E\u003C/script\u003E\n  \u003C/body\u003E\n\u003C/html\u003E\n\n--- server output ---\nnpm notice run vital-fitness-app@0.0.0 dev\r\nnpm notice run vite --host 127.0.0.1 --port 5179 --strictPort\r\n\r\n  \u001B[32m\u001B[1mVITE\u001B[22m v8.3.3\u001B[39m  \u001B[2mready in \u001B[0m\u001B[1m488\u001B[22m\u001B[2m\u001B[0m ms\u001B[22m\r\n\r\n  \u001B[32m\u279C\u001B[39m  \u001B[1mLocal\u001B[22m:   \u001B[36mhttp://127.0.0.1:\u001B[1m5179\u001B[22m/\u001B[39m\r\n",
+        "durationMs": 3346
+      }
+    ],
+    "executions": [
+      {
+        "source": "tests-pass",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "test"
+        ],
+        "cwd": "C:\\projects\\VITAL-FITNESS_APP",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "project-lint",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "lint"
+        ],
+        "cwd": "C:\\projects\\VITAL-FITNESS_APP",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "server-typecheck",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "typecheck:server"
+        ],
+        "cwd": "C:\\projects\\VITAL-FITNESS_APP",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "production-build",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "build"
+        ],
+        "cwd": "C:\\projects\\VITAL-FITNESS_APP",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "register-route-serves",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "dev",
+          "--",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "5179",
+          "--strictPort"
+        ],
+        "cwd": "C:\\projects\\VITAL-FITNESS_APP",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      }
+    ]
+  }
+}

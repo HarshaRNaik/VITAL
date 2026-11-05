@@ -63,7 +63,7 @@ export default function Register() {
       }
       const error = await verifyEmailOtp(f.email, otp)
       if (error) { setErrors({ form: error }); return }
-      nav('/', { replace: true })
+      nav('/dashboard', { replace: true })
     } finally { setSubmitting(false) }
   }
 
@@ -79,7 +79,7 @@ export default function Register() {
       const result = await register(f)
       if (typeof result === 'string') { setNotice(result); return }
       applyGame(result.game, 'register', result.user.id)
-      nav('/')
+      nav('/dashboard')
     } finally { setSubmitting(false) }
   }
 
@@ -104,7 +104,7 @@ export default function Register() {
 
   async function googleSignUp() {
     setSubmitting(true); setErrors({}); setNotice('')
-    const error = await loginWithGoogle('/')
+    const error = await loginWithGoogle('/dashboard')
     if (error) { setErrors({ form: error }); setSubmitting(false) }
   }
 

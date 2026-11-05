@@ -11,7 +11,7 @@ import {
 } from '../services/email-otp'
 import { getAuthRedirectUrl } from '../services/auth-redirect'
 
-const initialGame = { totalXP: 50, streak: 0, lastActive: null, counts: { register: 1 }, badges: ['welcome'], chatToday: false }
+const initialGame = { totalXP: 50, streak: 0, lastActive: null, counts: { register: 1 }, badges: ['welcome'] }
 
 function publicUser(user) {
   if (!user) return null

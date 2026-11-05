@@ -22,8 +22,6 @@ const prisma = vi.hoisted(() => {
 
   const db: Record<string, any> = {
     authSession: delegate(),
-    assistantConversation: delegate(),
-    assistantMessage: delegate(),
     exercise: delegate(),
     fitnessGoal: delegate(),
     gameReward: delegate(),

@@ -2,8 +2,8 @@ import { Router } from "express";
 import { prisma } from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { HttpError } from "../middleware/http-error.js";
-import { dateKeyInTimeZone, grantReward, readGameState } from "../services/game.js";
-import { dateOnly, fitnessGoalSchema, legacyImportSchema, mealSchema, metricSchema, paginationSchema, rewardSchema, workoutSchema, workoutUpdateSchema } from "../validation.js";
+import { grantReward, readGameState } from "../services/game.js";
+import { dateOnly, fitnessGoalSchema, legacyImportSchema, mealSchema, metricSchema, paginationSchema, workoutSchema, workoutUpdateSchema } from "../validation.js";
 
 function dateString(value: Date) {
   return value.toISOString().slice(0, 10);
@@ -418,13 +418,5 @@ activityRouter.post("/account/import-local", async (req, res) => {
 
 activityRouter.get("/game", async (req, res) => {
   const game = await prisma.$transaction((tx) => readGameState(tx, req.user!.id));
-  res.json({ game });
-});
-
-activityRouter.post("/game/rewards", async (req, res) => {
-  rewardSchema.parse(req.body);
-  const settings = await prisma.userSettings.findUnique({ where: { userId: req.user!.id }, select: { timeZone: true } });
-  const activityDate = dateKeyInTimeZone(new Date(), settings?.timeZone || "UTC");
-  const game = await prisma.$transaction((tx) => grantReward(tx, req.user!.id, "chat", `chat:${activityDate}`));
   res.json({ game });
 });

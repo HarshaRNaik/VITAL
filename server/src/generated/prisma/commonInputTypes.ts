@@ -361,23 +361,6 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
 }
 
-export type EnumAssistantRoleFilter<$PrismaModel = never> = {
-  equals?: $Enums.AssistantRole | Prisma.EnumAssistantRoleFieldRefInput<$PrismaModel>
-  in?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAssistantRoleFilter<$PrismaModel> | $Enums.AssistantRole
-}
-
-export type EnumAssistantRoleWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.AssistantRole | Prisma.EnumAssistantRoleFieldRefInput<$PrismaModel>
-  in?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAssistantRoleWithAggregatesFilter<$PrismaModel> | $Enums.AssistantRole
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumAssistantRoleFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumAssistantRoleFilter<$PrismaModel>
-}
-
 export type NestedUuidFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -683,23 +666,6 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
-}
-
-export type NestedEnumAssistantRoleFilter<$PrismaModel = never> = {
-  equals?: $Enums.AssistantRole | Prisma.EnumAssistantRoleFieldRefInput<$PrismaModel>
-  in?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAssistantRoleFilter<$PrismaModel> | $Enums.AssistantRole
-}
-
-export type NestedEnumAssistantRoleWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.AssistantRole | Prisma.EnumAssistantRoleFieldRefInput<$PrismaModel>
-  in?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AssistantRole[] | Prisma.ListEnumAssistantRoleFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAssistantRoleWithAggregatesFilter<$PrismaModel> | $Enums.AssistantRole
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumAssistantRoleFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumAssistantRoleFilter<$PrismaModel>
 }
 
 

@@ -208,7 +208,6 @@ export type UserWhereInput = {
   gameState?: Prisma.XOR<Prisma.GameStateNullableScalarRelationFilter, Prisma.GameStateWhereInput> | null
   gameRewards?: Prisma.GameRewardListRelationFilter
   workoutPlans?: Prisma.WorkoutPlanListRelationFilter
-  conversations?: Prisma.AssistantConversationListRelationFilter
   auditEvents?: Prisma.SecurityAuditEventListRelationFilter
 }
 
@@ -230,7 +229,6 @@ export type UserOrderByWithRelationInput = {
   gameState?: Prisma.GameStateOrderByWithRelationInput
   gameRewards?: Prisma.GameRewardOrderByRelationAggregateInput
   workoutPlans?: Prisma.WorkoutPlanOrderByRelationAggregateInput
-  conversations?: Prisma.AssistantConversationOrderByRelationAggregateInput
   auditEvents?: Prisma.SecurityAuditEventOrderByRelationAggregateInput
 }
 
@@ -255,7 +253,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   gameState?: Prisma.XOR<Prisma.GameStateNullableScalarRelationFilter, Prisma.GameStateWhereInput> | null
   gameRewards?: Prisma.GameRewardListRelationFilter
   workoutPlans?: Prisma.WorkoutPlanListRelationFilter
-  conversations?: Prisma.AssistantConversationListRelationFilter
   auditEvents?: Prisma.SecurityAuditEventListRelationFilter
 }, "id" | "email">
 
@@ -303,7 +300,6 @@ export type UserCreateInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -325,7 +321,6 @@ export type UserUncheckedCreateInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -347,7 +342,6 @@ export type UserUpdateInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -369,7 +363,6 @@ export type UserUncheckedUpdateInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -583,20 +576,6 @@ export type UserUpdateOneRequiredWithoutWorkoutPlansNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWorkoutPlansInput, Prisma.UserUpdateWithoutWorkoutPlansInput>, Prisma.UserUncheckedUpdateWithoutWorkoutPlansInput>
 }
 
-export type UserCreateNestedOneWithoutConversationsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutConversationsInput, Prisma.UserUncheckedCreateWithoutConversationsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutConversationsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutConversationsInput, Prisma.UserUncheckedCreateWithoutConversationsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationsInput
-  upsert?: Prisma.UserUpsertWithoutConversationsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutConversationsInput, Prisma.UserUpdateWithoutConversationsInput>, Prisma.UserUncheckedUpdateWithoutConversationsInput>
-}
-
 export type UserCreateNestedOneWithoutAuditEventsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAuditEventsInput, Prisma.UserUncheckedCreateWithoutAuditEventsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuditEventsInput
@@ -630,7 +609,6 @@ export type UserCreateWithoutLegacyImportInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -651,7 +629,6 @@ export type UserUncheckedCreateWithoutLegacyImportInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -688,7 +665,6 @@ export type UserUpdateWithoutLegacyImportInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -709,7 +685,6 @@ export type UserUncheckedUpdateWithoutLegacyImportInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -730,7 +705,6 @@ export type UserCreateWithoutFitnessGoalsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -751,7 +725,6 @@ export type UserUncheckedCreateWithoutFitnessGoalsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -788,7 +761,6 @@ export type UserUpdateWithoutFitnessGoalsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -809,7 +781,6 @@ export type UserUncheckedUpdateWithoutFitnessGoalsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -830,7 +801,6 @@ export type UserCreateWithoutSettingsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -851,7 +821,6 @@ export type UserUncheckedCreateWithoutSettingsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -888,7 +857,6 @@ export type UserUpdateWithoutSettingsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -909,7 +877,6 @@ export type UserUncheckedUpdateWithoutSettingsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -930,7 +897,6 @@ export type UserCreateWithoutSessionsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -951,7 +917,6 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -988,7 +953,6 @@ export type UserUpdateWithoutSessionsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1009,7 +973,6 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1030,7 +993,6 @@ export type UserCreateWithoutWorkoutsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -1051,7 +1013,6 @@ export type UserUncheckedCreateWithoutWorkoutsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1088,7 +1049,6 @@ export type UserUpdateWithoutWorkoutsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1109,7 +1069,6 @@ export type UserUncheckedUpdateWithoutWorkoutsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1130,7 +1089,6 @@ export type UserCreateWithoutMealsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -1151,7 +1109,6 @@ export type UserUncheckedCreateWithoutMealsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1188,7 +1145,6 @@ export type UserUpdateWithoutMealsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1209,7 +1165,6 @@ export type UserUncheckedUpdateWithoutMealsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1230,7 +1185,6 @@ export type UserCreateWithoutMetricsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -1251,7 +1205,6 @@ export type UserUncheckedCreateWithoutMetricsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1288,7 +1241,6 @@ export type UserUpdateWithoutMetricsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1309,7 +1261,6 @@ export type UserUncheckedUpdateWithoutMetricsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1330,7 +1281,6 @@ export type UserCreateWithoutGameStateInput = {
   legacyImport?: Prisma.LegacyImportCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -1351,7 +1301,6 @@ export type UserUncheckedCreateWithoutGameStateInput = {
   legacyImport?: Prisma.LegacyImportUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1388,7 +1337,6 @@ export type UserUpdateWithoutGameStateInput = {
   legacyImport?: Prisma.LegacyImportUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1409,7 +1357,6 @@ export type UserUncheckedUpdateWithoutGameStateInput = {
   legacyImport?: Prisma.LegacyImportUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1430,7 +1377,6 @@ export type UserCreateWithoutGameRewardsInput = {
   legacyImport?: Prisma.LegacyImportCreateNestedOneWithoutUserInput
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -1451,7 +1397,6 @@ export type UserUncheckedCreateWithoutGameRewardsInput = {
   legacyImport?: Prisma.LegacyImportUncheckedCreateNestedOneWithoutUserInput
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1488,7 +1433,6 @@ export type UserUpdateWithoutGameRewardsInput = {
   legacyImport?: Prisma.LegacyImportUpdateOneWithoutUserNestedInput
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1509,7 +1453,6 @@ export type UserUncheckedUpdateWithoutGameRewardsInput = {
   legacyImport?: Prisma.LegacyImportUncheckedUpdateOneWithoutUserNestedInput
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1530,7 +1473,6 @@ export type UserCreateWithoutWorkoutPlansInput = {
   legacyImport?: Prisma.LegacyImportCreateNestedOneWithoutUserInput
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
 }
 
@@ -1551,7 +1493,6 @@ export type UserUncheckedCreateWithoutWorkoutPlansInput = {
   legacyImport?: Prisma.LegacyImportUncheckedCreateNestedOneWithoutUserInput
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1588,7 +1529,6 @@ export type UserUpdateWithoutWorkoutPlansInput = {
   legacyImport?: Prisma.LegacyImportUpdateOneWithoutUserNestedInput
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1609,107 +1549,6 @@ export type UserUncheckedUpdateWithoutWorkoutPlansInput = {
   legacyImport?: Prisma.LegacyImportUncheckedUpdateOneWithoutUserNestedInput
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
-  auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutConversationsInput = {
-  id?: string
-  email: string
-  name: string
-  passwordHash: string
-  goal: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  workouts?: Prisma.WorkoutCreateNestedManyWithoutUserInput
-  meals?: Prisma.MealCreateNestedManyWithoutUserInput
-  metrics?: Prisma.ProgressMetricCreateNestedManyWithoutUserInput
-  fitnessGoals?: Prisma.FitnessGoalCreateNestedManyWithoutUserInput
-  legacyImport?: Prisma.LegacyImportCreateNestedOneWithoutUserInput
-  gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
-  gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
-  workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  auditEvents?: Prisma.SecurityAuditEventCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutConversationsInput = {
-  id?: string
-  email: string
-  name: string
-  passwordHash: string
-  goal: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  workouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutUserInput
-  meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
-  metrics?: Prisma.ProgressMetricUncheckedCreateNestedManyWithoutUserInput
-  fitnessGoals?: Prisma.FitnessGoalUncheckedCreateNestedManyWithoutUserInput
-  legacyImport?: Prisma.LegacyImportUncheckedCreateNestedOneWithoutUserInput
-  gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
-  gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
-  workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  auditEvents?: Prisma.SecurityAuditEventUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutConversationsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutConversationsInput, Prisma.UserUncheckedCreateWithoutConversationsInput>
-}
-
-export type UserUpsertWithoutConversationsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutConversationsInput, Prisma.UserUncheckedUpdateWithoutConversationsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutConversationsInput, Prisma.UserUncheckedCreateWithoutConversationsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutConversationsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutConversationsInput, Prisma.UserUncheckedUpdateWithoutConversationsInput>
-}
-
-export type UserUpdateWithoutConversationsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  goal?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  workouts?: Prisma.WorkoutUpdateManyWithoutUserNestedInput
-  meals?: Prisma.MealUpdateManyWithoutUserNestedInput
-  metrics?: Prisma.ProgressMetricUpdateManyWithoutUserNestedInput
-  fitnessGoals?: Prisma.FitnessGoalUpdateManyWithoutUserNestedInput
-  legacyImport?: Prisma.LegacyImportUpdateOneWithoutUserNestedInput
-  gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
-  gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
-  workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  auditEvents?: Prisma.SecurityAuditEventUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutConversationsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  goal?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  workouts?: Prisma.WorkoutUncheckedUpdateManyWithoutUserNestedInput
-  meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
-  metrics?: Prisma.ProgressMetricUncheckedUpdateManyWithoutUserNestedInput
-  fitnessGoals?: Prisma.FitnessGoalUncheckedUpdateManyWithoutUserNestedInput
-  legacyImport?: Prisma.LegacyImportUncheckedUpdateOneWithoutUserNestedInput
-  gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
-  gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
-  workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.SecurityAuditEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1731,7 +1570,6 @@ export type UserCreateWithoutAuditEventsInput = {
   gameState?: Prisma.GameStateCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -1752,7 +1590,6 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   gameState?: Prisma.GameStateUncheckedCreateNestedOneWithoutUserInput
   gameRewards?: Prisma.GameRewardUncheckedCreateNestedManyWithoutUserInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.AssistantConversationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -1789,7 +1626,6 @@ export type UserUpdateWithoutAuditEventsInput = {
   gameState?: Prisma.GameStateUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -1810,7 +1646,6 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   gameState?: Prisma.GameStateUncheckedUpdateOneWithoutUserNestedInput
   gameRewards?: Prisma.GameRewardUncheckedUpdateManyWithoutUserNestedInput
   workoutPlans?: Prisma.WorkoutPlanUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.AssistantConversationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1826,7 +1661,6 @@ export type UserCountOutputType = {
   fitnessGoals: number
   gameRewards: number
   workoutPlans: number
-  conversations: number
   auditEvents: number
 }
 
@@ -1838,7 +1672,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   fitnessGoals?: boolean | UserCountOutputTypeCountFitnessGoalsArgs
   gameRewards?: boolean | UserCountOutputTypeCountGameRewardsArgs
   workoutPlans?: boolean | UserCountOutputTypeCountWorkoutPlansArgs
-  conversations?: boolean | UserCountOutputTypeCountConversationsArgs
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
 }
 
@@ -1904,13 +1737,6 @@ export type UserCountOutputTypeCountWorkoutPlansArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AssistantConversationWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountAuditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SecurityAuditEventWhereInput
 }
@@ -1934,7 +1760,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   gameState?: boolean | Prisma.User$gameStateArgs<ExtArgs>
   gameRewards?: boolean | Prisma.User$gameRewardsArgs<ExtArgs>
   workoutPlans?: boolean | Prisma.User$workoutPlansArgs<ExtArgs>
-  conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1981,7 +1806,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   gameState?: boolean | Prisma.User$gameStateArgs<ExtArgs>
   gameRewards?: boolean | Prisma.User$gameRewardsArgs<ExtArgs>
   workoutPlans?: boolean | Prisma.User$workoutPlansArgs<ExtArgs>
-  conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -2001,7 +1825,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     gameState: Prisma.$GameStatePayload<ExtArgs> | null
     gameRewards: Prisma.$GameRewardPayload<ExtArgs>[]
     workoutPlans: Prisma.$WorkoutPlanPayload<ExtArgs>[]
-    conversations: Prisma.$AssistantConversationPayload<ExtArgs>[]
     auditEvents: Prisma.$SecurityAuditEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2416,7 +2239,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   gameState<T extends Prisma.User$gameStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gameStateArgs<ExtArgs>>): Prisma.Prisma__GameStateClient<runtime.Types.Result.GetResult<Prisma.$GameStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   gameRewards<T extends Prisma.User$gameRewardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gameRewardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GameRewardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workoutPlans<T extends Prisma.User$workoutPlansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workoutPlansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  conversations<T extends Prisma.User$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssistantConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SecurityAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3069,30 +2891,6 @@ export type User$workoutPlansArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.WorkoutPlanScalarFieldEnum | Prisma.WorkoutPlanScalarFieldEnum[]
-}
-
-/**
- * User.conversations
- */
-export type User$conversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AssistantConversation
-   */
-  select?: Prisma.AssistantConversationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AssistantConversation
-   */
-  omit?: Prisma.AssistantConversationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AssistantConversationInclude<ExtArgs> | null
-  where?: Prisma.AssistantConversationWhereInput
-  orderBy?: Prisma.AssistantConversationOrderByWithRelationInput | Prisma.AssistantConversationOrderByWithRelationInput[]
-  cursor?: Prisma.AssistantConversationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AssistantConversationScalarFieldEnum | Prisma.AssistantConversationScalarFieldEnum[]
 }
 
 /**

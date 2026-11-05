@@ -65,8 +65,6 @@ export const ModelName = {
   Exercise: 'Exercise',
   WorkoutPlan: 'WorkoutPlan',
   WorkoutPlanExercise: 'WorkoutPlanExercise',
-  AssistantConversation: 'AssistantConversation',
-  AssistantMessage: 'AssistantMessage',
   SecurityAuditEvent: 'SecurityAuditEvent'
 } as const
 
@@ -300,29 +298,6 @@ export const WorkoutPlanExerciseScalarFieldEnum = {
 } as const
 
 export type WorkoutPlanExerciseScalarFieldEnum = (typeof WorkoutPlanExerciseScalarFieldEnum)[keyof typeof WorkoutPlanExerciseScalarFieldEnum]
-
-
-export const AssistantConversationScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  title: 'title',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type AssistantConversationScalarFieldEnum = (typeof AssistantConversationScalarFieldEnum)[keyof typeof AssistantConversationScalarFieldEnum]
-
-
-export const AssistantMessageScalarFieldEnum = {
-  id: 'id',
-  conversationId: 'conversationId',
-  clientRequestId: 'clientRequestId',
-  role: 'role',
-  content: 'content',
-  createdAt: 'createdAt'
-} as const
-
-export type AssistantMessageScalarFieldEnum = (typeof AssistantMessageScalarFieldEnum)[keyof typeof AssistantMessageScalarFieldEnum]
 
 
 export const SecurityAuditEventScalarFieldEnum = {

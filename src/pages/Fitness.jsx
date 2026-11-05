@@ -196,7 +196,7 @@ export default function Fitness() {
       const searchText = [item.name, item.description, ...item.targetMuscles, ...item.exercises.map((exercise) => exercise.name)].join(' ').toLowerCase()
       const durationMatches = durationFilter === 'Any duration'
         || (durationFilter === 'Under 15 min' && item.durationMinutes < 15)
-        || (durationFilter === '15–30 min' && item.durationMinutes >= 15 && item.durationMinutes <= 30)
+        || (durationFilter === '15â€“30 min' && item.durationMinutes >= 15 && item.durationMinutes <= 30)
         || (durationFilter === 'Over 30 min' && item.durationMinutes > 30)
       const quickMatches = !quickFilter
         || (quickFilter === 'No equipment' && ['Bodyweight only', 'No-equipment cardio'].includes(item.equipment))
@@ -234,13 +234,13 @@ export default function Fitness() {
       {/* Page Header */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-xp/20 via-white/5 to-transparent p-5">
         <div className="relative z-10">
-          <Link to="/workout" className="btn-ghost mb-2 inline-flex min-h-10 items-center text-xs">← Workout modes</Link>
+          <Link to="/workout" className="btn-ghost mb-2 inline-flex min-h-10 items-center text-xs">â† Workout modes</Link>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-xp">
             FITNESS
           </p>
 
           <h1 className="mt-2 text-2xl md:text-3xl font-bold">
-            Train stronger. Move better. 💪
+            Train stronger. Move better. ðŸ’ª
           </h1>
 
           <p className="mt-1 max-w-xl text-sm text-gray-400">
@@ -266,7 +266,7 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">💪</span>
+            <span className="text-xl">ðŸ’ª</span>
           </div>
 
           <p className="mt-2 text-[11px] text-gray-500">
@@ -286,7 +286,7 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">⏱️</span>
+            <span className="text-xl">â±ï¸</span>
           </div>
 
           <p className="mt-2 text-[11px] text-gray-500">
@@ -303,7 +303,7 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">🔥</span>
+            <span className="text-xl">ðŸ”¥</span>
           </div>
 
           <p className="mt-2 text-[11px] text-gray-500">
@@ -316,7 +316,7 @@ export default function Fitness() {
             <div>
               <p className="text-xs text-gray-400">Latest weight</p>
               <p className="mt-1 text-2xl font-bold">
-                {latestWeight ?? '—'}
+                {latestWeight ?? 'â€”'}
                 {latestWeight && (
                   <span className="ml-1 text-xs font-normal text-gray-500">
                     kg
@@ -325,7 +325,7 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">⚖️</span>
+            <span className="text-xl">âš–ï¸</span>
           </div>
 
           <p className="mt-2 text-[11px] text-gray-500">
@@ -351,7 +351,7 @@ export default function Fitness() {
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {recommendedWorkouts.map((item) => <article key={item.id} className="rounded-xl border border-cyan-200/10 bg-black/15 p-4">
                 <h3 className="font-semibold text-white">{item.name}</h3>
-                <p className="mt-1 text-xs text-gray-400">{item.durationMinutes} min · {item.difficulty} · {item.equipment}</p>
+                <p className="mt-1 text-xs text-gray-400">{item.durationMinutes} min Â· {item.difficulty} Â· {item.equipment}</p>
                 <button type="button" className="btn-ghost mt-3 min-h-10 w-full text-xs" onClick={() => { setSelectedWorkoutId(item.id); document.getElementById('workout-library')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>View compatible plan</button>
               </article>)}
             </div>
@@ -363,7 +363,7 @@ export default function Fitness() {
             <h2 className="mt-2 text-2xl font-extrabold">Choose your session.</h2>
             <p className="mt-1 text-sm text-gray-400">Browse {WORKOUTS.length} plans with real exercise sequences, equipment, and modifications.</p>
           </div>
-          <a href="#workout-log" className="btn-ghost min-h-11 text-sm">＋ Log completed training</a>
+          <a href="#workout-log" className="btn-ghost min-h-11 text-sm">ï¼‹ Log completed training</a>
         </div>
 
         <div className="card space-y-4">
@@ -373,11 +373,11 @@ export default function Fitness() {
             ))}
           </div>
           <div className="grid gap-x-3 sm:grid-cols-2 xl:grid-cols-3">
-            <Field label="Search workouts or movements" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try squats, mobility, cardio…" />
+            <Field label="Search workouts or movements" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try squats, mobility, cardioâ€¦" />
             <Field label="Training category" options={['All categories', ...TRAINING_CATEGORIES]} value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} />
             <Field label="Equipment" options={['All equipment', ...EQUIPMENT_CATEGORIES]} value={equipmentFilter} onChange={(event) => setEquipmentFilter(event.target.value)} />
             <Field label="Difficulty" options={['All levels', ...DIFFICULTIES]} value={difficultyFilter} onChange={(event) => setDifficultyFilter(event.target.value)} />
-            <Field label="Duration" options={['Any duration', 'Under 15 min', '15–30 min', 'Over 30 min']} value={durationFilter} onChange={(event) => setDurationFilter(event.target.value)} />
+            <Field label="Duration" options={['Any duration', 'Under 15 min', '15â€“30 min', 'Over 30 min']} value={durationFilter} onChange={(event) => setDurationFilter(event.target.value)} />
             <Field label="Target muscle group" options={['All muscle groups', ...muscleGroups]} value={muscleFilter} onChange={(event) => setMuscleFilter(event.target.value)} />
           </div>
           <p aria-live="polite" className="text-xs text-gray-500">{filteredWorkouts.length} {filteredWorkouts.length === 1 ? 'workout' : 'workouts'} match your filters.</p>
@@ -414,10 +414,10 @@ export default function Fitness() {
                 const sessionMovements = selectedWorkout.exercises.filter((exercise) => session.movementIds.includes(exercise.id))
                 const sessionEquipment = [...new Set(sessionMovements.map((exercise) => exercise.equipment).filter((item) => item !== 'Bodyweight only' && item !== 'No-equipment cardio'))]
                 return <li key={session.day} className="flex flex-col rounded-xl border border-white/5 bg-white/[0.03] p-3">
-                  <p className="text-xs font-bold text-xp">{session.day} · {session.focus}</p>
+                  <p className="text-xs font-bold text-xp">{session.day} Â· {session.focus}</p>
                   <p className="mt-1 text-xs text-gray-400">{session.detail}</p>
                   {session.exerciseCountNote && <p className="mt-2 text-[11px] text-xp">{session.exerciseCountNote}</p>}
-                  <p className="mt-2 text-[11px] text-gray-500">{session.durationMinutes} min · {sessionEquipment.length ? sessionEquipment.join(', ') : 'No external equipment'}</p>
+                  <p className="mt-2 text-[11px] text-gray-500">{session.durationMinutes} min Â· {sessionEquipment.length ? sessionEquipment.join(', ') : 'No external equipment'}</p>
                   <Link to={`/fitness/workout?plan=${selectedWorkout.id}&courseSession=${sessionIndex}`} className="btn-ghost mt-3 min-h-10 justify-center text-xs">Start {session.day}</Link>
                 </li>
               })}</ol>
@@ -431,7 +431,7 @@ export default function Fitness() {
                       : <span className="text-lg">{exercise.emoji}</span>}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-white">{index + 1}. {exercise.name}</p>
-                      <p className="mt-1 text-xs text-gray-400">{exercise.tracking === 'reps' ? `${exercise.sets} sets × ${exercise.reps} reps` : `${exercise.sets} × ${exercise.durationSeconds}s`} · {exercise.restSeconds}s rest</p>
+                      <p className="mt-1 text-xs text-gray-400">{exercise.tracking === 'reps' ? `${exercise.sets} sets Ã— ${exercise.reps} reps` : `${exercise.sets} Ã— ${exercise.durationSeconds}s`} Â· {exercise.restSeconds}s rest</p>
                       <p className="mt-1 text-xs text-gray-500">{exercise.instruction}</p>
                       {exercise.easier && <p className="mt-1 text-xs text-xp">Easier option: {exercise.easier}</p>}
                     </div>
@@ -440,13 +440,13 @@ export default function Fitness() {
               ))}
             </ol>
             <p className="mt-4 rounded-xl border border-streak/20 bg-streak/5 p-3 text-xs text-gray-300">Move at a controlled pace, use the listed alternatives when needed, and stop if you feel pain, dizziness, or anything concerning.</p>
-            {!selectedWorkout.weeklySchedule && <Link to={`/fitness/workout?plan=${selectedWorkout.id}`} className="btn mt-4 min-h-12">Start workout <span aria-hidden="true">→</span></Link>}
+            {!selectedWorkout.weeklySchedule && <Link to={`/fitness/workout?plan=${selectedWorkout.id}`} className="btn mt-4 min-h-12">Start workout <span aria-hidden="true">â†’</span></Link>}
           </article>
         )}
 
         {filteredWorkouts.length === 0 ? (
           <div className="empty-state min-h-44">
-            <span className="text-3xl">🔎</span><p className="mt-2 text-sm font-semibold text-white">No plans match those filters</p>
+            <span className="text-3xl">ðŸ”Ž</span><p className="mt-2 text-sm font-semibold text-white">No plans match those filters</p>
             <p className="mt-1 text-xs text-gray-500">Try clearing a filter or searching for another movement.</p>
             <button type="button" className="btn-ghost mt-3" onClick={() => { setSearch(''); setCategoryFilter('All categories'); setEquipmentFilter('All equipment'); setDifficultyFilter('All levels'); setDurationFilter('Any duration'); setMuscleFilter('All muscle groups'); setQuickFilter('') }}>Clear filters</button>
           </div>
@@ -456,14 +456,14 @@ export default function Fitness() {
               <article key={item.id} className="card card-interactive flex flex-col">
                 <div className="flex items-start justify-between gap-3">
                   <div><p className="text-[10px] font-bold uppercase tracking-wider text-xp">{item.category}</p><h3 className="mt-2 text-base font-bold text-white">{item.name}</h3></div>
-                  <span aria-hidden="true" className="rounded-xl bg-xp/10 p-2 text-xl">{item.equipment === 'Dumbbells' || item.equipment === 'Barbells and plates' || item.equipment === 'Kettlebells' ? '🏋️' : item.equipment === 'Gym machines' ? '🏢' : item.equipment === 'Resistance bands' ? '🟢' : item.category === 'Mixed training courses' ? '🔀' : item.category === 'Yoga and recovery' ? '🧘' : '🤸'}</span>
+                  <span aria-hidden="true" className="rounded-xl bg-xp/10 p-2 text-xl">{item.equipment === 'Dumbbells' || item.equipment === 'Barbells and plates' || item.equipment === 'Kettlebells' ? 'ðŸ‹ï¸' : item.equipment === 'Gym machines' ? 'ðŸ¢' : item.equipment === 'Resistance bands' ? 'ðŸŸ¢' : item.category === 'Mixed training courses' ? 'ðŸ”€' : item.category === 'Yoga and recovery' ? 'ðŸ§˜' : 'ðŸ¤¸'}</span>
                 </div>
                 <p className="mt-2 flex-1 text-xs leading-relaxed text-gray-400">{item.description}</p>
                 {item.exerciseCountNote && <p className="mt-2 text-[11px] text-xp">{item.exerciseCountNote}</p>}
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   <span className="badge">{item.durationMinutes} min</span><span className="badge">{item.difficulty}</span><span className="badge">{item.equipment}</span>
                 </div>
-                <p className="mt-3 text-[11px] text-gray-500">{item.exercises.length} movements · {item.targetMuscles.join(' · ')}</p>
+                <p className="mt-3 text-[11px] text-gray-500">{item.exercises.length} movements Â· {item.targetMuscles.join(' Â· ')}</p>
                 <button type="button" className="btn-ghost mt-4 min-h-11 w-full" aria-expanded={selectedWorkoutId === item.id} onClick={() => { setSelectedWorkoutId(selectedWorkoutId === item.id ? '' : item.id); document.getElementById('workout-library')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>View plan & exercises</button>
               </article>
             ))}
@@ -491,7 +491,7 @@ export default function Fitness() {
             </div>
 
             <span className="text-xl">
-              {editId ? '✏️' : '➕'}
+              {editId ? 'âœï¸' : 'âž•'}
             </span>
           </div>
 
@@ -547,7 +547,7 @@ export default function Fitness() {
 
           <div className="flex gap-2 pt-1">
             <button className="btn min-h-11 flex-1" disabled={saving}>
-              {saving ? 'Saving…' : editId ? 'Save changes' : 'Add workout (+25 XP)'}
+              {saving ? 'Savingâ€¦' : editId ? 'Save changes' : 'Add workout (+25 XP)'}
             </button>
 
             {editId && (
@@ -580,12 +580,12 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">📋</span>
+            <span className="text-xl">ðŸ“‹</span>
           </div>
 
           {wList.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
-              <div className="text-4xl">🏃</div>
+              <div className="text-4xl">ðŸƒ</div>
 
               <p className="mt-3 font-semibold">
                 No workouts yet
@@ -607,14 +607,14 @@ export default function Fitness() {
 
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-xp/10 text-lg">
                       {x.type === 'Cardio'
-                        ? '🏃'
+                        ? 'ðŸƒ'
                         : x.type === 'Strength'
-                          ? '🏋️'
+                          ? 'ðŸ‹ï¸'
                           : x.type === 'Yoga'
-                            ? '🧘'
+                            ? 'ðŸ§˜'
                             : x.type === 'HIIT'
-                              ? '⚡'
-                              : '💪'}
+                              ? 'âš¡'
+                              : 'ðŸ’ª'}
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -623,15 +623,15 @@ export default function Fitness() {
                       </p>
 
                       <p className="mt-0.5 text-xs text-gray-500">
-                        {x.type} · {x.date}
+                        {x.type} Â· {x.date}
                       </p>
 
                       <p className="mt-1 text-xs text-gray-400">
                         {x.duration} min
                         {x.planId && WORKOUTS.find((plan) => plan.id === x.planId)
-                          ? ` actual · ${x.plannedDurationMinutes || WORKOUTS.find((plan) => plan.id === x.planId).durationMinutes} min planned`
+                          ? ` actual Â· ${x.plannedDurationMinutes || WORKOUTS.find((plan) => plan.id === x.planId).durationMinutes} min planned`
                           : ''}
-                        {x.calories > 0 ? ` · ${x.calories} kcal` : x.planId ? ' · calories not estimated' : ''}
+                        {x.calories > 0 ? ` Â· ${x.calories} kcal` : x.planId ? ' Â· calories not estimated' : ''}
                       </p>
                     </div>
 
@@ -688,7 +688,7 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">⚖️</span>
+            <span className="text-xl">âš–ï¸</span>
           </div>
 
           <Field
@@ -715,7 +715,7 @@ export default function Fitness() {
           />
 
           <button className="btn min-h-11 w-full" disabled={saving}>
-            {saving ? 'Saving…' : 'Log weight (+15 XP)'}
+            {saving ? 'Savingâ€¦' : 'Log weight (+15 XP)'}
           </button>
         </form>
 
@@ -733,12 +733,12 @@ export default function Fitness() {
               </p>
             </div>
 
-            <span className="text-xl">📈</span>
+            <span className="text-xl">ðŸ“ˆ</span>
           </div>
 
           {mList.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
-              <div className="text-4xl">⚖️</div>
+              <div className="text-4xl">âš–ï¸</div>
 
               <p className="mt-3 font-semibold">
                 No weight entries yet

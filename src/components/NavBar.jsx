@@ -4,11 +4,11 @@ import { useAuth } from '../context/auth-context'
 import ThemeToggle from './ThemeToggle'
 
 const links = [
-  { to: '/', label: 'System', icon: '⌂' },
+  { to: '/coach', label: 'AI Coach', icon: '✦' },
+  { to: '/dashboard', label: 'Dashboard', icon: '⌂' },
   { to: '/workout', label: 'Workout', icon: '◇' },
   { to: '/diet', label: 'Nutrition', icon: '◈' },
   { to: '/analytics', label: 'Analytics', icon: '▥' },
-  { to: '/assistant', label: 'Coach', icon: '⌁' },
   { to: '/profile', label: 'Status', icon: '◉' },
 ]
 
@@ -33,7 +33,7 @@ export default function NavBar() {
           <NavLink
             key={l.to}
             to={l.to}
-            end={l.to === '/'}
+            end
             className={({ isActive }) =>
               `${l.to === '/login' ? 'hidden md:flex' : 'flex'} system-nav-link min-h-12 min-w-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent px-1 text-[9px] transition-colors md:min-h-11 md:flex-initial md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm ${
                 isActive ? 'font-bold' : 'text-gray-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-white'

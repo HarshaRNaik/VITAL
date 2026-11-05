@@ -25,9 +25,6 @@ server/.env
 server/.env.*
 !server/.env.example
 
-# Local Gemini File Search store resource and upload hashes
-data/gemini-knowledge/.file-search-state.json
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -38,3 +35,6 @@ data/gemini-knowledge/.file-search-state.json
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
+.env*
